@@ -1,4 +1,12 @@
-/** Design tokens de la maquette, mode clair et mode sombre. */
+/**
+ * Design tokens — registre santé / nutrition.
+ *
+ * Thème clair : bleu profond `#084684`. Thème sombre : abricot `#F7B97B`.
+ * `primary` sert d'aplat (cartes principales, états sélectionnés, boutons) ; `heroText` est la
+ * couleur de texte posée dessus et suit donc la clarté de `primary` (claire sur le bleu, sombre
+ * sur l'abricot). Pour les textes et bordures accentués sur `surface`, on utilise `primaryInk`,
+ * une déclinaison de la même teinte qui tient le 4,5:1 exigé par WCAG AA.
+ */
 
 export interface Tokens {
   bg: string;
@@ -11,68 +19,87 @@ export interface Tokens {
   divider: string;
   border: string;
   borderStrong: string;
+  /** couleur de marque, en aplat uniquement */
   primary: string;
   primaryDark: string;
-  /** couleur de texte / bordure accentuée */
+  /** version foncée, lisible en texte sur `surface` */
   primaryInk: string;
   primaryTint: string;
+  /** dégradé de la carte principale */
+  heroGradient: string;
+  /** texte posé sur `primary` et sur `heroGradient` */
+  heroText: string;
+  /** accent secondaire */
+  accent: string;
   errorBg: string;
   errorInk: string;
   warnBg: string;
   warnInk: string;
-  shadow1: string;
-  shadow2: string;
+  macroProt: string;
+  macroFat: string;
+  macroCarb: string;
+  /** repère de la dépense totale sur la barre de fourchette */
+  marker: string;
   /** pastille du bouton de thème */
   themeDot: string;
 }
 
 export const lightTokens: Tokens = {
-  bg: '#f4f6f8',
+  bg: '#fbf7f2',
   surface: '#ffffff',
-  surface2: '#f7f9fa',
-  text: '#212121',
-  muted: '#5f6368',
-  muted2: '#757575',
-  faint: '#9e9e9e',
-  divider: '#eceff1',
-  border: '#e0e0e0',
-  borderStrong: '#bdbdbd',
-  primary: '#1976d2',
-  primaryDark: '#1565c0',
-  primaryInk: '#1565c0',
-  primaryTint: 'rgba(25,118,210,.08)',
-  errorBg: '#fdecea',
-  errorInk: '#b71c1c',
-  warnBg: '#fff8e1',
-  warnInk: '#8d6e00',
-  shadow1:
-    '0 2px 1px -1px rgba(0,0,0,.2), 0 1px 1px 0 rgba(0,0,0,.14), 0 1px 3px 0 rgba(0,0,0,.12)',
-  shadow2: '0 3px 5px -1px rgba(0,0,0,.2), 0 6px 10px 0 rgba(0,0,0,.14)',
-  themeDot: '#ffe082',
+  surface2: '#f6efe6',
+  text: '#241a12',
+  muted: '#5a4c40',
+  muted2: '#6a5b4d',
+  faint: '#78685a',
+  divider: '#efe6da',
+  border: '#e3d7c8',
+  borderStrong: '#bfae9b',
+  primary: '#084684',
+  primaryDark: '#063461',
+  primaryInk: '#084684',
+  primaryTint: 'rgba(8,70,132,.10)',
+  heroGradient: 'linear-gradient(135deg, #084684 0%, #0a5da9 100%)',
+  heroText: '#f2f7fc',
+  accent: '#3f7d6e',
+  errorBg: '#fbeceb',
+  errorInk: '#a02017',
+  warnBg: '#fdf1de',
+  warnInk: '#7a5410',
+  macroProt: '#a85b12',
+  macroFat: '#4e7ca1',
+  macroCarb: '#3f7d53',
+  marker: '#8a7a6b',
+  themeDot: '#084684',
 };
 
 export const darkTokens: Tokens = {
-  bg: '#121417',
-  surface: '#1c1f24',
-  surface2: '#23272e',
-  text: '#e8eaed',
-  muted: '#b0b6bd',
-  muted2: '#9aa1a9',
-  faint: '#7c848d',
-  divider: '#2c3138',
-  border: '#343a42',
-  borderStrong: '#4a5158',
-  primary: '#1565c0',
-  primaryDark: '#0d47a1',
-  primaryInk: '#90caf9',
-  primaryTint: 'rgba(144,202,249,.12)',
-  errorBg: '#3a1f1e',
+  bg: '#16120e',
+  surface: '#1e1913',
+  surface2: '#28211a',
+  text: '#f1e7dc',
+  muted: '#bcaf9f',
+  muted2: '#ab9e8e',
+  faint: '#9a8b7c',
+  divider: '#2e271f',
+  border: '#392f26',
+  borderStrong: '#52463a',
+  primary: '#f7b97b',
+  primaryDark: '#e9a25e',
+  primaryInk: '#f7b97b',
+  primaryTint: 'rgba(247,185,123,.16)',
+  heroGradient: 'linear-gradient(135deg, #f0ac68 0%, #d98c3f 100%)',
+  heroText: '#231609',
+  accent: '#6fb3a1',
+  errorBg: '#3a1e1c',
   errorInk: '#ffb4ab',
   warnBg: '#33291a',
-  warnInk: '#ffd28a',
-  shadow1: '0 1px 2px rgba(0,0,0,.5)',
-  shadow2: '0 6px 14px rgba(0,0,0,.55)',
-  themeDot: '#0d1117',
+  warnInk: '#f2c98a',
+  macroProt: '#f0a461',
+  macroFat: '#84b0d4',
+  macroCarb: '#7fc08f',
+  marker: '#9a8b7c',
+  themeDot: '#241809',
 };
 
 export const tokensFor = (mode: 'light' | 'dark'): Tokens =>

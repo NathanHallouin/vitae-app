@@ -5,21 +5,28 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useColorMode } from '@/theme/ThemeRegistry';
-import { FS } from '@/theme/theme';
+import { DISPLAY_FONT, FS } from '@/theme/theme';
+import { useProfile } from './ProfileProvider';
 
-export default function AppHeader({ onReset }: { onReset: () => void }) {
+export default function AppHeader() {
   const { mode, toggle } = useColorMode();
+  const { status } = useProfile();
+  const pathname = usePathname();
   const label = mode === 'dark' ? 'Sombre' : 'Clair';
+  const showProfileLink = status === 'ready' && pathname !== '/profil';
 
   return (
     <AppBar
       position="sticky"
       elevation={0}
       sx={(t) => ({
-        backgroundColor: t.tokens.primary,
-        color: '#fff',
-        boxShadow: '0 2px 4px -1px rgba(0,0,0,.2), 0 4px 5px 0 rgba(0,0,0,.14)',
+        backgroundColor: t.tokens.surface,
+        color: t.tokens.text,
+        borderBottom: `1px solid ${t.tokens.divider}`,
+        boxShadow: 'none',
       })}
     >
       <Toolbar
@@ -35,73 +42,91 @@ export default function AppHeader({ onReset }: { onReset: () => void }) {
         }}
       >
         <Box
-          aria-hidden
+          component={Link}
+          href="/"
           sx={{
-            width: { xs: 28, sm: 32 },
-            height: { xs: 28, sm: 32 },
-            flex: 'none',
-            borderRadius: '50%',
-            border: '3px solid rgba(255,255,255,.85)',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: FS.small,
-            fontWeight: 700,
-            letterSpacing: '.02em',
-          }}
-        >
-          MB
-        </Box>
-        <Typography
-          component="h1"
-          noWrap
-          sx={{
-            fontSize: { xs: FS.option, sm: FS.h3 },
-            fontWeight: 500,
-            letterSpacing: '.0075em',
+            gap: { xs: 0.75, sm: 2 },
+            color: 'inherit',
+            textDecoration: 'none',
             flex: 1,
             minWidth: 0,
           }}
         >
-          Métabolisme de base
-        </Typography>
+          <Box
+            aria-hidden
+            sx={(t) => ({
+              width: { xs: 30, sm: 34 },
+              height: { xs: 30, sm: 34 },
+              flex: 'none',
+              borderRadius: '30%',
+              background: t.tokens.heroGradient,
+              color: t.tokens.heroText,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: FS.caption,
+              fontWeight: 700,
+              letterSpacing: '.02em',
+            })}
+          >
+            MB
+          </Box>
+          <Typography
+            component="span"
+            noWrap
+            sx={{
+              fontFamily: DISPLAY_FONT,
+              fontSize: { xs: FS.option, sm: FS.h3 },
+              fontWeight: 600,
+              letterSpacing: '-.01em',
+              minWidth: 0,
+            }}
+          >
+            Métabolisme de base
+          </Typography>
+        </Box>
 
-        <Button
-          onClick={onReset}
-          sx={{
-            color: 'rgba(255,255,255,.92)',
-            fontSize: { xs: FS.caption, sm: FS.base },
-            px: { xs: '4px', sm: '12px' },
-            py: 1,
-            flex: 'none',
-            minWidth: 0,
-            '&:hover': { backgroundColor: 'rgba(255,255,255,.12)' },
-          }}
-        >
-          Recommencer
-        </Button>
+        {showProfileLink ? (
+          <Button
+            component={Link}
+            href="/profil"
+            sx={(t) => ({
+              color: t.tokens.muted,
+              fontSize: { xs: FS.caption, sm: FS.base },
+              px: { xs: '8px', sm: '14px' },
+              py: 1,
+              flex: 'none',
+              minWidth: 0,
+              '&:hover': { backgroundColor: t.tokens.surface2, color: t.tokens.text },
+            })}
+          >
+            Mon profil
+          </Button>
+        ) : null}
 
         <Button
           onClick={toggle}
           title={label}
           aria-label={`Basculer en mode ${mode === 'dark' ? 'clair' : 'sombre'}`}
           sx={(t) => ({
-            color: '#fff',
-            border: '1px solid rgba(255,255,255,.5)',
-            borderRadius: 16,
+            color: t.tokens.muted,
+            border: `1px solid ${t.tokens.border}`,
+            borderRadius: 999,
             fontSize: FS.small,
-            px: { xs: '8px', sm: '14px' },
-            py: '7px',
+            px: { xs: '10px', sm: '14px' },
+            py: '6px',
             minWidth: 0,
             gap: 1,
             flex: 'none',
-            '&:hover': { backgroundColor: 'rgba(255,255,255,.12)' },
+            '&:hover': { backgroundColor: t.tokens.surface2, color: t.tokens.text },
             '& .dot': {
               width: 12,
               height: 12,
               borderRadius: '50%',
               backgroundColor: t.tokens.themeDot,
-              border: '1.5px solid #fff',
+              border: `1px solid ${t.tokens.borderStrong}`,
             },
           })}
         >

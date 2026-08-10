@@ -1,31 +1,47 @@
 import type { Metadata, Viewport } from 'next';
-import { Roboto } from 'next/font/google';
+import { Fraunces, Inter } from 'next/font/google';
+import AppHeader from '@/components/AppHeader';
+import ProfileProvider from '@/components/ProfileProvider';
 import ThemeRegistry from '@/theme/ThemeRegistry';
 
-const roboto = Roboto({
-  weight: ['400', '500', '700'],
+/** Titres et grands chiffres. */
+const display = Fraunces({
   subsets: ['latin'],
   display: 'swap',
-  variable: '--font-roboto',
+  variable: '--font-display',
+  // Axe optique adouci : la Fraunces par défaut est très contrastée sur les grands corps.
+  axes: ['SOFT'],
+});
+
+/** Interface et textes courants. */
+const sans = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-sans',
 });
 
 export const metadata: Metadata = {
-  title: 'Métabolisme de base — calculateur de besoins caloriques',
+  title: 'Métabolisme de base — combien de calories votre corps dépense',
   description:
-    "Calculez votre métabolisme de base et votre dépense énergétique totale (Mifflin-St Jeor), votre IMC et la fourchette d'apport adaptée à votre objectif.",
+    'Calculez ce que votre corps dépense au repos et dans la journée, votre IMC, et combien manger selon votre objectif. Expliqué simplement, sans compte à créer.',
 };
 
 export const viewport: Viewport = {
-  themeColor: '#1976d2',
+  themeColor: '#2e7d54',
   width: 'device-width',
   initialScale: 1,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr" className={roboto.variable}>
+    <html lang="fr" className={`${display.variable} ${sans.variable}`}>
       <body>
-        <ThemeRegistry>{children}</ThemeRegistry>
+        <ThemeRegistry>
+          <ProfileProvider>
+            <AppHeader />
+            {children}
+          </ProfileProvider>
+        </ThemeRegistry>
       </body>
     </html>
   );

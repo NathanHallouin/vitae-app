@@ -11,13 +11,12 @@ import {
   type Goal,
   type GoalKey,
   goalByKey,
-  MACRO_COLORS,
   MOVE_SHARES,
   MOVES,
   NEAT,
   NEAT_ACTIVE,
 } from './constants';
-import { dec } from './format';
+import { dec, kcal } from './format';
 
 export interface Metrics {
   /** métabolisme de base, arrondi */
@@ -119,22 +118,122 @@ export function bmiGaugePosition(bmi: number): number {
 
 export interface Macro {
   label: string;
+  /** à quoi sert ce macronutriment, en une ligne */
+  hint: string;
   grams: number;
   kcal: number;
   pct: number;
   color: string;
 }
 
-export function buildMacros(m: Metrics, primaryColor: string): Macro[] {
-  const protG = Math.round(m.poids * m.goal.prot);
-  const fatG = Math.round((m.target * 0.28) / 9);
+/**
+ * Poids de référence pour les protéines.
+ * Au-delà d'un IMC de 30, appliquer les g/kg au poids total surestime le besoin : la masse grasse
+ * ne consomme pas de protéines. On utilise le poids ajusté classique en clinique, soit le haut du
+ * poids santé plus 25 % de l'excès.
+ */
+export function proteinReferenceWeight(m: Metrics): number {
+  if (m.bmi < 30) return m.poids;
+  return m.healthyMax + 0.25 * (m.poids - m.healthyMax);
+}
+
+export interface MacroColors {
+  prot: string;
+  fat: string;
+  carb: string;
+}
+
+export function buildMacros(m: Metrics, colors: MacroColors): Macro[] {
+  const refWeight = proteinReferenceWeight(m);
+  const protG = Math.round(refWeight * m.goal.prot);
+
+  // Plancher de lipides : sous 0,6 g/kg, la production hormonale et l'absorption des vitamines
+  // liposolubles finissent par en pâtir. 28 % de l'apport reste la valeur cible habituelle.
+  const fatFloor = Math.round(0.6 * refWeight);
+  let fatG = Math.max(Math.round((m.target * 0.28) / 9), fatFloor);
+
+  // Garde-fou : protéines et lipides ne doivent pas absorber tout l'apport ; on garde au moins
+  // 10 % de l'énergie pour les glucides, sauf si le plancher lipidique l'interdit.
+  const maxFatKcal = m.target * 0.9 - protG * 4;
+  if (fatG * 9 > maxFatKcal) fatG = Math.max(fatFloor, Math.floor(maxFatKcal / 9));
+
   const carbG = Math.max(0, Math.round((m.target - protG * 4 - fatG * 9) / 4));
+
   const rows = [
-    { label: 'Protéines', grams: protG, kcal: protG * 4, color: primaryColor },
-    { label: 'Lipides', grams: fatG, kcal: fatG * 9, color: MACRO_COLORS.fat },
-    { label: 'Glucides', grams: carbG, kcal: carbG * 4, color: MACRO_COLORS.carb },
+    {
+      label: 'Protéines',
+      hint: 'pour garder vos muscles',
+      grams: protG,
+      kcal: protG * 4,
+      color: colors.prot,
+    },
+    {
+      label: 'Lipides',
+      hint: 'pour les hormones et les vitamines',
+      grams: fatG,
+      kcal: fatG * 9,
+      color: colors.fat,
+    },
+    {
+      label: 'Glucides',
+      hint: 'le carburant de la journée et de l’effort',
+      grams: carbG,
+      kcal: carbG * 4,
+      color: colors.carb,
+    },
   ];
   return rows.map((row) => ({ ...row, pct: Math.round((row.kcal / m.target) * 100) }));
+}
+
+/** Explique sur quelle base les protéines sont calculées, quand ce n'est pas le poids affiché. */
+export function proteinBasisNote(m: Metrics): string {
+  const ref = proteinReferenceWeight(m);
+  if (ref === m.poids) {
+    return `Soit ${m.goal.prot.toFixed(1).replace('.', ',')} g de protéines par kilo de poids de corps.`;
+  }
+  return `Calculé sur un poids de référence de ${Math.round(ref)} kg plutôt que sur vos ${Math.round(m.poids)} kg : au-delà d'un IMC de 30, appliquer les grammes par kilo au poids total gonfle inutilement la quantité de protéines.`;
+}
+
+/** Décomposition de la dépense quotidienne, pour rendre le chiffre concret. */
+export function energyBreakdown(m: Metrics) {
+  const movement = Math.max(0, m.tdee - m.bmr);
+  // Thermogenèse alimentaire : environ 10 % de ce qui est mangé, déjà compris dans la dépense
+  // totale via le facteur d'activité. Affiché à part parce que c'est contre-intuitif.
+  const digestion = Math.round(m.target * 0.1);
+  return {
+    bmr: m.bmr,
+    bmrPct: Math.round((m.bmr / m.tdee) * 100),
+    movement: Math.round(movement),
+    movementPct: Math.round((movement / m.tdee) * 100),
+    digestion,
+  };
+}
+
+/**
+ * Un rythme de perte sain se situe autour de 0,5 à 1 % du poids de corps par semaine.
+ * Plus vite, la part de muscle perdue augmente nettement.
+ */
+export function rateAssessment(
+  m: Metrics,
+  kgPerWeek: number,
+): { level: 'lent' | 'bon' | 'rapide'; text: string } {
+  const pct = Math.abs(kgPerWeek) / m.poids;
+  if (pct > 0.01) {
+    return {
+      level: 'rapide',
+      text: `Ce rythme représente plus de 1 % de votre poids par semaine. C'est rapide : au-delà, une partie de ce que vous perdez est du muscle, et la faim devient difficile à gérer. Remontez un peu l'apport ou visez une cible intermédiaire.`,
+    };
+  }
+  if (pct < 0.0025 && Math.abs(kgPerWeek) > 0) {
+    return {
+      level: 'lent',
+      text: `Ce rythme est très progressif : les variations d'eau d'un jour à l'autre le masqueront sur la balance. Pesez-vous toujours dans les mêmes conditions et regardez la moyenne sur la semaine.`,
+    };
+  }
+  return {
+    level: 'bon',
+    text: `Ce rythme se situe dans la zone recommandée, entre 0,5 et 1 % du poids de corps par semaine : assez rapide pour se voir, assez lent pour préserver le muscle.`,
+  };
 }
 
 /** Positions en % de la barre de fourchette (échelle MB → DET × 1,2). */
@@ -147,22 +246,23 @@ export function rangeBar(m: Metrics) {
   };
 }
 
+/** Intitulé de la fourchette, formulé comme une question que l'utilisateur se pose. */
 export function rangeCaption(goal: GoalKey): string {
-  if (goal === 'masse') return 'Fourchette de surplus recommandée';
-  if (goal === 'recomp') return "Fourchette d'apport recommandée";
-  return 'Fourchette de déficit recommandée';
+  if (goal === 'masse') return 'Entre combien et combien manger pour prendre du muscle';
+  if (goal === 'recomp') return 'Entre combien et combien manger';
+  return 'Entre combien et combien manger pour perdre du gras';
 }
 
 export function warningText(m: Metrics): string {
   if (m.belowFloor) {
     return (
-      'La fourchette théorique descend sous ' +
-      m.floor.toLocaleString('fr-FR') +
-      " kcal ; elle a été relevée à votre métabolisme de base. Un apport aussi bas ne devrait pas être suivi sans accompagnement d'un professionnel de santé."
+      'Le calcul descendait sous ' +
+      kcal(m.floor) +
+      " kcal par jour, ce qui est trop bas. La fourchette a été remontée au niveau que votre corps consomme au repos. Manger aussi peu ne devrait pas se faire sans l'avis d'un médecin ou d'un diététicien."
     );
   }
   if (m.clamped || m.raised) {
-    return 'La fourchette a été relevée à votre métabolisme de base : manger durablement moins que ce que votre corps consomme au repos dégrade la masse musculaire et le métabolisme.';
+    return 'La fourchette a été remontée au niveau que votre corps consomme au repos. Manger durablement moins que ça fatigue l’organisme et fait fondre du muscle, pas seulement de la graisse.';
   }
   return '';
 }
@@ -181,22 +281,32 @@ export function weightTargets(m: Metrics): WeightTarget[] {
   const m2 = (m.taille / 100) ** 2;
   if (m.bmi >= 25) {
     return [
-      { key: 'healthy', label: 'Haut du poids santé', sub: 'IMC 25', w: round1(24.9 * m2) },
+      { key: 'healthy', label: 'Poids santé maximum', sub: 'IMC 25', w: round1(24.9 * m2) },
       { key: 'mid', label: 'Milieu du poids santé', sub: 'IMC 22', w: round1(22 * m2) },
-      { key: 'step', label: 'Première étape', sub: '−5 % de poids', w: round1(m.poids * 0.95) },
+      {
+        key: 'step',
+        label: 'Une première étape',
+        sub: '−5 % de votre poids',
+        w: round1(m.poids * 0.95),
+      },
     ];
   }
   if (m.bmi < 18.5) {
     return [
-      { key: 'healthy', label: 'Bas du poids santé', sub: 'IMC 18,5', w: round1(18.6 * m2) },
+      { key: 'healthy', label: 'Poids santé minimum', sub: 'IMC 18,5', w: round1(18.6 * m2) },
       { key: 'mid', label: 'Milieu du poids santé', sub: 'IMC 22', w: round1(22 * m2) },
-      { key: 'step', label: 'Première étape', sub: '+5 % de poids', w: round1(m.poids * 1.05) },
+      {
+        key: 'step',
+        label: 'Une première étape',
+        sub: '+5 % de votre poids',
+        w: round1(m.poids * 1.05),
+      },
     ];
   }
   return [
-    { key: 'cut', label: 'Sèche légère', sub: '−5 % de poids', w: round1(m.poids * 0.95) },
-    { key: 'stable', label: 'Poids stable', sub: 'recomposition', w: round1(m.poids) },
-    { key: 'gain', label: 'Prise de masse', sub: '+5 % de poids', w: round1(m.poids * 1.05) },
+    { key: 'cut', label: 'Perdre un peu', sub: '−5 % de votre poids', w: round1(m.poids * 0.95) },
+    { key: 'stable', label: 'Garder mon poids', sub: 'sans changement', w: round1(m.poids) },
+    { key: 'gain', label: 'Prendre un peu', sub: '+5 % de votre poids', w: round1(m.poids * 1.05) },
   ];
 }
 
@@ -302,12 +412,12 @@ export function buildProjection(m: Metrics, goal: GoalKey, targetKey: string | n
 
 function projectionNote(coherent: boolean, rate: number): string {
   if (coherent) {
-    return "Projection linéaire à apport constant. En pratique la courbe s'aplatit : le métabolisme diminue avec le poids, il faut réévaluer les besoins tous les 4 à 5 kg.";
+    return "Cette courbe suppose que vous mangez pareil tous les jours. En vrai elle s'aplatit avec le temps : plus vous êtes léger, moins vous dépensez. Refaites le calcul tous les 4 à 5 kg.";
   }
   if (Math.abs(rate) < 0.03) {
-    return "À l'apport recommandé actuel, le poids reste stable : aucune projection possible. Choisissez l'objectif sèche ou prise de masse pour créer un écart, ou visez le poids stable en recomposition.";
+    return "À ce niveau, vous mangez ce que vous dépensez : votre poids ne bouge pas, il n'y a donc rien à projeter. Choisissez « perdre du gras » ou « prendre du muscle » pour créer un écart.";
   }
-  return "Le poids cible choisi va dans le sens opposé à votre objectif calorique. Ajustez l'un ou l'autre pour obtenir une projection.";
+  return "Ce poids cible va dans le sens inverse de ce que vous mangez : vous ne pouvez pas grossir en mangeant moins, ni maigrir en mangeant plus. Changez la cible ou l'objectif.";
 }
 
 export interface PlanMove {
@@ -348,12 +458,12 @@ export function buildPlan(m: Metrics, activity: number, goal: GoalKey): Plan {
   const movePct = Math.round(share * 100);
 
   return {
-    title: goal === 'masse' ? 'Construire le surplus' : "Construire l'écart",
+    title: goal === 'masse' ? 'Comment utiliser ce surplus' : 'Comment créer cet écart',
     note: planNote(goal, activity),
     hasSplit: gap > 20 || isSurplus,
-    splitLabel: isSurplus ? 'Surplus quotidien à répartir' : 'Écart quotidien à répartir',
-    moveLabel: isSurplus ? "Dépense d'entraînement" : 'Par le mouvement',
-    foodLabel: isSurplus ? "En plus dans l'assiette" : "En moins dans l'assiette",
+    splitLabel: isSurplus ? 'Où mettre ce surplus chaque jour' : 'Où prendre cet écart chaque jour',
+    moveLabel: isSurplus ? 'Dépensé à l’entraînement' : 'En bougeant plus',
+    foodLabel: isSurplus ? 'En mangeant un peu plus' : 'En mangeant un peu moins',
     moveKcal: Math.round(Math.abs(gap) * share),
     foodKcal: Math.round(Math.abs(gap) * (1 - share)),
     movePct,
@@ -365,14 +475,14 @@ export function buildPlan(m: Metrics, activity: number, goal: GoalKey): Plan {
 
 function planNote(goal: GoalKey, activity: number): string {
   if (goal === 'masse') {
-    return "En prise de masse, l'exercice ne sert pas à creuser un écart mais à orienter le surplus vers le muscle : 3 à 4 séances de renforcement par semaine, progression en charge ou en répétitions.";
+    return 'Ici, le sport ne sert pas à brûler des calories mais à envoyer ce que vous mangez vers le muscle plutôt que vers la graisse. Comptez 3 à 4 séances de renforcement par semaine, en augmentant peu à peu les charges ou les répétitions.';
   }
   if (activity <= 1) {
     return (
       'Vous êtes ' +
       ACTIVITIES[activity].label.toLowerCase() +
-      " : une partie de l'écart peut venir du mouvement plutôt que d'une restriction alimentaire supplémentaire. Casser la sédentarité augmente aussi la dépense sans fatigue notable."
+      " : une bonne partie de l'écart peut venir du mouvement, plutôt que de manger encore moins. Bouger dans la journée dépense aussi beaucoup, sans vous fatiguer."
     );
   }
-  return "Votre niveau d'activité est déjà élevé : la majeure partie de l'écart doit venir de l'assiette, sinon la récupération et la performance se dégradent.";
+  return "Vous bougez déjà beaucoup : l'écart doit surtout venir de l'assiette. En ajouter encore à l'entraînement se paierait en fatigue et en baisse de performance.";
 }

@@ -1,6 +1,8 @@
 /**
  * Données de référence du calculateur.
- * Valeurs et libellés repris à l'identique de la maquette (`maquette/Calculateur MB.dc.html`).
+ * Les valeurs numériques viennent de la maquette (`maquette/Calculateur MB.dc.html`).
+ * Les libellés ont été réécrits en langage courant : le terme technique est conservé en
+ * second plan (`detail`) pour ceux qui le connaissent.
  */
 
 export type GoalKey = 'seche' | 'recomp' | 'masse' | 'maintien';
@@ -14,8 +16,11 @@ export interface Activity {
 
 export interface Goal {
   key: GoalKey;
+  /** formulé en langage courant : « Perdre du gras » plutôt que « Sèche » */
   label: string;
   desc: string;
+  /** terme technique et écart en pourcentage, en petit */
+  detail: string;
   /** multiplicateur de DET pour la borne basse */
   min: number;
   /** multiplicateur de DET pour la borne haute */
@@ -54,28 +59,31 @@ export const ACTIVITIES: Activity[] = [
 export const GOALS: Goal[] = [
   {
     key: 'seche',
-    label: 'Sèche',
-    desc: 'Déficit de 10 à 25 %',
+    label: 'Perdre du gras',
+    desc: 'Manger un peu moins que ce que vous dépensez',
+    detail: 'aussi appelé « sèche » · −10 à −25 %',
     min: 0.75,
     max: 0.9,
     rec: 0.82,
     prot: 2.0,
-    note: "Perdre du gras en conservant le muscle. Restez dans la fourchette : au-delà de 25 % de déficit, la perte de masse musculaire s'accélère et l'adhérence chute.",
+    note: 'Vous perdez de la graisse sans perdre vos muscles. Ne descendez pas sous la fourchette : si vous mangez trop peu, le corps puise dans le muscle et la faim devient vite ingérable.',
   },
   {
     key: 'recomp',
-    label: 'Recomposition corporelle',
-    desc: 'De −5 % à +5 %',
+    label: 'Perdre du gras et prendre du muscle',
+    desc: 'Manger à peu près ce que vous dépensez',
+    detail: 'recomposition corporelle · −5 à +5 %',
     min: 0.95,
     max: 1.05,
     rec: 1.0,
     prot: 1.8,
-    note: "Perdre du gras et gagner du muscle simultanément, autour du niveau d'équilibre. Fonctionne surtout chez les débutants et après une longue pause, avec un apport protéique élevé.",
+    note: "Vous mangez à peu près ce que vous dépensez : la graisse baisse pendant que le muscle monte. Cela marche surtout quand on débute la musculation ou qu'on reprend après une longue pause, à condition de manger beaucoup de protéines.",
   },
   {
     key: 'masse',
-    label: 'Prise de masse',
-    desc: 'Surplus de 5 à 15 %',
+    label: 'Prendre du muscle',
+    desc: 'Manger un peu plus que ce que vous dépensez',
+    detail: 'prise de masse · +5 à +15 %',
     min: 1.05,
     max: 1.15,
     rec: 1.1,
@@ -84,8 +92,9 @@ export const GOALS: Goal[] = [
   },
   {
     key: 'maintien',
-    label: 'Maintien',
-    desc: 'Aucun écart',
+    label: 'Rester à mon poids',
+    desc: 'Manger autant que ce que vous dépensez',
+    detail: 'maintien · aucun écart',
     min: 0.97,
     max: 1.03,
     rec: 1.0,
@@ -95,12 +104,12 @@ export const GOALS: Goal[] = [
 ];
 
 export const BMI_BANDS: BmiBand[] = [
-  { max: 18.5, label: 'Insuffisance pondérale', color: '#0288d1' },
-  { max: 25, label: 'Corpulence normale', color: '#2e7d32' },
-  { max: 30, label: 'Surpoids', color: '#f9a825' },
-  { max: 35, label: 'Obésité modérée', color: '#ef6c00' },
-  { max: 40, label: 'Obésité sévère', color: '#d84315' },
-  { max: 999, label: 'Obésité massive', color: '#b71c1c' },
+  { max: 18.5, label: 'Insuffisance pondérale', color: '#3a6ea5' },
+  { max: 25, label: 'Corpulence normale', color: '#2e7d54' },
+  { max: 30, label: 'Surpoids', color: '#b06f10' },
+  { max: 35, label: 'Obésité modérée', color: '#b4551c' },
+  { max: 40, label: 'Obésité sévère', color: '#9e3b23' },
+  { max: 999, label: 'Obésité massive', color: '#7d2a1c' },
 ];
 
 /** Les 4 segments affichés sur la jauge (les bandes d'obésité sont regroupées en « > 30 »). */
@@ -185,26 +194,29 @@ export const MOVE_SHARES = [0.45, 0.35, 0.25, 0.15, 0.1];
 export const FLOORS = { homme: 1500, femme: 1200 } as const;
 
 export const BENEFITS = [
-  { n: '1', title: 'Métabolisme de base', desc: 'Vos calories au repos, formule Mifflin-St Jeor.' },
-  { n: '2', title: 'Dépense énergétique totale', desc: "Ajustée à votre niveau d'activité réel." },
+  {
+    n: '1',
+    title: 'Ce que vous brûlez au repos',
+    desc: 'L’énergie que votre corps consomme sans rien faire.',
+  },
+  {
+    n: '2',
+    title: 'Ce que vous brûlez en tout',
+    desc: 'En comptant votre travail, vos déplacements et votre sport.',
+  },
   {
     n: '3',
-    title: 'IMC et poids santé',
-    desc: "Votre corpulence et l'intervalle de poids correspondant.",
+    title: 'Votre corpulence',
+    desc: 'Où vous vous situez et le poids conseillé pour votre taille.',
   },
   {
     n: '4',
-    title: "Fourchette d'apport",
-    desc: "Déficit ou surplus minimum et maximum selon l'objectif, avec les macros.",
+    title: 'Combien manger',
+    desc: 'Entre combien et combien, selon votre objectif, avec la répartition.',
   },
 ];
 
-export const STEP_TITLES = ['Parlons de vous', 'Vos mesures', 'Votre activité', 'Votre objectif'];
-
-export const MACRO_COLORS = { fat: '#f9a825', carb: '#00897b' } as const;
-
-/** Repère visuel de la DET sur la barre de fourchette. */
-export const TDEE_MARKER_COLOR = '#90a4ae';
+export const STEP_TITLES = ['Vous êtes', 'Vos mesures', 'Vous bougez', 'Votre objectif'];
 
 export function goalByKey(key: GoalKey): Goal {
   return GOALS.find((g) => g.key === key) ?? GOALS[3];

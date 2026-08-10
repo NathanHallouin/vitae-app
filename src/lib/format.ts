@@ -2,8 +2,15 @@
 
 const MINUS = '−';
 
+/**
+ * `toLocaleString('fr-FR')` sépare les milliers par une espace fine insécable (U+202F), que
+ * beaucoup de polices — dont celles utilisées ici — ne dessinent pas. On la remplace par une
+ * espace insécable classique.
+ */
 export function kcal(n: number): string {
-  return Math.round(n).toLocaleString('fr-FR');
+  return Math.round(n)
+    .toLocaleString('fr-FR')
+    .replace(/\u202f/g, '\u00a0');
 }
 
 export function dec(n: number, digits = 1): string {

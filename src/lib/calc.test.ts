@@ -13,7 +13,7 @@ import {
   rangeBar,
 } from './calc';
 import { fmtGap, fmtKg, fmtWeekly, kcal } from './format';
-import { initialState, reducer, validate } from './state';
+import { emptyForm, formFromProfile, profileFromForm, reducer, validate } from './state';
 
 const HOMME = {
   sexe: 'homme',
@@ -23,6 +23,8 @@ const HOMME = {
   activity: 2,
   goal: 'seche',
 } as const;
+
+const COLORS = { prot: '#2e7d54', fat: '#b06f10', carb: '#3a6ea5' };
 
 describe('computeMetrics', () => {
   test('Mifflin-St Jeor, DET et fourchette (homme 30 ans, 175 cm, 70 kg, modéré, sèche)', () => {
@@ -105,7 +107,7 @@ describe('projection', () => {
     if (!m) throw new Error('métriques attendues');
     const p = buildProjection(m, 'seche', 'gain');
     expect(p.coherent).toBe(false);
-    expect(p.note).toContain('sens opposé');
+    expect(p.note).toContain('sens inverse');
   });
 
   test('pas de projection en maintien : le poids est stable', () => {
@@ -113,7 +115,7 @@ describe('projection', () => {
     if (!m) throw new Error('métriques attendues');
     const p = buildProjection(m, 'maintien', null);
     expect(p.coherent).toBe(false);
-    expect(p.note).toContain('le poids reste stable');
+    expect(p.note).toContain('votre poids ne bouge pas');
   });
 });
 
@@ -121,7 +123,7 @@ describe('macros et plan', () => {
   test('répartition indicative', () => {
     const m = computeMetrics(HOMME);
     if (!m) throw new Error('métriques attendues');
-    const [prot, fat, carb] = buildMacros(m, '#1976d2');
+    const [prot, fat, carb] = buildMacros(m, COLORS);
     expect(prot.grams).toBe(140); // 70 kg × 2,0 g/kg
     expect(fat.grams).toBe(65); // 28 % des kcal / 9
     expect(carb.grams).toBe(238);
@@ -132,7 +134,7 @@ describe('macros et plan', () => {
     const m = computeMetrics(HOMME);
     if (!m) throw new Error('métriques attendues');
     const plan = buildPlan(m, 2, 'seche');
-    expect(plan.title).toBe("Construire l'écart");
+    expect(plan.title).toBe('Comment créer cet écart');
     expect(plan.movePct).toBe(25);
     expect(plan.foodPct).toBe(75);
     expect(plan.moveKcal + plan.foodKcal).toBe(m.tdee - m.target);
@@ -151,9 +153,9 @@ describe('macros et plan', () => {
     const m = computeMetrics({ ...HOMME, goal: 'masse' });
     if (!m) throw new Error('métriques attendues');
     const plan = buildPlan(m, 2, 'masse');
-    expect(plan.title).toBe('Construire le surplus');
-    expect(plan.splitLabel).toBe('Surplus quotidien à répartir');
-    expect(plan.foodLabel).toBe("En plus dans l'assiette");
+    expect(plan.title).toBe('Comment utiliser ce surplus');
+    expect(plan.splitLabel).toBe('Où mettre ce surplus chaque jour');
+    expect(plan.foodLabel).toBe('En mangeant un peu plus');
   });
 });
 
@@ -170,7 +172,7 @@ describe('barre de fourchette', () => {
 
 describe('formats français', () => {
   test('espace insécable, virgule décimale et signe moins U+2212', () => {
-    expect(kcal(2096)).toBe((2096).toLocaleString('fr-FR'));
+    expect(kcal(2096)).toBe('2\u00a0096'); // espace insécable, dessinée par toutes les polices
     expect(fmtGap(-460)).toBe('−460 kcal');
     expect(fmtGap(0)).toBe('équilibre');
     expect(fmtKg(-3.5)).toBe('−3,5 kg');
@@ -181,31 +183,100 @@ describe('formats français', () => {
   });
 });
 
-describe('état et validation', () => {
-  test('messages de validation du formulaire', () => {
-    const form = { ...initialState, mode: 'form' as const };
-    expect(validate(form)).toBe(
-      'Sélectionnez un sexe biologique pour appliquer la bonne équation.',
+describe('formulaire et validation', () => {
+  const NOW = new Date(2026, 7, 10); // 10 août 2026
+
+  const PROFIL = {
+    v: 1,
+    sexe: 'homme' as const,
+    naissance: '1992-03-15',
+    taille: '178',
+    poids: '86',
+    activity: 1,
+    goal: 'seche' as const,
+    updatedAt: '2026-08-09T10:00:00.000Z',
+  };
+
+  test('messages de validation, en langage courant', () => {
+    const form = { ...emptyForm, mode: 'form' as const };
+    const rempli = { ...form, sexe: 'homme' as const, taille: '175', poids: '70' };
+
+    expect(validate(form, NOW)).toBe('Choisissez femme ou homme : le calcul n’est pas le même.');
+    expect(validate({ ...form, sexe: 'homme' }, NOW)).toBe(
+      'Renseignez la date de naissance, la taille et le poids.',
     );
-    expect(validate({ ...form, sexe: 'homme' })).toBe("Renseignez l'âge, la taille et le poids.");
-    expect(validate({ ...form, sexe: 'homme', age: '8', taille: '175', poids: '70' })).toBe(
-      "L'âge doit être compris entre 15 et 100 ans.",
+    expect(validate({ ...rempli, naissance: '2018-01-01' }, NOW)).toBe(
+      'Ce calcul est prévu pour les 15 à 100 ans.',
     );
-    expect(validate({ ...form, sexe: 'homme', age: '30', taille: '175', poids: '70' })).toBe('');
+    expect(validate({ ...rempli, naissance: '1992-03-15' }, NOW)).toBe('');
+  });
+
+  test('une date de naissance invalide est traitée comme absente', () => {
+    const form = {
+      ...emptyForm,
+      mode: 'form' as const,
+      sexe: 'homme' as const,
+      taille: '175',
+      poids: '70',
+    };
+    for (const naissance of ['', '2026-02-31', '15/03/1992', '2030-01-01']) {
+      expect(validate({ ...form, naissance }, NOW)).toBe(
+        'Renseignez la date de naissance, la taille et le poids.',
+      );
+    }
   });
 
   test('le mode guidé ne valide que les champs de l’étape courante', () => {
-    const wizard = { ...initialState, screen: 'input' as const, sexe: 'homme' as const };
-    expect(reducer(wizard, { type: 'submit' }).step).toBe(1); // étape 0 : sexe seul
+    const wizard = { ...emptyForm, sexe: 'homme' as const };
+    expect(validate(wizard, NOW)).toBe(''); // étape 0 : le sexe suffit
+    expect(reducer(wizard, { type: 'next' }).step).toBe(1);
+    expect(validate(reducer(wizard, { type: 'next' }), NOW)).toBe(
+      'Renseignez la date de naissance, la taille et le poids.',
+    );
   });
 
-  test('changer d’objectif réinitialise le poids cible choisi', () => {
-    const withTarget = { ...initialState, targetKey: 'mid' };
-    expect(reducer(withTarget, { type: 'setGoal', value: 'masse' }).targetKey).toBeNull();
+  test('poids périmé : le champ est vidé et le rappel affiché', () => {
+    const staleWeight = { previous: '86', updatedAt: PROFIL.updatedAt };
+    const form = formFromProfile(PROFIL, staleWeight, 'form');
+
+    expect(form.poids).toBe('');
+    expect(form.taille).toBe('178');
+    expect(form.staleWeight).toEqual(staleWeight);
+
+    const retapé = reducer(form, { type: 'setField', field: 'poids', value: '84' });
+    expect(retapé.poids).toBe('84');
+    expect(retapé.staleWeight).toBeNull();
   });
 
-  test('« Recommencer » remet l’état initial', () => {
-    const dirty = { ...initialState, screen: 'result' as const, poids: '86', error: 'oups' };
-    expect(reducer(dirty, { type: 'reset' })).toEqual(initialState);
+  test('poids récent : conservé tel quel', () => {
+    const form = formFromProfile(PROFIL, null, 'form');
+    expect(form.poids).toBe('86');
+    expect(form.staleWeight).toBeNull();
+  });
+
+  test('la date de naissance restaurée n’est plus modifiable', () => {
+    const form = formFromProfile(PROFIL, null, 'form');
+    expect(form.naissanceLocked).toBe(true);
+
+    const tentative = reducer(form, { type: 'setField', field: 'naissance', value: '2000-01-01' });
+    expect(tentative.naissance).toBe('1992-03-15');
+
+    // Les autres champs restent modifiables.
+    expect(reducer(form, { type: 'setField', field: 'taille', value: '179' }).taille).toBe('179');
+    // Un profil vidé rend la saisie de nouveau possible.
+    expect(formFromProfile(null, null).naissanceLocked).toBe(false);
+  });
+
+  test('le formulaire ne produit un profil que s’il est utilisable', () => {
+    expect(profileFromForm(emptyForm)).toBeNull();
+    const form = formFromProfile(PROFIL, null, 'form');
+    expect(profileFromForm(form)).toEqual({
+      sexe: 'homme',
+      naissance: '1992-03-15',
+      taille: '178',
+      poids: '86',
+      activity: 1,
+      goal: 'seche',
+    });
   });
 });

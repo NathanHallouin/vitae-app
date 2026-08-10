@@ -295,22 +295,74 @@ bun run typecheck  # tsc --noEmit
 
 | Chemin | Rôle |
 |---|---|
-| `src/lib/constants.ts` | données de référence : `ACTIVITIES`, `GOALS`, `BMI_BANDS`, `MOVES`, `NEAT`, copies |
+| `src/lib/constants.ts` | données de référence et libellés en langage courant |
 | `src/lib/calc.ts` | métier pur : Mifflin-St Jeor, DET, fourchettes, IMC, macros, poids cible, projection, plan |
 | `src/lib/format.ts` | formats français (espace insécable, virgule décimale, `−` U+2212) |
-| `src/lib/state.ts` | état unique + `reducer` + validation des étapes |
-| `src/lib/calc.test.ts` | valeurs de référence du prototype, verrouillées par `bun test` |
-| `src/theme/tokens.ts` | tokens de la maquette, clair et sombre |
-| `src/theme/theme.ts` | `createTheme` : palette, ombres elevation 1/3, overrides de composants |
-| `src/theme/ThemeRegistry.tsx` | `AppRouterCacheProvider` + `ThemeProvider` + bascule clair/sombre |
-| `src/components/` | écrans (`HomeScreen`, `InputScreen`, `ResultScreen`) et cartes de résultat |
+| `src/lib/date.ts` | âge calculé depuis la date de naissance, fraîcheur du poids (7 jours) |
+| `src/lib/storage.ts` | profil en `localStorage`, clé versionnée `vitae.v1.profile` |
+| `src/lib/state.ts` | état du formulaire de saisie + validation (la navigation est au routeur) |
+| `src/lib/nutrition.ts` | table de composition des aliments et génération d'une journée type |
+| `src/lib/training.ts` | semaine d'entraînement au poids du corps, adaptée à l'objectif |
+| `src/theme/` | tokens clair/sombre → `createTheme`, exposés via `theme.tokens` |
+| `src/components/ProfileProvider.tsx` | profil chargé au montage, métriques dérivées, partagées par toutes les pages |
+| `src/components/screens/` | un composant par page |
+
+### Pages
+
+| Route | Contenu |
+|---|---|
+| `/` | accueil : à quoi sert le calcul, et reprise du profil s'il existe |
+| `/profil` | saisie guidée (4 questions) ou formulaire complet, avec aperçu en direct |
+| `/metabolisme` | dépense au repos, dépense totale, IMC |
+| `/alimentation` | objectif, combien manger, fourchette, répartition des macros |
+| `/poids` | poids cible et projection dans le temps |
+| `/bouger` | répartition mouvement / assiette, exercices, anti-sédentarité |
+
+Les quatre dernières partagent un layout (`src/app/(resultats)/layout.tsx`) qui porte les onglets,
+le rappel du profil et l'avertissement médical, et renvoie vers `/profil` si aucun profil n'est
+enregistré.
 
 Les tokens sont exposés via `theme.tokens` (augmentation de type MUI) : `sx={(t) => ({ color: t.tokens.muted })}`.
 
+### Direction visuelle
+
+La maquette a servi de base fonctionnelle, mais l'habillage a été refait pour correspondre au
+secteur (santé / nutrition) :
+
+- **Palette** : bleu profond `#084684` en thème clair, abricot `#f7b97b` en thème sombre, sur des
+  fonds chauds plutôt que gris neutres. `primary` ne sert **qu'en aplat** (carte principale, états
+  sélectionnés, boutons pleins) ; le texte posé dessus (`heroText`) suit sa clarté. Pour les textes
+  et bordures accentués, le token `primaryInk` (`#084684` en clair, 9,4:1 sur blanc) tient
+  largement le 4,5:1. Les macronutriments utilisent un trio
+  orange / bleu / vert, distinguable en cas de daltonisme.
+- **Typographie** : *Fraunces* (serif, axe `SOFT` adouci) pour les titres et les grands chiffres,
+  *Inter* pour l'interface. Les chiffres restent en `tabular-nums`.
+- **Formes** : cartes de rayon 16 px avec bordure fine et ombre diffuse, boutons de rayon 10 px
+  sans majuscules, onglets en pastilles, champs sur fond `surface2`.
+- **En-tête clair** au lieu de la barre pleine couleur, pour laisser la carte principale porter
+  la couleur.
+- **Contraste** : vérifié par mesure dans le navigateur, tous les textes passent le seuil WCAG AA
+  dans les deux thèmes (4,5:1, ou 3:1 pour les grands corps). Le `faint` de la maquette
+  (`#9e9e9e`, 2,7:1) ne passait pas.
+
+Deux notes d'implémentation :
+
+- `toLocaleString('fr-FR')` sépare les milliers par une espace fine insécable (U+202F) que ni
+  Inter ni Fraunces ne dessinent. `kcal()` la remplace par une espace insécable classique.
+- MUI 9 n'émet plus les classes combinées `MuiButton-textPrimary` : les surcharges de bouton par
+  couleur passent par `components.MuiButton.variants`, sinon elles sont silencieusement ignorées
+  et le texte reste sur `palette.primary.main`.
+
 ### Choix d'implémentation
 
-- Un seul composant client (`Calculator`) porte l'état via `useReducer` ; tout le reste est dérivé,
-  conformément au handoff. Aucune donnée distante, aucune persistance (comme le prototype).
+- **Écart assumé avec la maquette : les résultats sont découpés en quatre pages** au lieu d'un
+  écran unique, avec une URL par sujet et des onglets. Le profil étant persisté, chaque page se
+  recharge et se partage indépendamment.
+- **Écart assumé : les textes ont été réécrits en langage courant.** Les termes techniques
+  restent accessibles en second plan (« Perdre du gras » avec « aussi appelé sèche · −10 à −25 % »).
+  Les valeurs numériques, elles, restent celles de la maquette.
+- Le profil est chargé une fois par `ProfileProvider` ; les pages n'en dérivent que des calculs
+  purs. Aucune donnée distante.
 - Le graphique de projection est un SVG maison qui reprend la géométrie du prototype
   (`viewBox` 600 × 196, `x0=6`, `x1=594`, `y0=10`, `y1=170`), avec les libellés d'axe en `<text>`
   SVG — la contrainte du prototype n'existe plus ici, MUI X Charts n'est donc pas nécessaire.
@@ -321,5 +373,25 @@ Les tokens sont exposés via `theme.tokens` (augmentation de type MUI) : `sx={(t
   largeur 100, imports organisés automatiquement. Les règles spécifiques à Next.js
   (`eslint-config-next`) n'ont pas d'équivalent Biome ; `bun run build` reste le garde-fou
   pour les erreurs propres au framework.
+- **Écart assumé avec la maquette : la saisie demande une date de naissance, pas un âge.**
+  L'âge est recalculé à chaque affichage (`ageFrom`), donc un profil enregistré ne vieillit pas
+  faux. Les copies concernées ont été adaptées : « Renseignez la date de naissance, la taille et
+  le poids. » et le libellé du champ. Le message sur les bornes d'âge reste inchangé.
+- **Profil persisté en `localStorage`**, sans base de données : le profil complet est enregistré à
+  chaque saisie avec sa date de modification. Au retour sur l'app, il est restauré ; si le poids
+  date de plus de 7 jours, le champ est vidé et un rappel indique le dernier poids connu. La date
+  de naissance restaurée passe en lecture seule — « Recommencer » efface le profil et la rend à
+  nouveau saisissable.
+- **Repères nutritionnels vérifiés** : au-delà d'un IMC de 30, les protéines sont calculées sur un
+  poids ajusté (haut du poids santé + 25 % de l'excès) plutôt que sur le poids total ; les lipides
+  ne descendent jamais sous 0,6 g/kg ; il reste toujours au moins 10 % de l'énergie en glucides.
+  `src/lib/plan.test.ts` vérifie ces bornes sur 60 combinaisons de profils, d'activités et
+  d'objectifs.
+- **Journée alimentaire générée**, pas rédigée : les portions découlent des macros, avec un
+  plafond par aliment et un rééquilibrage final sur les féculents. Le menu tombe à moins de 1 % de
+  l'apport visé sur tous les profils testés.
+- **Semaine d'entraînement** construite sur les repères usuels : au moins deux séances de
+  renforcement (OMS), 48 h entre deux séances des mêmes muscles, progression par répétitions avant
+  progression par difficulté, arrêt des séries 2 à 3 répétitions avant l'échec.
 - Les garde-fous de la fourchette (`safeMin`, recommandé borné) et le positionnement par morceaux
   du curseur IMC sont implémentés tels que décrits, avec commentaires dans `src/lib/calc.ts`.

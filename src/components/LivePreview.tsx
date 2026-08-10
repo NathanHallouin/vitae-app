@@ -3,37 +3,50 @@
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
-import type { Metrics } from '@/lib/calc';
+import { computeMetrics } from '@/lib/calc';
 import { ACTIVITIES, goalByKey } from '@/lib/constants';
 import { dec, kcal } from '@/lib/format';
-import type { State } from '@/lib/state';
+import type { FormState } from '@/lib/state';
 import { FS } from '@/theme/theme';
 import Overline from './ui/Overline';
 
-/** Panneau latéral « Aperçu en direct » : recalculé à chaque frappe. */
-export default function LivePreview({ state, metrics }: { state: State; metrics: Metrics | null }) {
+/** Panneau latéral : les chiffres se recalculent à chaque frappe. */
+export default function LivePreview({ form, age }: { form: FormState; age: number | null }) {
+  const metrics = computeMetrics({
+    sexe: form.sexe,
+    age: age === null ? '' : String(age),
+    taille: form.taille,
+    poids: form.poids,
+    activity: form.activity,
+    goal: form.goal,
+  });
+
   const rows = [
     {
-      label: 'Métabolisme de base',
+      label: 'Au repos, vous brûlez',
       value: metrics ? `${kcal(metrics.bmr)} kcal` : '—',
       accent: false,
     },
-    { label: 'Dépense totale', value: metrics ? `${kcal(metrics.tdee)} kcal` : '—', accent: false },
     {
-      label: 'Apport recommandé',
+      label: 'Avec votre activité',
+      value: metrics ? `${kcal(metrics.tdee)} kcal` : '—',
+      accent: false,
+    },
+    {
+      label: 'À manger par jour',
       value: metrics ? `${kcal(metrics.target)} kcal` : '—',
       accent: true,
     },
     {
-      label: 'IMC',
+      label: 'Corpulence (IMC)',
       value: metrics ? `${dec(metrics.bmi)} · ${metrics.band.label}` : '—',
       accent: false,
     },
   ];
 
   const hint = metrics
-    ? `Les valeurs se mettent à jour à chaque modification. ${ACTIVITIES[state.activity].label}, objectif ${goalByKey(state.goal).label.toLowerCase()}.`
-    : 'Renseignez sexe, âge, taille et poids pour voir les valeurs se calculer ici.';
+    ? `Calculé pour « ${ACTIVITIES[form.activity].label.toLowerCase()} », objectif « ${goalByKey(form.goal).label.toLowerCase()} ». Tout se met à jour pendant que vous tapez.`
+    : 'Répondez aux questions : les chiffres se calculent ici au fur et à mesure.';
 
   return (
     <Paper
@@ -48,7 +61,7 @@ export default function LivePreview({ state, metrics }: { state: State; metrics:
         p: '20px',
       }}
     >
-      <Overline sx={{ mb: '14px' }}>Aperçu en direct</Overline>
+      <Overline sx={{ mb: '14px' }}>Vos chiffres en direct</Overline>
       <Box sx={{ display: 'flex', flexDirection: 'column' }}>
         {rows.map((row) => (
           <Box
@@ -80,7 +93,7 @@ export default function LivePreview({ state, metrics }: { state: State; metrics:
         ))}
       </Box>
       <Typography
-        sx={(t) => ({ fontSize: FS.caption, lineHeight: 1.55, color: t.tokens.faint, mt: '14px' })}
+        sx={(t) => ({ fontSize: FS.caption, lineHeight: 1.55, color: t.tokens.muted2, mt: '14px' })}
       >
         {hint}
       </Typography>

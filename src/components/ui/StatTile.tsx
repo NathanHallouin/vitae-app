@@ -3,7 +3,7 @@
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import type { ReactNode } from 'react';
-import { FS } from '@/theme/theme';
+import { DISPLAY_FONT, FS } from '@/theme/theme';
 
 /** Tuile de statistique sur fond `surface2` : libellé, valeur 22 px, note optionnelle. */
 export default function StatTile({
@@ -21,8 +21,8 @@ export default function StatTile({
     <Box
       sx={(theme) => ({
         backgroundColor: theme.tokens.surface2,
-        borderRadius: 1,
-        p: '14px',
+        borderRadius: '12px',
+        p: '16px',
       })}
     >
       <Typography sx={(t) => ({ fontSize: FS.caption, color: t.tokens.muted2, mb: '4px' })}>
@@ -30,8 +30,9 @@ export default function StatTile({
       </Typography>
       <Typography
         sx={(t) => ({
+          fontFamily: DISPLAY_FONT,
           fontSize: FS.stat2,
-          fontWeight: 500,
+          fontWeight: 600,
           fontVariantNumeric: 'tabular-nums',
           color: accent ? t.tokens.primaryInk : 'inherit',
         })}

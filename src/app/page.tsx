@@ -1,5 +1,5 @@
-import Calculator from '@/components/Calculator';
+import HomeScreen from '@/components/screens/HomeScreen';
 
 export default function Page() {
-  return <Calculator />;
+  return <HomeScreen />;
 }

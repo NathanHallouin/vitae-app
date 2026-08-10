@@ -7,37 +7,63 @@ import LinearProgress from '@mui/material/LinearProgress';
 import Paper from '@mui/material/Paper';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import type { Dispatch } from 'react';
-import type { Metrics } from '@/lib/calc';
+import { useReducer } from 'react';
 import { ACTIVITIES, GOALS, STEP_TITLES } from '@/lib/constants';
+import { ageFrom, formatBirthDate, formatLongDate, todayISO } from '@/lib/date';
 import { fmtFactor } from '@/lib/format';
-import { type Action, type State, stepFields } from '@/lib/state';
+import {
+  type FormState,
+  isLastStep,
+  profileFromForm,
+  reducer,
+  stepFields,
+  validate,
+} from '@/lib/state';
+import type { ProfileInput } from '@/lib/storage';
 import { FS } from '@/theme/theme';
-import LivePreview from './LivePreview';
-import OptionButton from './ui/OptionButton';
-import Overline from './ui/Overline';
+import LivePreview from '../LivePreview';
+import OptionButton from '../ui/OptionButton';
+import Overline from '../ui/Overline';
 
 const MEASURES = [
-  { field: 'age', label: 'Âge', unit: 'ans', placeholder: '30' },
   { field: 'taille', label: 'Taille', unit: 'cm', placeholder: '175' },
   { field: 'poids', label: 'Poids', unit: 'kg', placeholder: '70' },
 ] as const;
 
-export default function InputScreen({
-  state,
-  metrics,
-  dispatch,
+export default function ProfilForm({
+  initial,
+  onSubmit,
+  onCancel,
+  onReset,
+  hasProfile,
 }: {
-  state: State;
-  metrics: Metrics | null;
-  dispatch: Dispatch<Action>;
+  initial: FormState;
+  onSubmit: (profile: ProfileInput) => void;
+  onCancel: () => void;
+  onReset: () => void;
+  hasProfile: boolean;
 }) {
-  const fields = stepFields(state);
-  const isWizard = state.mode === 'wizard';
-  const kicker = isWizard ? `Étape ${state.step + 1} sur 4` : 'Formulaire complet';
-  const title = isWizard ? STEP_TITLES[state.step] : 'Vos informations';
-  const nextLabel = !isWizard || state.step === 3 ? 'Calculer' : 'Continuer';
-  const backLabel = isWizard && state.step > 0 ? 'Retour' : 'Annuler';
+  const [form, dispatch] = useReducer(reducer, initial);
+  const fields = stepFields(form);
+  const isWizard = form.mode === 'wizard';
+  const age = ageFrom(form.naissance);
+
+  const kicker = isWizard ? `Question ${form.step + 1} sur 4` : 'Toutes vos informations';
+  const title = isWizard
+    ? STEP_TITLES[form.step]
+    : hasProfile
+      ? 'Mes informations'
+      : 'Vos informations';
+  const nextLabel = isLastStep(form) ? 'Voir mes résultats' : 'Continuer';
+  const backLabel = isWizard && form.step > 0 ? 'Retour' : 'Annuler';
+
+  const submit = () => {
+    const error = validate(form);
+    if (error) return dispatch({ type: 'error', message: error });
+    if (!isLastStep(form)) return dispatch({ type: 'next' });
+    const profile = profileFromForm(form);
+    if (profile) onSubmit(profile);
+  };
 
   return (
     <Box>
@@ -53,20 +79,20 @@ export default function InputScreen({
       >
         <Box>
           <Overline sx={{ mb: '4px' }}>{kicker}</Overline>
-          <Typography variant="h2" component="h2">
+          <Typography variant="h2" component="h1">
             {title}
           </Typography>
         </Box>
         <Button onClick={() => dispatch({ type: 'toggleMode' })} sx={{ fontSize: FS.small, p: 1 }}>
-          {isWizard ? "Tout saisir d'un coup" : 'Mode guidé'}
+          {isWizard ? 'Tout saisir d’un coup' : 'Une question à la fois'}
         </Button>
       </Box>
 
       {isWizard ? (
         <LinearProgress
           variant="determinate"
-          value={((state.step + 1) / 4) * 100}
-          aria-label={`Progression : étape ${state.step + 1} sur 4`}
+          value={((form.step + 1) / 4) * 100}
+          aria-label={`Progression : question ${form.step + 1} sur 4`}
           sx={{ mb: 3 }}
         />
       ) : null}
@@ -76,29 +102,49 @@ export default function InputScreen({
           component="form"
           onSubmit={(e: React.FormEvent) => {
             e.preventDefault();
-            dispatch({ type: 'submit' });
+            submit();
           }}
           sx={{ flex: '1 1 460px', minWidth: 0, p: 3 }}
         >
           {fields.sex ? (
             <Box sx={{ mb: 3 }} role="group" aria-labelledby="label-sexe">
-              <FieldLabel id="label-sexe">Sexe biologique</FieldLabel>
+              <FieldLabel id="label-sexe">Vous êtes</FieldLabel>
               <Box sx={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
                 {(['femme', 'homme'] as const).map((sexe) => (
                   <OptionButton
                     key={sexe}
-                    selected={state.sexe === sexe}
+                    selected={form.sexe === sexe}
                     onClick={() => dispatch({ type: 'setSexe', value: sexe })}
                     sx={{ flex: 1, minWidth: 130, p: 2, fontSize: FS.option, fontWeight: 500 }}
                   >
-                    {sexe === 'femme' ? 'Femme' : 'Homme'}
+                    {sexe === 'femme' ? 'Une femme' : 'Un homme'}
                   </OptionButton>
                 ))}
               </Box>
-              <Typography sx={(t) => ({ fontSize: FS.caption, color: t.tokens.faint, mt: 1 })}>
-                Utilisé uniquement pour l&apos;équation, qui diffère selon la composition corporelle
-                moyenne.
+              <Typography sx={(t) => ({ fontSize: FS.caption, color: t.tokens.muted2, mt: 1 })}>
+                Le calcul diffère : à poids et taille égaux, un corps féminin et un corps masculin
+                ne consomment pas la même énergie au repos.
               </Typography>
+            </Box>
+          ) : null}
+
+          {fields.body && form.staleWeight ? (
+            <Box
+              role="status"
+              sx={(t) => ({
+                backgroundColor: t.tokens.warnBg,
+                color: t.tokens.warnInk,
+                borderRadius: 1,
+                p: '12px 14px',
+                fontSize: FS.small,
+                lineHeight: 1.55,
+                mb: '20px',
+                textWrap: 'pretty',
+              })}
+            >
+              Votre dernier poids date du {formatLongDate(form.staleWeight.updatedAt)} (
+              {form.staleWeight.previous} kg). Repesez-vous et indiquez votre poids d’aujourd’hui :
+              tout le reste en dépend.
             </Box>
           ) : null}
 
@@ -111,6 +157,50 @@ export default function InputScreen({
                 mb: 3,
               }}
             >
+              <Box>
+                <FieldLabel htmlFor="field-naissance">Date de naissance</FieldLabel>
+                {form.naissanceLocked ? (
+                  // Date issue du profil enregistré : lecture seule, et affichée en clair plutôt
+                  // qu'en sélecteur de date, pour qu'aucun contrôle natif ne laisse croire
+                  // qu'elle est modifiable.
+                  <TextField
+                    id="field-naissance"
+                    type="text"
+                    fullWidth
+                    value={formatBirthDate(form.naissance)}
+                    slotProps={{
+                      htmlInput: { readOnly: true, 'aria-label': 'Date de naissance enregistrée' },
+                    }}
+                    sx={(t) => ({
+                      '& .MuiOutlinedInput-root': { backgroundColor: t.tokens.surface2 },
+                      '& .MuiOutlinedInput-input': { color: t.tokens.muted, cursor: 'default' },
+                    })}
+                  />
+                ) : (
+                  <TextField
+                    id="field-naissance"
+                    type="date"
+                    fullWidth
+                    value={form.naissance}
+                    onChange={(e) =>
+                      dispatch({ type: 'setField', field: 'naissance', value: e.target.value })
+                    }
+                    slotProps={{
+                      htmlInput: { max: todayISO(), 'aria-label': 'Date de naissance' },
+                    }}
+                  />
+                )}
+                <Typography
+                  sx={(t) => ({ fontSize: FS.caption, color: t.tokens.muted2, mt: '6px' })}
+                >
+                  {age === null
+                    ? 'Votre âge est calculé tout seul.'
+                    : form.naissanceLocked
+                      ? `${age} ans · enregistré, « Tout effacer » pour le changer`
+                      : `${age} ans aujourd’hui`}
+                </Typography>
+              </Box>
+
               {MEASURES.map((m) => (
                 <Box key={m.field}>
                   <FieldLabel htmlFor={`field-${m.field}`}>{m.label}</FieldLabel>
@@ -118,7 +208,7 @@ export default function InputScreen({
                     id={`field-${m.field}`}
                     type="number"
                     fullWidth
-                    value={state[m.field]}
+                    value={form[m.field]}
                     placeholder={m.placeholder}
                     onChange={(e) =>
                       dispatch({ type: 'setField', field: m.field, value: e.target.value })
@@ -137,10 +227,10 @@ export default function InputScreen({
 
           {fields.activity ? (
             <Box sx={{ mb: 3 }} role="radiogroup" aria-labelledby="label-activity">
-              <FieldLabel id="label-activity">Niveau d&apos;activité physique</FieldLabel>
+              <FieldLabel id="label-activity">Vous bougez combien&nbsp;?</FieldLabel>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                 {ACTIVITIES.map((a, i) => {
-                  const selected = state.activity === i;
+                  const selected = form.activity === i;
                   return (
                     <OptionButton
                       key={a.label}
@@ -175,7 +265,7 @@ export default function InputScreen({
                           {a.label}
                         </Typography>
                         <Typography
-                          sx={(t) => ({ fontSize: FS.small, color: t.tokens.muted2, mt: '2px' })}
+                          sx={(t) => ({ fontSize: FS.small, color: t.tokens.muted, mt: '2px' })}
                         >
                           {a.desc}
                         </Typography>
@@ -183,7 +273,7 @@ export default function InputScreen({
                       <Typography
                         sx={(t) => ({
                           fontSize: FS.small,
-                          color: t.tokens.faint,
+                          color: t.tokens.muted2,
                           fontVariantNumeric: 'tabular-nums',
                         })}
                       >
@@ -198,18 +288,18 @@ export default function InputScreen({
 
           {fields.goal ? (
             <Box sx={{ mb: 3 }} role="radiogroup" aria-labelledby="label-goal">
-              <FieldLabel id="label-goal">Objectif</FieldLabel>
+              <FieldLabel id="label-goal">Vous voulez</FieldLabel>
               <Box
                 sx={{
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
                   gap: '10px',
                 }}
               >
                 {GOALS.map((g) => (
                   <OptionButton
                     key={g.key}
-                    selected={state.goal === g.key}
+                    selected={form.goal === g.key}
                     onClick={() => dispatch({ type: 'setGoal', value: g.key })}
                     sx={{ p: '14px 16px' }}
                   >
@@ -217,9 +307,12 @@ export default function InputScreen({
                       {g.label}
                     </Typography>
                     <Typography
-                      sx={(t) => ({ fontSize: FS.small, color: t.tokens.muted2, mt: '2px' })}
+                      sx={(t) => ({ fontSize: FS.small, color: t.tokens.muted, mt: '2px' })}
                     >
                       {g.desc}
+                    </Typography>
+                    <Typography sx={(t) => ({ fontSize: FS.caption, color: t.tokens.muted })}>
+                      {g.detail}
                     </Typography>
                   </OptionButton>
                 ))}
@@ -227,7 +320,7 @@ export default function InputScreen({
             </Box>
           ) : null}
 
-          {state.error ? (
+          {form.error ? (
             <Box
               role="alert"
               sx={(t) => ({
@@ -239,7 +332,7 @@ export default function InputScreen({
                 mb: '20px',
               })}
             >
-              {state.error}
+              {form.error}
             </Box>
           ) : null}
 
@@ -255,7 +348,9 @@ export default function InputScreen({
           >
             <Button
               type="button"
-              onClick={() => dispatch({ type: 'back' })}
+              onClick={() =>
+                isWizard && form.step > 0 ? dispatch({ type: 'previous' }) : onCancel()
+              }
               sx={(t) => ({
                 color: t.tokens.muted,
                 '&:hover': { backgroundColor: 'rgba(0,0,0,.04)' },
@@ -269,8 +364,16 @@ export default function InputScreen({
           </Box>
         </Paper>
 
-        <LivePreview state={state} metrics={metrics} />
+        <LivePreview form={form} age={age} />
       </Box>
+
+      {hasProfile ? (
+        <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
+          <Button onClick={onReset} sx={(t) => ({ color: t.tokens.muted, fontSize: FS.small })}>
+            Tout effacer
+          </Button>
+        </Box>
+      ) : null}
     </Box>
   );
 }

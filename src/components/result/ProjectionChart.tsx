@@ -29,7 +29,9 @@ export default function ProjectionChart({
       viewBox={`0 0 ${CHART.width} ${VIEW_HEIGHT}`}
       role="img"
       aria-label={`Projection du poids sur ${projection.weeks} semaines jusqu'à ${targetLabel}`}
-      sx={{ width: '100%', height: 'auto', display: 'block' }}
+      // Largeur bornée : le texte du SVG grossit avec la largeur d'affichage, et les libellés
+      // d'axe deviendraient énormes sur un écran large.
+      sx={{ width: '100%', maxWidth: 760, height: 'auto', display: 'block' }}
     >
       {ticks.map((t) => (
         <line
@@ -64,7 +66,7 @@ export default function ProjectionChart({
       <polyline
         points={line}
         fill="none"
-        stroke={tokens.primary}
+        stroke={tokens.primaryInk}
         strokeWidth={3}
         strokeLinejoin="round"
         strokeLinecap="round"
@@ -73,7 +75,7 @@ export default function ProjectionChart({
         cx={targetX}
         cy={targetY}
         r={5}
-        fill={tokens.primary}
+        fill={tokens.primaryInk}
         stroke={tokens.surface}
         strokeWidth={2}
       />
