@@ -132,6 +132,8 @@ const PATHS = {
   ),
 
   // Lien sortant : flèche hors du cadre, convention établie pour « ouvre un autre site »
+  coche: <path d="M5 12.5 9.5 17 19 7" />,
+
   // Retirage : flèche circulaire ouverte, avec sa pointe.
   rotation: (
     <>

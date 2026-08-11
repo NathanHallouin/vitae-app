@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import RecetteAtelier, { GarderEcranAllume } from '@/components/recette/RecetteAtelier';
 import { dureeISO, dureeTotale, getRecipe, getRecipeSlugs } from '@/lib/content';
 import { SITE_NAME, SITE_URL } from '@/lib/site';
 
@@ -101,45 +102,43 @@ export default async function RecettePage({ params }: { params: Promise<{ slug: 
         </h1>
         <p className="mb-6 text-body leading-[1.6] text-muted text-pretty">{recette.description}</p>
 
-        <dl className="mb-8 grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-3">
+        {/* Repères en une seule ligne défilante plutôt qu'en grille de quatre pavés : sur un
+            téléphone, la grille poussait les ingrédients sous la ligne de flottaison. */}
+        <dl className="mb-5 flex flex-wrap gap-x-5 gap-y-2 text-small">
           {[
             { t: 'Préparation', v: `${recette.preparation} min` },
             { t: 'Cuisson', v: `${recette.cuisson} min` },
-            { t: 'Portions', v: String(recette.portions) },
+            { t: 'En tout', v: `${total} min` },
             { t: 'Par portion', v: `${recette.kcal} kcal · ${recette.proteines} g de protéines` },
           ].map((item) => (
-            <div key={item.t} className="rounded-xl bg-surface2 p-4">
-              <dt className="mb-1 text-caption text-muted2">{item.t}</dt>
-              <dd className="text-base font-medium tabular-nums">{item.v}</dd>
+            <div key={item.t} className="flex items-baseline gap-[6px]">
+              <dt className="text-muted2">{item.t}</dt>
+              <dd className="font-medium tabular-nums">{item.v}</dd>
             </div>
           ))}
         </dl>
 
-        <section className="card mb-8 p-6">
-          <h2 className="mb-3 font-display text-h3 font-semibold">Ingrédients</h2>
-          <ul className="flex flex-col gap-2">
-            {recette.ingredients.map((ing) => (
-              <li key={ing} className="flex items-start gap-3 text-base leading-[1.55]">
-                <span
-                  aria-hidden
-                  className="mt-[9px] size-[5px] flex-none rounded-full bg-primary-ink"
-                />
-                {ing}
-              </li>
-            ))}
-          </ul>
-        </section>
+        <div className="mb-5">
+          <GarderEcranAllume />
+        </div>
 
-        {/*
-          `prose` de @tailwindcss/typography met en forme le HTML produit par Markdown. Les
-          couleurs sont recâblées sur les tokens, sinon la palette par défaut du plugin ignorerait
-          le thème sombre.
-        */}
-        <div
-          className="prose max-w-none prose-headings:font-display prose-headings:font-semibold prose-headings:text-ink prose-p:text-muted prose-li:text-muted prose-strong:text-ink prose-a:text-primary-ink"
-          // biome-ignore lint/security/noDangerouslySetInnerHtml: contenu Markdown du dépôt, pas une saisie utilisateur
-          dangerouslySetInnerHTML={{ __html: recette.html }}
-        />
+        {recette.introHtml ? (
+          <div
+            className="prose mb-5 max-w-none prose-p:text-muted prose-strong:text-ink prose-em:text-ink"
+            // biome-ignore lint/security/noDangerouslySetInnerHtml: contenu Markdown du dépôt, pas une saisie utilisateur
+            dangerouslySetInnerHTML={{ __html: recette.introHtml }}
+          />
+        ) : null}
+
+        <RecetteAtelier recette={recette} />
+
+        {recette.suiteHtml ? (
+          <div
+            className="prose max-w-none prose-headings:font-display prose-headings:font-semibold prose-headings:text-ink prose-p:text-muted prose-li:text-muted prose-strong:text-ink prose-a:text-primary-ink"
+            // biome-ignore lint/security/noDangerouslySetInnerHtml: contenu Markdown du dépôt, pas une saisie utilisateur
+            dangerouslySetInnerHTML={{ __html: recette.suiteHtml }}
+          />
+        ) : null}
       </article>
     </main>
   );

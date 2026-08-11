@@ -39,10 +39,12 @@ export interface RecipeMeta {
 }
 
 export interface Recipe extends RecipeMeta {
-  /** étapes extraites du Markdown, pour `recipeInstructions` */
+  /** étapes extraites du Markdown, pour `recipeInstructions` et pour l'affichage pas à pas */
   etapes: string[];
-  /** corps rendu en HTML */
-  html: string;
+  /** ce qui précède la liste numérotée, en HTML */
+  introHtml: string;
+  /** ce qui la suit, en HTML */
+  suiteHtml: string;
 }
 
 function champManquant(slug: string, champ: string): never {
@@ -84,16 +86,50 @@ function lireMeta(slug: string, data: Record<string, unknown>): RecipeMeta {
 }
 
 /**
- * Les étapes sont les éléments de la liste numérotée du corps.
+ * Découpe le corps en trois : ce qui précède la liste numérotée, les étapes, et ce qui la suit.
  *
- * Extraites du Markdown plutôt que dupliquées dans le frontmatter : les redire deux fois, c'est
- * s'exposer à ce que la page et les données structurées divergent au premier ajustement.
+ * Les étapes sont extraites du Markdown plutôt que dupliquées dans le frontmatter : les redire
+ * deux fois, c'est s'exposer à ce que la page, les données structurées et le pas à pas divergent
+ * au premier ajustement. Les sortir de la prose permet aussi de les afficher en cases à cocher,
+ * plutôt qu'en `<ol>` où l'on perd sa place dès qu'on lève les yeux.
+ *
+ * Une étape peut tenir sur plusieurs lignes : les lignes indentées qui suivent lui appartiennent.
  */
-function lireEtapes(markdown: string): string[] {
-  return markdown
-    .split('\n')
-    .map((ligne) => ligne.match(/^\s*\d+\.\s+(.*)$/)?.[1]?.trim())
-    .filter((etape): etape is string => Boolean(etape));
+function decouper(markdown: string): { intro: string; etapes: string[]; suite: string } {
+  const lignes = markdown.split('\n');
+  const etapes: string[] = [];
+  const intro: string[] = [];
+  const suite: string[] = [];
+  let zone: 'intro' | 'etapes' | 'suite' = 'intro';
+
+  for (const ligne of lignes) {
+    const debut = ligne.match(/^\s*\d+\.\s+(.*)$/);
+
+    if (debut) {
+      if (zone === 'suite') {
+        // Une seconde liste numérotée après d'autres paragraphes n'est pas la recette.
+        suite.push(ligne);
+        continue;
+      }
+      zone = 'etapes';
+      etapes.push(debut[1].trim());
+      continue;
+    }
+
+    if (zone === 'etapes') {
+      // Ligne indentée non vide : continuation de l'étape précédente.
+      if (/^\s+\S/.test(ligne) && etapes.length > 0) {
+        etapes[etapes.length - 1] += ` ${ligne.trim()}`;
+        continue;
+      }
+      if (ligne.trim() === '') continue;
+      zone = 'suite';
+    }
+
+    (zone === 'intro' ? intro : suite).push(ligne);
+  }
+
+  return { intro: intro.join('\n').trim(), etapes, suite: suite.join('\n').trim() };
 }
 
 async function fichiers(): Promise<string[]> {
@@ -115,10 +151,12 @@ export async function getRecipe(slug: string): Promise<Recipe | null> {
   }
 
   const { data, content } = matter(brut);
+  const { intro, etapes, suite } = decouper(content);
   return {
     ...lireMeta(slug, data as Record<string, unknown>),
-    etapes: lireEtapes(content),
-    html: await marked.parse(content),
+    etapes,
+    introHtml: await marked.parse(intro),
+    suiteHtml: await marked.parse(suite),
   };
 }
 
