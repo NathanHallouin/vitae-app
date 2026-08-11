@@ -30,6 +30,15 @@ export default function AppHeader() {
           </span>
         </Link>
 
+        {/* Les recettes sont la partie publique du site : accessible sans profil, et toujours
+            visible, y compris sur mobile où la barre du bas ne porte que l'outil. */}
+        <Link
+          href="/recettes"
+          className="flex-none rounded-[var(--radius-control)] px-2 py-2 text-base font-semibold text-muted hover:bg-surface2 hover:text-ink nav:px-[14px]"
+        >
+          Recettes
+        </Link>
+
         {/* Masqué sur mobile : la barre du bas porte déjà « Profil », et deux entrées pour la
             même page à deux endroits de l'écran brouillent plus qu'elles n'aident. */}
         {showProfileLink ? (

@@ -27,7 +27,11 @@ export default function HomeScreen() {
           </p>
           <p className="mb-8 max-w-[58ch] text-base leading-[1.6] text-muted2">
             Quatre questions, une minute. Rien n’est envoyé sur internet : vos réponses restent dans
-            ce navigateur.
+            ce navigateur. Vous pouvez aussi parcourir directement{' '}
+            <Link href="/recettes" className="text-primary-ink underline underline-offset-2">
+              les recettes
+            </Link>
+            .
           </p>
 
           {known && metrics ? (
