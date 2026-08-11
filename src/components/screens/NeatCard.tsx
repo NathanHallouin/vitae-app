@@ -1,12 +1,7 @@
-'use client';
-
-import Box from '@mui/material/Box';
-import Paper from '@mui/material/Paper';
-import Typography from '@mui/material/Typography';
 import { kcal } from '@/lib/format';
 import type { NeatPlan } from '@/lib/neat';
-import { FS } from '@/theme/theme';
 import Overline from '../ui/Overline';
+import { Bullet } from '../ui/primitives';
 import StatTile from '../ui/StatTile';
 
 /**
@@ -16,29 +11,14 @@ import StatTile from '../ui/StatTile';
  */
 export default function NeatCard({ neat }: { neat: NeatPlan }) {
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-      <Paper sx={{ p: 3 }}>
-        <Overline sx={{ mb: '10px' }}>Ce que votre quotidien dépense déjà</Overline>
-        <Typography
-          sx={(t) => ({
-            fontSize: FS.base,
-            lineHeight: 1.6,
-            color: t.tokens.muted,
-            maxWidth: '68ch',
-            textWrap: 'pretty',
-            mb: '20px',
-          })}
-        >
+    <div className="flex flex-col gap-6">
+      <div className="card p-6">
+        <Overline className="mb-[10px]">Ce que votre quotidien dépense déjà</Overline>
+        <p className="mb-5 max-w-[68ch] text-base leading-[1.6] text-muted text-pretty">
           {neat.lead}
-        </Typography>
+        </p>
 
-        <Box
-          sx={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-            gap: '12px',
-          }}
-        >
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-3">
           <StatTile
             label="Mouvement du quotidien"
             value={`${kcal(neat.currentKcal)} kcal`}
@@ -52,121 +32,52 @@ export default function NeatCard({ neat }: { neat: NeatPlan }) {
               note="en passant au cran de mouvement au-dessus"
             />
           ) : null}
-        </Box>
+        </div>
 
-        <Typography
-          sx={(t) => ({
-            fontSize: FS.small,
-            lineHeight: 1.6,
-            color: t.tokens.muted,
-            mt: '14px',
-            maxWidth: '68ch',
-          })}
-        >
-          {neat.note}
-        </Typography>
-      </Paper>
+        <p className="mt-[14px] max-w-[68ch] text-small leading-[1.6] text-muted">{neat.note}</p>
+      </div>
 
-      <Box
-        sx={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-          gap: 3,
-          alignItems: 'start',
-        }}
-      >
-        <Paper sx={{ p: 3 }}>
-          <Overline sx={{ mb: '4px' }}>Où aller la chercher</Overline>
-          <Typography sx={(t) => ({ fontSize: FS.small, color: t.tokens.muted, mb: '6px' })}>
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] items-start gap-6">
+        <div className="card p-6">
+          <Overline className="mb-1">Où aller la chercher</Overline>
+          <p className="mb-[6px] text-small text-muted">
             Des gestes à répéter tous les jours, y compris les jours de séance. Les calories sont
             estimées pour votre poids actuel.
-          </Typography>
-          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+          </p>
+          <ul className="flex flex-col">
             {neat.actions.map((action) => (
-              <Box
+              <li
                 key={action.label}
-                sx={(t) => ({
-                  display: 'flex',
-                  gap: 2,
-                  alignItems: 'flex-start',
-                  py: '12px',
-                  borderTop: `1px solid ${t.tokens.divider}`,
-                })}
+                className="flex items-start gap-4 border-t border-divider py-3"
               >
-                <Box sx={{ flex: 1 }}>
-                  <Typography sx={{ fontSize: FS.option, fontWeight: 500, mb: '2px' }}>
-                    {action.label}
-                  </Typography>
-                  <Typography
-                    sx={(t) => ({ fontSize: FS.small, lineHeight: 1.5, color: t.tokens.muted })}
-                  >
-                    {action.detail}
-                  </Typography>
-                </Box>
-                <Typography
-                  sx={(t) => ({
-                    flex: 'none',
-                    fontSize: FS.small,
-                    fontWeight: 500,
-                    color: t.tokens.primaryInk,
-                    fontVariantNumeric: 'tabular-nums',
-                    whiteSpace: 'nowrap',
-                    pt: '1px',
-                  })}
-                >
+                <div className="flex-1">
+                  <p className="mb-[2px] text-option font-medium">{action.label}</p>
+                  <p className="text-small leading-[1.5] text-muted">{action.detail}</p>
+                </div>
+                <span className="flex-none pt-[1px] text-small font-medium whitespace-nowrap text-primary-ink tabular-nums">
                   ≈ {action.kcal} kcal
-                </Typography>
-              </Box>
+                </span>
+              </li>
             ))}
-          </Box>
-          <Typography
-            sx={(t) => ({
-              fontSize: FS.caption,
-              lineHeight: 1.6,
-              color: t.tokens.muted2,
-              mt: '12px',
-            })}
-          >
+          </ul>
+          <p className="mt-3 text-caption leading-[1.6] text-muted2">
             Ces gestes ne demandent aucune récupération : contrairement à une séance, vous pouvez
             les cumuler tous les jours sans jamais avoir à lever le pied.
-          </Typography>
-        </Paper>
+          </p>
+        </div>
 
-        <Paper sx={{ p: 3 }}>
-          <Overline sx={{ mb: '4px' }}>Vos repères</Overline>
-          <Typography sx={(t) => ({ fontSize: FS.small, color: t.tokens.muted, mb: '14px' })}>
+        <div className="card p-6">
+          <Overline className="mb-1">Vos repères</Overline>
+          <p className="mb-[14px] text-small text-muted">
             Adaptés à votre façon de passer vos journées.
-          </Typography>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          </p>
+          <ul className="flex flex-col gap-3">
             {[neat.steps, ...neat.tips].map((tip) => (
-              <Box
-                key={tip}
-                sx={(t) => ({
-                  display: 'flex',
-                  gap: '12px',
-                  alignItems: 'flex-start',
-                  backgroundColor: t.tokens.surface2,
-                  borderRadius: 1,
-                  p: '14px',
-                })}
-              >
-                <Box
-                  aria-hidden
-                  sx={(t) => ({
-                    width: 6,
-                    height: 6,
-                    borderRadius: '50%',
-                    backgroundColor: t.tokens.primaryInk,
-                    flex: 'none',
-                    mt: '7px',
-                  })}
-                />
-                <Typography sx={{ fontSize: FS.base, lineHeight: 1.55 }}>{tip}</Typography>
-              </Box>
+              <Bullet key={tip}>{tip}</Bullet>
             ))}
-          </Box>
-        </Paper>
-      </Box>
-    </Box>
+          </ul>
+        </div>
+      </div>
+    </div>
   );
 }

@@ -1,17 +1,14 @@
 'use client';
 
-import Box from '@mui/material/Box';
-import Paper from '@mui/material/Paper';
-import Typography from '@mui/material/Typography';
 import { buildPlan } from '@/lib/calc';
 import { kcal } from '@/lib/format';
 import { buildNeat, movementSplit } from '@/lib/neat';
 import { buildWeek } from '@/lib/training';
-import { FS } from '@/theme/theme';
 import { useProfile } from '../ProfileProvider';
 import RunningDoodle from '../ui/doodles/RunningDoodle';
 import Overline from '../ui/Overline';
 import PageIntro from '../ui/PageIntro';
+import { SplitBar } from '../ui/primitives';
 import SectionHeading from '../ui/SectionHeading';
 import StatTile from '../ui/StatTile';
 import NeatCard from './NeatCard';
@@ -33,63 +30,29 @@ export default function BougerScreen() {
   const split = movementSplit(metrics, profile.daily, profile.sessions);
 
   return (
-    <Box>
+    <div>
       <PageIntro
         title="Bouger"
         lead="Tout ne doit pas venir de l’assiette. Deux leviers, à ne pas confondre : ce que vous bougez dans la journée, et vos séances, sans salle ni matériel."
         illustration={<RunningDoodle />}
       />
 
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-        <Paper sx={{ p: 3 }}>
-          <Overline sx={{ mb: '10px' }}>{plan.title}</Overline>
-          <Typography
-            sx={(t) => ({
-              fontSize: FS.base,
-              lineHeight: 1.6,
-              color: t.tokens.muted,
-              maxWidth: '68ch',
-              textWrap: 'pretty',
-              mb: plan.hasSplit ? '20px' : 0,
-            })}
+      <div className="flex flex-col gap-6">
+        <div className="card p-6">
+          <Overline className="mb-[10px]">{plan.title}</Overline>
+          <p
+            className={`max-w-[68ch] text-base leading-[1.6] text-muted text-pretty ${
+              plan.hasSplit ? 'mb-5' : ''
+            }`}
           >
             {plan.note}
-          </Typography>
+          </p>
 
           {plan.hasSplit ? (
             <>
-              <Overline sx={{ mb: '12px' }}>{plan.splitLabel}</Overline>
-              <Box
-                sx={{
-                  display: 'flex',
-                  height: 10,
-                  borderRadius: '5px',
-                  overflow: 'hidden',
-                  mb: '12px',
-                }}
-              >
-                <Box
-                  sx={(t) => ({
-                    height: 10,
-                    backgroundColor: t.tokens.primaryInk,
-                    width: `${plan.movePct}%`,
-                  })}
-                />
-                <Box
-                  sx={(t) => ({
-                    height: 10,
-                    backgroundColor: t.tokens.divider,
-                    width: `${plan.foodPct}%`,
-                  })}
-                />
-              </Box>
-              <Box
-                sx={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-                  gap: '12px',
-                }}
-              >
+              <Overline className="mb-3">{plan.splitLabel}</Overline>
+              <SplitBar pct={plan.movePct} />
+              <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-3">
                 <StatTile
                   label={`${plan.moveLabel} · ${plan.movePct} %`}
                   value={`${kcal(plan.moveKcal)} kcal`}
@@ -99,60 +62,22 @@ export default function BougerScreen() {
                   label={`${plan.foodLabel} · ${plan.foodPct} %`}
                   value={`${kcal(plan.foodKcal)} kcal`}
                 />
-              </Box>
+              </div>
             </>
           ) : null}
-        </Paper>
+        </div>
 
-        <Paper sx={{ p: 3 }}>
-          <Overline sx={{ mb: '4px' }}>D’où vient le mouvement, chez vous</Overline>
-          <Typography
-            sx={(t) => ({
-              fontSize: FS.base,
-              lineHeight: 1.6,
-              color: t.tokens.muted,
-              maxWidth: '68ch',
-              textWrap: 'pretty',
-              mb: '16px',
-            })}
-          >
+        <div className="card p-6">
+          <Overline className="mb-1">D’où vient le mouvement, chez vous</Overline>
+          <p className="mb-4 max-w-[68ch] text-base leading-[1.6] text-muted text-pretty">
             Sur les {kcal(metrics.tdee - metrics.bmr)} kcal que vous dépensez chaque jour en plus de
             votre métabolisme de base, voici ce qui revient à vos journées et ce qui revient à vos
             séances, une fois celles-ci lissées sur la semaine.
-          </Typography>
+          </p>
 
-          <Box
-            sx={{
-              display: 'flex',
-              height: 10,
-              borderRadius: '5px',
-              overflow: 'hidden',
-              mb: '12px',
-            }}
-          >
-            <Box
-              sx={(t) => ({
-                height: 10,
-                backgroundColor: t.tokens.primaryInk,
-                width: `${split.neatPct}%`,
-              })}
-            />
-            <Box
-              sx={(t) => ({
-                height: 10,
-                backgroundColor: t.tokens.divider,
-                width: `${split.sessionsPct}%`,
-              })}
-            />
-          </Box>
+          <SplitBar pct={split.neatPct} />
 
-          <Box
-            sx={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-              gap: '12px',
-            }}
-          >
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-3">
             <StatTile
               label={`Le quotidien · ${split.neatPct} %`}
               value={`${kcal(split.neat)} kcal`}
@@ -164,8 +89,8 @@ export default function BougerScreen() {
               value={`${kcal(split.sessions)} kcal`}
               note="lissées sur les sept jours"
             />
-          </Box>
-        </Paper>
+          </div>
+        </div>
 
         <SectionHeading
           icon="marche"
@@ -184,7 +109,7 @@ export default function BougerScreen() {
         />
 
         <WeekPlanCard week={week} />
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 }

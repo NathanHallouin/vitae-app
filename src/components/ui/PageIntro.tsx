@@ -1,9 +1,3 @@
-'use client';
-
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-import { FS } from '@/theme/theme';
-
 /**
  * Titre de page et phrase d'accroche : de quoi parle cette page, en une ligne.
  *
@@ -20,35 +14,17 @@ export default function PageIntro({
   illustration?: React.ReactNode;
 }) {
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 4, mb: 3 }}>
-      <Box sx={{ flex: 1, minWidth: 0 }}>
-        <Typography variant="h2" component="h1" sx={{ mb: '6px' }}>
+    <div className="mb-6 flex items-center gap-8">
+      <div className="min-w-0 flex-1">
+        <h1 className="mb-[6px] font-display text-h2 font-semibold leading-[1.2] tracking-[-.01em]">
           {title}
-        </Typography>
-        <Typography
-          sx={(t) => ({
-            fontSize: FS.body,
-            lineHeight: 1.6,
-            color: t.tokens.muted,
-            maxWidth: '62ch',
-            textWrap: 'pretty',
-          })}
-        >
-          {lead}
-        </Typography>
-      </Box>
+        </h1>
+        <p className="max-w-[62ch] text-body leading-[1.6] text-muted text-pretty">{lead}</p>
+      </div>
 
       {illustration ? (
-        <Box
-          sx={{
-            display: { xs: 'none', md: 'block' },
-            width: 190,
-            flex: 'none',
-          }}
-        >
-          {illustration}
-        </Box>
+        <div className="hidden w-[190px] flex-none md:block">{illustration}</div>
       ) : null}
-    </Box>
+    </div>
   );
 }

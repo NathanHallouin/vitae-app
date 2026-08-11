@@ -1,8 +1,3 @@
-'use client';
-
-import Box from '@mui/material/Box';
-import { useTokens } from '@/theme/ThemeRegistry';
-
 /**
  * Illustration d'accueil : une jauge d'énergie, la flamme du métabolisme au centre, et le rythme
  * de la dépense sur la journée en dessous. Purement graphique : aucun texte, donc rien à traduire
@@ -24,44 +19,47 @@ const BASELINE = 196;
 const BAR_W = 9;
 
 export default function HomeIllustration() {
-  const t = useTokens();
-
   return (
-    <Box
-      component="svg"
+    <svg
       viewBox="0 0 320 208"
       role="img"
       aria-label="Une jauge d’énergie surmontée d’une flamme, au-dessus du rythme de la dépense sur une journée"
-      sx={{ width: '100%', maxWidth: 400, height: 'auto', display: 'block', mx: 'auto' }}
+      className="mx-auto block h-auto w-full max-w-[400px]"
     >
       {/* Disque : pose la flamme sur un fond, sans bord dur. Teinte chaude plutôt que le bleu
           translucide, qui vire au gris sur le fond crème. */}
-      <circle cx="160" cy="112" r="44" fill={t.surface2} />
+      <circle cx="160" cy="112" r="44" className="fill-surface2" />
 
       {/* Jauge : piste complète, puis portion remplie */}
       <path
         d="M86.7 138.7A78 78 0 1 1 233.3 138.7"
         fill="none"
-        stroke={t.divider}
         strokeWidth="12"
+        className="stroke-divider"
         strokeLinecap="round"
       />
       <path
         d="M86.7 138.7A78 78 0 0 1 215.2 56.8"
         fill="none"
-        stroke={t.primary}
         strokeWidth="12"
+        className="stroke-primary"
         strokeLinecap="round"
       />
-      <circle cx="215.2" cy="56.8" r="7.5" fill={t.surface} stroke={t.primary} strokeWidth="4" />
+      <circle
+        cx="215.2"
+        cy="56.8"
+        r="7.5"
+        strokeWidth="4"
+        className="fill-surface stroke-primary"
+      />
 
       {/* Flamme : le tracé du jeu d'icônes, agrandi */}
       <g transform="translate(121.6 80) scale(3.2)">
         <path
           d="M12 3c2.8 3.2 4.8 5.6 4.8 8.6a4.8 4.8 0 0 1-9.6 0c0-1.7.8-3 1.8-4 .2 1.3.9 2 1.7 2 1.1 0 1.6-.9 1.6-2.2 0-1.5-.5-2.9-.3-4.4Z"
           fill="none"
-          stroke={t.primaryInk}
           strokeWidth="1.5"
+          className="stroke-primary-ink"
           strokeLinejoin="round"
         />
       </g>
@@ -75,10 +73,10 @@ export default function HomeIllustration() {
           width={BAR_W}
           height={barre.hauteur}
           rx={BAR_W / 2}
-          fill={t.primaryInk}
+          className="fill-primary-ink"
           opacity={0.22 + (barre.hauteur / PIC) * 0.5}
         />
       ))}
-    </Box>
+    </svg>
   );
 }

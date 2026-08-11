@@ -161,28 +161,42 @@ kcal en moins dans l'assiette = |écart| × (1 − part)
 
 ### Recettes proposées
 
-La page « Ce que je mange » ne fabrique plus de menu au gramme près : elle renvoie vers des
-recettes publiées ailleurs. Une liste de portions pesées se lit bien mais ne se cuisine pas.
+La page « Ce que je mange » ne fabrique plus de menu au gramme près : elle propose des plats à
+cuisiner. Une liste de portions pesées se lit bien mais ne se cuisine pas.
 
-Le catalogue (`src/lib/recipes.ts`) est en dur, et c'est un choix : l'app ne parle à aucun serveur
-et n'a pas de clé d'API. Chaque entrée porte le titre exact, le site auteur, l'URL, et les kcal et
-protéines **par portion** telles qu'annoncées sur la page. Ces valeurs ont été relevées à la main
-en ouvrant chaque recette ; rien n'est deviné. Sources actuelles : jeremyloreau.com et delizioso.fr
-(Marmiton bloque les accès automatisés, ses liens n'ont donc pas pu être vérifiés).
+Le catalogue (`src/lib/recipes.ts`) tient en dur : l'app ne parle à aucun serveur et n'a pas de clé
+d'API. Chaque entrée porte un plat, ses kcal et protéines **pour une portion courante**, son
+`slot` (`matin` ou `plat`), sa `base` (ingrédient dominant, pour la variété) et ce qu'elle
+`contient` (pour les filtres). L'URL est **une recherche** sur Marmiton ou Femme Actuelle, pas une
+recette précise.
 
-Pour ajouter une recette : ouvrir la page, relever titre / kcal / protéines par portion, vérifier
-que le lien répond, renseigner `slot` (`matin` ou `plat`) et `base` (ingrédient dominant).
+Pourquoi une recherche plutôt qu'une URL de recette : Marmiton publie bien des valeurs
+nutritionnelles en JSON-LD, mais elles sont calculées automatiquement, absentes sur une partie des
+recettes et parfois très fausses — 19 g de protéines pour 427 g de poulet rôti, 6 g pour un curry
+de poulet. Caler un budget calorique là-dessus donnerait de mauvais conseils. Les deux URL de
+recherche répondent et ne sont pas interdites par leur `robots.txt` (seules les variantes paginées
+le sont chez Marmiton).
+
+Pour ajouter un plat : une ligne dans `CATALOGUE`, avec des ordres de grandeur plausibles pour une
+portion. L'URL et les ingrédients implicites (viande, poisson, œufs, laitier selon la `base`) sont
+dérivés automatiquement.
 
 Sélection, dans `buildRecipeSuggestions()` :
 
 | Étape | Règle |
 |---|---|
 | Budget du repas | 25 % de l'apport visé au petit-déjeuner, 35 % au déjeuner, 30 % au dîner ; les 10 % restants sont la collation |
+| Filtres | `excluded` écarte les plats concernés ; « Végétarien » couvre aussi le poisson. Enregistré dans le profil |
 | Tri | densité protéique (`prot / kcal`) en sèche et recomposition, kcal par portion en prise de masse, proximité au budget en maintien |
-| Variété | deux recettes par repas, jamais la même base dans un repas ; les bases sont suivies séparément pour le matin et pour les plats |
+| Vivier | en déficit, tout ce qui tient 7 g de protéines pour 100 kcal ; sinon la moitié haute du classement. Jamais moins de 8 plats, quitte à descendre en qualité — un repas sans proposition serait pire |
+| Tirage | aléatoire dans le vivier, graine dérivée du profil : reproductible d'un rendu à l'autre, sinon le serveur et le client afficheraient deux plats différents |
+| Variété | deux plats par repas, jamais la même base dans un repas ; les bases sont suivies séparément pour le matin et pour les plats |
+| « Changer » | `offsets[slotKey]` avance d'un cran dans l'ordre tiré, pour ce créneau seul. Vit dans l'état du composant, pas dans le profil : c'est le geste d'une visite |
 | Portions | `budget / kcal` arrondi au demi, plafonné à 2 : au-delà, le manque est annoncé plutôt que couvert par une portion démesurée |
 
-Chaque carte est un lien `target="_blank" rel="noopener noreferrer"` vers le site auteur.
+Le titre est un lien `target="_blank" rel="noopener noreferrer"`, pas la carte entière : « changer »
+est un bouton, et un bouton dans un lien est du HTML invalide. La zone cliquable du titre est
+étendue à la carte par un `::after`, pour garder une cible confortable au doigt.
 
 Le mouvement est traité sur deux registres distincts, jamais additionnés dans une même liste.
 
@@ -377,7 +391,7 @@ bun run typecheck  # tsc --noEmit
 | `src/lib/storage.ts` | profil en `localStorage`, clé versionnée `vitae.v1.profile` |
 | `src/lib/state.ts` | état du formulaire de saisie + validation (la navigation est au routeur) |
 | `src/lib/nutrition.ts` | conseils alimentaires selon l'objectif |
-| `src/lib/recipes.ts` | catalogue de recettes externes vérifiées et sélection par repas |
+| `src/lib/recipes.ts` | catalogue de plats, filtres d'ingrédients et tirage par repas |
 | `src/lib/training.ts` | séances de renforcement, adaptées à l'âge, au sexe, au poids, au métabolisme et à l'objectif |
 | `src/lib/neat.ts` | mouvement du quotidien (NEAT), tenu à part des séances |
 | `src/lib/nav.ts` | plan de navigation et seuil `NAV_BREAKPOINT`, partagés par les deux barres |

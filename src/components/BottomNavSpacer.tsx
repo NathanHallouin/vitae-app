@@ -1,7 +1,5 @@
 'use client';
 
-import Box from '@mui/material/Box';
-import { FROM_NAV } from '@/lib/nav';
 import { BOTTOM_NAV_HEIGHT } from './BottomNav';
 import { useProfile } from './ProfileProvider';
 
@@ -16,13 +14,10 @@ export default function BottomNavSpacer() {
   if (status !== 'ready') return null;
 
   return (
-    <Box
+    <div
       aria-hidden
-      sx={{
-        display: 'block',
-        [FROM_NAV]: { display: 'none' },
-        height: `calc(${BOTTOM_NAV_HEIGHT}px + env(safe-area-inset-bottom))`,
-      }}
+      className="block nav:hidden"
+      style={{ height: `calc(${BOTTOM_NAV_HEIGHT}px + env(safe-area-inset-bottom))` }}
     />
   );
 }

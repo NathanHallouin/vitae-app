@@ -1,32 +1,25 @@
-'use client';
-
-import type { SxProps, Theme } from '@mui/material/styles';
-import Typography from '@mui/material/Typography';
 import type { ReactNode } from 'react';
+import { cx } from './primitives';
 
-/** Surtitre 12 px majuscules, gris `muted2`, utilisé en tête de chaque carte. */
+/** Surtitre 11 px majuscules, gris `muted2`, utilisé en tête de chaque carte. */
 export default function Overline({
   children,
-  sx,
+  className,
   onDark = false,
 }: {
   children: ReactNode;
-  sx?: SxProps<Theme>;
+  className?: string;
   onDark?: boolean;
 }) {
   return (
-    <Typography
-      variant="overline"
-      component="div"
-      sx={[
-        (theme) => ({
-          color: onDark ? 'inherit' : theme.tokens.muted2,
-          opacity: onDark ? 0.8 : 1,
-        }),
-        ...(Array.isArray(sx) ? sx : [sx]),
-      ]}
+    <div
+      className={cx(
+        'text-micro font-semibold uppercase tracking-[.1em] leading-[1.5]',
+        onDark ? 'opacity-80' : 'text-muted2',
+        className,
+      )}
     >
       {children}
-    </Typography>
+    </div>
   );
 }

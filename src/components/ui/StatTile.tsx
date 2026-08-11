@@ -1,9 +1,5 @@
-'use client';
-
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
 import type { ReactNode } from 'react';
-import { DISPLAY_FONT, FS } from '@/theme/theme';
+import { cx } from './primitives';
 
 /** Tuile de statistique sur fond `surface2` : libellé, valeur 22 px, note optionnelle. */
 export default function StatTile({
@@ -18,32 +14,17 @@ export default function StatTile({
   accent?: boolean;
 }) {
   return (
-    <Box
-      sx={(theme) => ({
-        backgroundColor: theme.tokens.surface2,
-        borderRadius: '12px',
-        p: '16px',
-      })}
-    >
-      <Typography sx={(t) => ({ fontSize: FS.caption, color: t.tokens.muted2, mb: '4px' })}>
-        {label}
-      </Typography>
-      <Typography
-        sx={(t) => ({
-          fontFamily: DISPLAY_FONT,
-          fontSize: FS.stat2,
-          fontWeight: 600,
-          fontVariantNumeric: 'tabular-nums',
-          color: accent ? t.tokens.primaryInk : 'inherit',
-        })}
+    <div className="rounded-xl bg-surface2 p-4">
+      <div className="mb-1 text-caption text-muted2">{label}</div>
+      <div
+        className={cx(
+          'font-display text-stat2 font-semibold tabular-nums',
+          accent && 'text-primary-ink',
+        )}
       >
         {value}
-      </Typography>
-      {note ? (
-        <Typography sx={(t) => ({ fontSize: FS.caption, color: t.tokens.muted, mt: '4px' })}>
-          {note}
-        </Typography>
-      ) : null}
-    </Box>
+      </div>
+      {note ? <div className="mt-1 text-caption text-muted">{note}</div> : null}
+    </div>
   );
 }

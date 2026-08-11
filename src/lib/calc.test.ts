@@ -184,7 +184,7 @@ describe('formulaire et validation', () => {
   const NOW = new Date(2026, 7, 10); // 10 août 2026
 
   const PROFIL = {
-    v: 2,
+    v: 3,
     sexe: 'homme' as const,
     naissance: '1992-03-15',
     taille: '178',
@@ -192,6 +192,7 @@ describe('formulaire et validation', () => {
     daily: 1,
     sessions: 1,
     goal: 'seche' as const,
+    excluded: [],
     updatedAt: '2026-08-09T10:00:00.000Z',
   };
 
@@ -276,6 +277,7 @@ describe('formulaire et validation', () => {
       daily: 1,
       sessions: 1,
       goal: 'seche',
+      excluded: [],
     });
   });
 });

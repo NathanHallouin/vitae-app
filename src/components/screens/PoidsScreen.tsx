@@ -1,17 +1,14 @@
 'use client';
 
-import Box from '@mui/material/Box';
-import Paper from '@mui/material/Paper';
-import Typography from '@mui/material/Typography';
 import { buildProjection, rateAssessment } from '@/lib/calc';
 import { dec, fmtKg, fmtWeekly, kcal, monthIn } from '@/lib/format';
-import { FS } from '@/theme/theme';
 import { useProfile } from '../ProfileProvider';
 import ProjectionChart from '../result/ProjectionChart';
 import LevitateDoodle from '../ui/doodles/LevitateDoodle';
 import OptionButton from '../ui/OptionButton';
 import Overline from '../ui/Overline';
 import PageIntro from '../ui/PageIntro';
+import { cx } from '../ui/primitives';
 
 export default function PoidsScreen() {
   const { metrics, profile, targetKey, setTargetKey } = useProfile();
@@ -22,86 +19,51 @@ export default function PoidsScreen() {
   const rythme = projection.coherent ? rateAssessment(metrics, projection.rate) : null;
 
   return (
-    <Box>
+    <div>
       <PageIntro
         title="Mon poids"
         lead={`Vous êtes à ${dec(metrics.poids)} kg. Voici où vous pourriez aller, et en combien de temps si vous mangez ${kcal(metrics.target)} kcal par jour.`}
         illustration={<LevitateDoodle />}
       />
 
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-        <Paper sx={{ p: 3 }}>
-          <Overline sx={{ mb: '4px' }}>Quel poids viser&nbsp;?</Overline>
-          <Typography sx={(t) => ({ fontSize: FS.small, color: t.tokens.muted, mb: '14px' })}>
+      <div className="flex flex-col gap-6">
+        <div className="card p-6">
+          <Overline className="mb-1">Quel poids viser&nbsp;?</Overline>
+          <p className="mb-[14px] text-small text-muted">
             Trois repères calculés pour votre taille. Choisissez celui qui vous parle, rien n’est
             définitif.
-          </Typography>
-          <Box
-            sx={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-              gap: '10px',
-            }}
-          >
+          </p>
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-[10px]">
             {projection.options.map((o) => (
               <OptionButton
                 key={o.key}
                 selected={o.key === projection.key}
                 onClick={() => setTargetKey(o.key)}
-                sx={{ p: '14px 16px' }}
+                className="p-[14px_16px]"
               >
-                <Typography
-                  sx={{
-                    fontSize: FS.stat3,
-                    fontWeight: 500,
-                    fontVariantNumeric: 'tabular-nums',
-                    color: 'inherit',
-                  }}
-                >
-                  {dec(o.w)} kg
-                </Typography>
-                <Typography sx={(t) => ({ fontSize: FS.small, color: t.tokens.muted, mt: '2px' })}>
-                  {o.label}
-                </Typography>
-                <Typography sx={(t) => ({ fontSize: FS.caption, color: t.tokens.muted })}>
-                  {o.sub}
-                </Typography>
+                <p className="text-stat3 font-medium tabular-nums">{dec(o.w)} kg</p>
+                <p className="mt-[2px] text-small text-muted">{o.label}</p>
+                <p className="text-caption text-muted">{o.sub}</p>
               </OptionButton>
             ))}
-          </Box>
-        </Paper>
+          </div>
+        </div>
 
-        <Paper sx={{ p: 3 }}>
-          <Overline sx={{ mb: '14px' }}>Combien de temps&nbsp;?</Overline>
+        <div className="card p-6">
+          <Overline className="mb-[14px]">Combien de temps&nbsp;?</Overline>
 
           {projection.coherent ? (
             <>
-              <Typography
-                sx={(t) => ({
-                  fontSize: FS.body,
-                  lineHeight: 1.6,
-                  color: t.tokens.text,
-                  mb: '18px',
-                  maxWidth: '62ch',
-                  textWrap: 'pretty',
-                })}
-              >
+              <p className="mb-[18px] max-w-[62ch] text-body leading-[1.6] text-pretty">
                 En mangeant {kcal(metrics.target)} kcal par jour, vous atteindriez{' '}
                 <strong>{cible}</strong> en environ{' '}
                 <strong>
                   {projection.weeks} {projection.weeks > 1 ? 'semaines' : 'semaine'}
                 </strong>
                 , soit vers {monthIn(projection.weeks)}.
-              </Typography>
+              </p>
 
-              <Box
-                sx={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-                  gap: '20px',
-                  mb: '20px',
-                }}
-              >
+              <div className="mb-5 grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-5">
                 <Stat
                   label="À perdre ou à prendre"
                   value={fmtKg(projection.selected.w - metrics.poids)}
@@ -113,84 +75,54 @@ export default function PoidsScreen() {
                   note={`≈ ${dec(Math.round(projection.months * 10) / 10)} mois`}
                 />
                 <Stat label="Objectif atteint vers" value={monthIn(projection.weeks)} />
-              </Box>
+              </div>
 
-              <Box
-                sx={(t) => ({
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'baseline',
-                  fontSize: FS.caption,
-                  color: t.tokens.muted2,
-                  mb: '4px',
-                })}
-              >
+              <div className="mb-1 flex items-baseline justify-between text-caption text-muted2">
                 <span>
                   Poids projeté, de {projection.hiLabel} à {projection.loLabel}
                 </span>
                 <span>Cible {cible}</span>
-              </Box>
+              </div>
               <ProjectionChart projection={projection} targetLabel={cible} />
             </>
           ) : null}
 
-          <Typography
-            sx={(t) => ({
-              fontSize: FS.base,
-              lineHeight: 1.6,
-              color: t.tokens.muted,
-              mt: projection.coherent ? '16px' : 0,
-              maxWidth: '62ch',
-              textWrap: 'pretty',
-            })}
+          <p
+            className={cx(
+              'max-w-[62ch] text-base leading-[1.6] text-muted text-pretty',
+              projection.coherent && 'mt-4',
+            )}
           >
             {projection.note}
-          </Typography>
+          </p>
 
           {rythme ? (
-            <Box
-              sx={(t) => ({
-                backgroundColor: rythme.level === 'bon' ? t.tokens.surface2 : t.tokens.warnBg,
-                color: rythme.level === 'bon' ? t.tokens.text : t.tokens.warnInk,
-                borderRadius: 1,
-                p: '14px',
-                fontSize: FS.small,
-                lineHeight: 1.55,
-                mt: '14px',
-                maxWidth: '68ch',
-                textWrap: 'pretty',
-              })}
+            <p
+              className={cx(
+                'mt-[14px] max-w-[68ch] rounded-xl p-[14px] text-small leading-[1.55] text-pretty',
+                rythme.level === 'bon' ? 'bg-surface2 text-ink' : 'bg-warn-bg text-warn-ink',
+              )}
             >
               {rythme.text}
-            </Box>
+            </p>
           ) : null}
-        </Paper>
+        </div>
 
-        <Paper sx={{ p: 3 }}>
-          <Overline sx={{ mb: '12px' }}>À quoi vous attendre en chemin</Overline>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <div className="card p-6">
+          <Overline className="mb-3">À quoi vous attendre en chemin</Overline>
+          <div className="flex flex-col gap-3">
             {ATTENTES.map((item) => (
-              <Box key={item.titre}>
-                <Typography sx={{ fontSize: FS.option, fontWeight: 500, mb: '2px' }}>
-                  {item.titre}
-                </Typography>
-                <Typography
-                  sx={(t) => ({
-                    fontSize: FS.base,
-                    lineHeight: 1.55,
-                    color: t.tokens.muted,
-                    maxWidth: '72ch',
-                    textWrap: 'pretty',
-                  })}
-                >
+              <div key={item.titre}>
+                <p className="mb-[2px] text-option font-medium">{item.titre}</p>
+                <p className="max-w-[72ch] text-base leading-[1.55] text-muted text-pretty">
                   {item.texte}
-                </Typography>
-              </Box>
+                </p>
+              </div>
             ))}
-          </Box>
-        </Paper>
-      </Box>
-    </Box>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -220,14 +152,10 @@ const ATTENTES = [
 
 function Stat({ label, value, note }: { label: string; value: string; note?: string }) {
   return (
-    <Box>
-      <Typography sx={(t) => ({ fontSize: FS.caption, color: t.tokens.muted2 })}>
-        {label}
-      </Typography>
-      <Typography sx={{ fontSize: FS.stat3, fontWeight: 500 }}>{value}</Typography>
-      {note ? (
-        <Typography sx={(t) => ({ fontSize: FS.small, color: t.tokens.muted })}>{note}</Typography>
-      ) : null}
-    </Box>
+    <div>
+      <p className="text-caption text-muted2">{label}</p>
+      <p className="text-stat3 font-medium">{value}</p>
+      {note ? <p className="text-small text-muted">{note}</p> : null}
+    </div>
   );
 }

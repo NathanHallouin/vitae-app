@@ -1,14 +1,11 @@
 'use client';
 
-import Box from '@mui/material/Box';
-import CircularProgress from '@mui/material/CircularProgress';
-import Typography from '@mui/material/Typography';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import ProfileBar from '@/components/ProfileBar';
 import { useProfile } from '@/components/ProfileProvider';
 import ResultTabs from '@/components/ResultTabs';
-import { FS } from '@/theme/theme';
+import { Spinner } from '@/components/ui/primitives';
 
 /** Toutes les pages de résultats supposent un profil enregistré : sinon, retour à la saisie. */
 export default function ResultsLayout({ children }: { children: React.ReactNode }) {
@@ -21,35 +18,24 @@ export default function ResultsLayout({ children }: { children: React.ReactNode 
 
   if (status !== 'ready' || !metrics) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', pt: 8 }}>
-        <CircularProgress aria-label="Chargement de vos résultats" />
-      </Box>
+      <div className="flex justify-center pt-16">
+        <Spinner label="Chargement de vos résultats" />
+      </div>
     );
   }
 
   return (
     <>
       <ResultTabs />
-      <Box
-        component="main"
-        sx={{ width: '100%', maxWidth: 1200, mx: 'auto', px: { xs: 2, sm: 3 }, pt: 3, pb: 8 }}
-      >
+      <main className="mx-auto w-full max-w-[1200px] px-4 pt-6 pb-16 sm:px-6">
         <ProfileBar />
         {children}
-        <Typography
-          sx={(t) => ({
-            fontSize: FS.caption,
-            lineHeight: 1.6,
-            color: t.tokens.faint,
-            mt: 4,
-            textWrap: 'pretty',
-          })}
-        >
+        <p className="mt-8 text-caption leading-[1.6] text-faint text-pretty">
           Ces chiffres sont une estimation, pas un avis médical. La dépense réelle varie d’environ
           10 % d’une personne à l’autre. En cas de doute, parlez-en à un médecin ou à un
           diététicien.
-        </Typography>
-      </Box>
+        </p>
+      </main>
     </>
   );
 }

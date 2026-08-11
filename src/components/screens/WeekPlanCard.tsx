@@ -1,242 +1,97 @@
-'use client';
-
-import Box from '@mui/material/Box';
-import Paper from '@mui/material/Paper';
-import Typography from '@mui/material/Typography';
 import type { WeekPlan } from '@/lib/training';
-import { DISPLAY_FONT, FS } from '@/theme/theme';
 import Overline from '../ui/Overline';
+import { Bullet } from '../ui/primitives';
 
 /** Programme hebdomadaire : quoi faire, dans quel ordre, et comment progresser. */
 export default function WeekPlanCard({ week }: { week: WeekPlan }) {
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-      <Paper sx={{ p: 3 }}>
-        <Overline sx={{ mb: '4px' }}>Votre semaine type</Overline>
-        <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1, m: '8px 0 8px' }}>
-          <Typography
-            sx={(t) => ({
-              fontFamily: DISPLAY_FONT,
-              fontSize: FS.display,
-              fontWeight: 600,
-              lineHeight: 1,
-              color: t.tokens.primaryInk,
-              fontVariantNumeric: 'tabular-nums',
-            })}
-          >
+    <div className="flex flex-col gap-6">
+      <div className="card p-6">
+        <Overline className="mb-1">Votre semaine type</Overline>
+        <div className="my-2 flex items-baseline gap-2">
+          <span className="font-display text-display leading-none font-semibold text-primary-ink tabular-nums">
             {week.strengthPerWeek}
-          </Typography>
-          <Typography sx={(t) => ({ fontSize: FS.option, color: t.tokens.muted })}>
-            séances de renforcement par semaine
-          </Typography>
-        </Box>
-        <Typography
-          sx={(t) => ({
-            fontSize: FS.base,
-            lineHeight: 1.6,
-            color: t.tokens.muted,
-            maxWidth: '68ch',
-            textWrap: 'pretty',
-          })}
-        >
-          {week.note}
-        </Typography>
-        <Typography sx={(t) => ({ fontSize: FS.small, color: t.tokens.muted2, mt: '10px' })}>
-          Répartition conseillée : {week.schedule}
-        </Typography>
-        <Typography sx={(t) => ({ fontSize: FS.small, color: t.tokens.muted2, mt: '6px' })}>
-          Échauffement : {week.warmup}
-        </Typography>
-      </Paper>
+          </span>
+          <span className="text-option text-muted">séances de renforcement par semaine</span>
+        </div>
+        <p className="max-w-[68ch] text-base leading-[1.6] text-muted text-pretty">{week.note}</p>
+        <p className="mt-[10px] text-small text-muted2">Répartition conseillée : {week.schedule}</p>
+        <p className="mt-[6px] text-small text-muted2">Échauffement : {week.warmup}</p>
+      </div>
 
-      <Paper sx={{ p: 3 }}>
-        <Overline sx={{ mb: '4px' }}>Pourquoi ce programme-là</Overline>
-        <Typography sx={(t) => ({ fontSize: FS.small, color: t.tokens.muted, mb: '14px' })}>
+      <div className="card p-6">
+        <Overline className="mb-1">Pourquoi ce programme-là</Overline>
+        <p className="mb-[14px] text-small text-muted">
           Ce que votre profil a changé par rapport au programme de base, et pour quelle raison.
-        </Typography>
-        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+        </p>
+        <ul className="flex flex-col">
           {week.adaptations.map((a) => (
-            <Box
-              key={a.label}
-              sx={(t) => ({ py: '12px', borderTop: `1px solid ${t.tokens.divider}` })}
-            >
-              <Typography
-                sx={(t) => ({
-                  fontSize: FS.option,
-                  fontWeight: 500,
-                  color: t.tokens.primaryInk,
-                  mb: '2px',
-                })}
-              >
-                {a.label}
-              </Typography>
-              <Typography
-                sx={(t) => ({
-                  fontSize: FS.small,
-                  lineHeight: 1.55,
-                  color: t.tokens.muted,
-                  maxWidth: '72ch',
-                })}
-              >
-                {a.reason}
-              </Typography>
-            </Box>
+            <li key={a.label} className="border-t border-divider py-3">
+              <p className="mb-[2px] text-option font-medium text-primary-ink">{a.label}</p>
+              <p className="max-w-[72ch] text-small leading-[1.55] text-muted">{a.reason}</p>
+            </li>
           ))}
-        </Box>
-      </Paper>
+        </ul>
+      </div>
 
       {week.sessions.map((session) => (
-        <Paper key={session.title} sx={{ p: 3 }}>
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'baseline',
-              flexWrap: 'wrap',
-              gap: 1,
-              mb: '4px',
-            }}
-          >
-            <Typography variant="h3" component="h2" sx={{ fontSize: FS.stat3 }}>
-              {session.title}
-            </Typography>
-            <Typography sx={(t) => ({ fontSize: FS.small, color: t.tokens.muted2 })}>
+        <section key={session.title} className="card p-6">
+          <div className="mb-1 flex flex-wrap items-baseline justify-between gap-2">
+            <h2 className="font-display text-stat3 font-semibold leading-[1.3]">{session.title}</h2>
+            <span className="text-small text-muted2">
               {session.focus} · {session.duration} · ≈ {session.kcal} kcal
-            </Typography>
-          </Box>
+            </span>
+          </div>
 
           {session.exercises.map((ex) => (
-            <Box
-              key={ex.name}
-              sx={(t) => ({ py: '14px', borderTop: `1px solid ${t.tokens.divider}` })}
-            >
-              <Box
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'baseline',
-                  gap: 2,
-                  flexWrap: 'wrap',
-                }}
-              >
-                <Typography sx={{ fontSize: FS.option, fontWeight: 500 }}>{ex.name}</Typography>
-                <Typography
-                  sx={(t) => ({
-                    fontSize: FS.small,
-                    fontWeight: 500,
-                    color: t.tokens.primaryInk,
-                    fontVariantNumeric: 'tabular-nums',
-                  })}
-                >
+            <div key={ex.name} className="border-t border-divider py-[14px]">
+              <div className="flex flex-wrap items-baseline justify-between gap-4">
+                <p className="text-option font-medium">{ex.name}</p>
+                <span className="text-small font-medium text-primary-ink tabular-nums">
                   {ex.volume} · repos {ex.rest}
-                </Typography>
-              </Box>
-              <Typography
-                sx={(t) => ({
-                  fontSize: FS.small,
-                  lineHeight: 1.55,
-                  color: t.tokens.muted,
-                  mt: '4px',
-                  maxWidth: '72ch',
-                })}
-              >
-                {ex.cue}
-              </Typography>
-              <Box
-                sx={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-                  gap: '8px',
-                  mt: '8px',
-                }}
-              >
-                <Typography sx={(t) => ({ fontSize: FS.caption, color: t.tokens.muted2 })}>
-                  <Box component="span" sx={{ fontWeight: 500 }}>
-                    Trop dur :
-                  </Box>{' '}
-                  {ex.easier}
-                </Typography>
-                <Typography sx={(t) => ({ fontSize: FS.caption, color: t.tokens.muted2 })}>
-                  <Box component="span" sx={{ fontWeight: 500 }}>
-                    Trop facile :
-                  </Box>{' '}
-                  {ex.harder}
-                </Typography>
-              </Box>
-            </Box>
+                </span>
+              </div>
+              <p className="mt-1 max-w-[72ch] text-small leading-[1.55] text-muted">{ex.cue}</p>
+              <div className="mt-2 grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))] gap-2">
+                <p className="text-caption text-muted2">
+                  <span className="font-medium">Trop dur :</span> {ex.easier}
+                </p>
+                <p className="text-caption text-muted2">
+                  <span className="font-medium">Trop facile :</span> {ex.harder}
+                </p>
+              </div>
+            </div>
           ))}
-        </Paper>
+        </section>
       ))}
 
-      <Box
-        sx={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-          gap: 3,
-          alignItems: 'start',
-        }}
-      >
-        <Paper sx={{ p: 3 }}>
-          <Overline sx={{ mb: '12px' }}>Progresser sans matériel</Overline>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] items-start gap-6">
+        <div className="card p-6">
+          <Overline className="mb-3">Progresser sans matériel</Overline>
+          <ol className="flex flex-col gap-[10px]">
             {week.progression.map((step, i) => (
-              <Box key={step} sx={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-                <Box
+              <li key={step} className="flex items-start gap-3">
+                <span
                   aria-hidden
-                  sx={(t) => ({
-                    width: 22,
-                    height: 22,
-                    flex: 'none',
-                    borderRadius: '50%',
-                    backgroundColor: t.tokens.primaryTint,
-                    color: t.tokens.primaryInk,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: FS.caption,
-                    fontWeight: 700,
-                  })}
+                  className="flex size-[22px] flex-none items-center justify-center rounded-full bg-primary-tint text-caption font-bold text-primary-ink"
                 >
                   {i + 1}
-                </Box>
-                <Typography sx={{ fontSize: FS.base, lineHeight: 1.55 }}>{step}</Typography>
-              </Box>
+                </span>
+                <span className="text-base leading-[1.55]">{step}</span>
+              </li>
             ))}
-          </Box>
-        </Paper>
+          </ol>
+        </div>
 
-        <Paper sx={{ p: 3 }}>
-          <Overline sx={{ mb: '12px' }}>Le cardio, en complément</Overline>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <div className="card p-6">
+          <Overline className="mb-3">Le cardio, en complément</Overline>
+          <ul className="flex flex-col gap-3">
             {week.cardio.map((line) => (
-              <Box
-                key={line}
-                sx={(t) => ({
-                  display: 'flex',
-                  gap: '12px',
-                  alignItems: 'flex-start',
-                  backgroundColor: t.tokens.surface2,
-                  borderRadius: 1,
-                  p: '14px',
-                })}
-              >
-                <Box
-                  aria-hidden
-                  sx={(t) => ({
-                    width: 6,
-                    height: 6,
-                    borderRadius: '50%',
-                    backgroundColor: t.tokens.primaryInk,
-                    flex: 'none',
-                    mt: '7px',
-                  })}
-                />
-                <Typography sx={{ fontSize: FS.base, lineHeight: 1.55 }}>{line}</Typography>
-              </Box>
+              <Bullet key={line}>{line}</Bullet>
             ))}
-          </Box>
-        </Paper>
-      </Box>
-    </Box>
+          </ul>
+        </div>
+      </div>
+    </div>
   );
 }

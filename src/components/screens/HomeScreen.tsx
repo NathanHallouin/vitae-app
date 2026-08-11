@@ -1,139 +1,82 @@
 'use client';
 
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import Paper from '@mui/material/Paper';
-import Typography from '@mui/material/Typography';
 import Link from 'next/link';
 import { BENEFITS } from '@/lib/constants';
 import { kcal } from '@/lib/format';
-import { FS } from '@/theme/theme';
 import { useProfile } from '../ProfileProvider';
 import HomeIllustration from '../ui/HomeIllustration';
 import Icon from '../ui/Icon';
 import Overline from '../ui/Overline';
+import { Button } from '../ui/primitives';
 
 export default function HomeScreen() {
   const { status, metrics } = useProfile();
   const known = status === 'ready' && metrics !== null;
 
   return (
-    <Box
-      component="main"
-      sx={{ width: '100%', maxWidth: 1200, mx: 'auto', px: { xs: 2, sm: 3 }, pt: 4, pb: 8 }}
-    >
-      <Box
-        sx={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-          gap: 4,
-          alignItems: 'center',
-        }}
-      >
-        <Box>
-          <Typography variant="h1" component="h1" sx={{ mb: 2 }}>
+    <main className="mx-auto w-full max-w-[1200px] px-4 pt-8 pb-16 sm:px-6">
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] items-center gap-8">
+        <div>
+          <h1 className="mb-4 font-display text-h1 font-semibold leading-[1.15] tracking-[-.015em]">
             Combien votre corps brûle-t-il de calories&nbsp;?
-          </Typography>
-          <Typography
-            sx={(t) => ({
-              fontSize: FS.body,
-              lineHeight: 1.6,
-              color: t.tokens.muted,
-              mb: 1,
-              maxWidth: '58ch',
-              textWrap: 'pretty',
-            })}
-          >
+          </h1>
+          <p className="mb-2 max-w-[58ch] text-body leading-[1.6] text-muted text-pretty">
             Même au repos, votre corps consomme de l’énergie pour respirer, faire battre votre cœur
             et vous garder au chaud. Savoir combien, c’est le point de départ pour perdre du gras,
             prendre du muscle ou simplement rester stable.
-          </Typography>
-          <Typography
-            sx={(t) => ({
-              fontSize: FS.base,
-              lineHeight: 1.6,
-              color: t.tokens.muted2,
-              mb: 4,
-              maxWidth: '58ch',
-            })}
-          >
+          </p>
+          <p className="mb-8 max-w-[58ch] text-base leading-[1.6] text-muted2">
             Quatre questions, une minute. Rien n’est envoyé sur internet : vos réponses restent dans
             ce navigateur.
-          </Typography>
+          </p>
 
           {known && metrics ? (
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: '12px', alignItems: 'center' }}>
-              <Button component={Link} href="/metabolisme" variant="contained" size="large">
+            <div className="flex flex-wrap items-center gap-3">
+              <Button as={Link} href="/metabolisme" variant="contained" size="large">
                 Voir mes résultats
               </Button>
-              <Button component={Link} href="/profil" variant="outlined" size="large">
+              <Button as={Link} href="/profil" variant="outlined" size="large">
                 Modifier mes infos
               </Button>
-              <Typography
-                sx={(t) => ({ fontSize: FS.small, color: t.tokens.muted2, width: '100%' })}
-              >
+              <p className="w-full text-small text-muted2">
                 Dernier calcul : {kcal(metrics.tdee)} kcal dépensées par jour,{' '}
                 {kcal(metrics.target)} kcal à manger pour votre objectif.
-              </Typography>
-            </Box>
+              </p>
+            </div>
           ) : (
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
-              <Button component={Link} href="/profil" variant="contained" size="large">
+            <div className="flex flex-wrap gap-3">
+              <Button as={Link} href="/profil" variant="contained" size="large">
                 Commencer
               </Button>
-              <Button component={Link} href="/profil?mode=form" variant="outlined" size="large">
+              <Button as={Link} href="/profil?mode=form" variant="outlined" size="large">
                 Tout saisir d’un coup
               </Button>
-            </Box>
+            </div>
           )}
-        </Box>
+        </div>
 
-        <Box>
+        <div>
           <HomeIllustration />
 
-          <Paper sx={{ p: 3, mt: 3 }}>
-            <Overline sx={{ mb: '20px' }}>Ce que vous obtenez</Overline>
+          <div className="card mt-6 p-6">
+            <Overline className="mb-5">Ce que vous obtenez</Overline>
             {BENEFITS.map((b) => (
-              <Box
-                key={b.n}
-                sx={(t) => ({
-                  display: 'flex',
-                  gap: 2,
-                  py: '12px',
-                  borderTop: `1px solid ${t.tokens.divider}`,
-                })}
-              >
-                <Box
+              <div key={b.n} className="flex gap-4 border-t border-divider py-3">
+                <span
                   aria-hidden
-                  sx={(t) => ({
-                    width: 28,
-                    height: 28,
-                    flex: 'none',
-                    borderRadius: '50%',
-                    backgroundColor: t.tokens.primaryTint,
-                    color: t.tokens.primaryInk,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  })}
+                  className="flex size-[30px] flex-none items-center justify-center rounded-full bg-primary-tint text-primary-ink"
                 >
                   <Icon name={b.icon} size={18} />
-                </Box>
-                <Box>
-                  <Typography sx={{ fontSize: FS.option, fontWeight: 500, mb: '2px' }}>
-                    {b.title}
-                  </Typography>
-                  <Typography
-                    sx={(t) => ({ fontSize: FS.small, lineHeight: 1.5, color: t.tokens.muted })}
-                  >
-                    {b.desc}
-                  </Typography>
-                </Box>
-              </Box>
+                </span>
+                <div>
+                  <p className="mb-[2px] text-option font-medium">{b.title}</p>
+                  <p className="text-small leading-[1.5] text-muted">{b.desc}</p>
+                </div>
+              </div>
             ))}
-          </Paper>
-        </Box>
-      </Box>
-    </Box>
+          </div>
+        </div>
+      </div>
+    </main>
   );
 }

@@ -5,6 +5,7 @@
 
 import type { GoalKey, Sexe } from './constants';
 import { ageFrom } from './date';
+import type { Exclusion } from './recipes';
 import type { ProfileInput, StoredProfile } from './storage';
 
 export type Mode = 'wizard' | 'form';
@@ -29,6 +30,11 @@ export interface FormState {
   /** index dans `SESSIONS` : volume d'entraînement */
   sessions: number;
   goal: GoalKey;
+  /**
+   * Filtres d'ingrédients. Le formulaire ne les modifie pas — ils se règlent sur la page « Ce que
+   * je mange » — mais il les transporte, sinon enregistrer le profil les effacerait.
+   */
+  excluded: Exclusion[];
   /** défini quand le profil enregistré avait un poids de plus d'une semaine */
   staleWeight: StaleWeight | null;
   /** la date de naissance vient du profil enregistré : elle n'est plus modifiable */
@@ -46,6 +52,7 @@ export const emptyForm: FormState = {
   daily: 1,
   sessions: 1,
   goal: 'seche',
+  excluded: [],
   staleWeight: null,
   naissanceLocked: false,
   error: '',
@@ -69,6 +76,7 @@ export function formFromProfile(
     daily: profile.daily,
     sessions: profile.sessions,
     goal: profile.goal,
+    excluded: profile.excluded,
     staleWeight,
     // Une date de naissance enregistrée est figée : « Recommencer » est la seule sortie.
     naissanceLocked: Boolean(profile.naissance),
@@ -86,6 +94,7 @@ export function profileFromForm(state: FormState): ProfileInput | null {
     daily: state.daily,
     sessions: state.sessions,
     goal: state.goal,
+    excluded: state.excluded,
   };
 }
 

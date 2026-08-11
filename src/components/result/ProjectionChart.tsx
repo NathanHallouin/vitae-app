@@ -1,8 +1,6 @@
 'use client';
 
-import Box from '@mui/material/Box';
 import { CHART, type Projection } from '@/lib/calc';
-import { useTokens } from '@/theme/ThemeRegistry';
 
 const LABEL_Y = 190;
 const VIEW_HEIGHT = 196;
@@ -15,7 +13,6 @@ export default function ProjectionChart({
   projection: Projection;
   targetLabel: string;
 }) {
-  const tokens = useTokens();
   const { points, ticks, targetX, targetY } = projection;
   if (points.length === 0) return null;
 
@@ -24,14 +21,13 @@ export default function ProjectionChart({
   const area = `${CHART.x0},${CHART.y1} ${line} ${lastX.toFixed(1)},${CHART.y1}`;
 
   return (
-    <Box
-      component="svg"
+    <svg
       viewBox={`0 0 ${CHART.width} ${VIEW_HEIGHT}`}
       role="img"
       aria-label={`Projection du poids sur ${projection.weeks} semaines jusqu'à ${targetLabel}`}
       // Largeur bornée : le texte du SVG grossit avec la largeur d'affichage, et les libellés
       // d'axe deviendraient énormes sur un écran large.
-      sx={{ width: '100%', maxWidth: 760, height: 'auto', display: 'block' }}
+      className="block h-auto w-full max-w-[760px]"
     >
       {ticks.map((t) => (
         <line
@@ -40,8 +36,8 @@ export default function ProjectionChart({
           x2={t.x}
           y1={CHART.y0}
           y2={CHART.y1}
-          stroke={tokens.divider}
           strokeWidth={1}
+          className="stroke-divider"
         />
       ))}
       <line
@@ -49,25 +45,25 @@ export default function ProjectionChart({
         x2={CHART.x1}
         y1={CHART.y1}
         y2={CHART.y1}
-        stroke={tokens.border}
         strokeWidth={1}
+        className="stroke-line"
       />
       <line
         x1={CHART.x0}
         x2={CHART.x1}
         y1={targetY}
         y2={targetY}
-        stroke={tokens.primaryInk}
         strokeWidth={1.5}
+        className="stroke-primary-ink"
         strokeDasharray="5 5"
         opacity={0.7}
       />
-      <polygon points={area} fill={tokens.primaryTint} stroke="none" />
+      <polygon points={area} stroke="none" className="fill-primary-tint" />
       <polyline
         points={line}
         fill="none"
-        stroke={tokens.primaryInk}
         strokeWidth={3}
+        className="stroke-primary-ink"
         strokeLinejoin="round"
         strokeLinecap="round"
       />
@@ -75,9 +71,8 @@ export default function ProjectionChart({
         cx={targetX}
         cy={targetY}
         r={5}
-        fill={tokens.primaryInk}
-        stroke={tokens.surface}
         strokeWidth={2}
+        className="fill-primary-ink stroke-surface"
       />
 
       {ticks.map((t) => (
@@ -86,12 +81,12 @@ export default function ProjectionChart({
           x={t.x}
           y={LABEL_Y}
           fontSize={12}
-          fill={tokens.faint}
+          className="fill-faint"
           textAnchor={t.x < 20 ? 'start' : t.x > CHART.width - 20 ? 'end' : 'middle'}
         >
           {t.label}
         </text>
       ))}
-    </Box>
+    </svg>
   );
 }

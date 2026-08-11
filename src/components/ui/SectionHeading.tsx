@@ -1,8 +1,3 @@
-'use client';
-
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-import { FS } from '@/theme/theme';
 import Icon, { type IconName } from './Icon';
 
 /**
@@ -22,37 +17,15 @@ export default function SectionHeading({
   icon?: IconName;
 }) {
   return (
-    <Box
-      sx={(t) => ({
-        borderLeft: `3px solid ${t.tokens.primaryInk}`,
-        pl: '18px',
-        mt: 2,
-      })}
-    >
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px', mb: '2px' }}>
-        {icon ? (
-          <Box sx={(t) => ({ color: t.tokens.primaryInk, display: 'flex' })}>
-            <Icon name={icon} size={16} />
-          </Box>
-        ) : null}
-        <Typography variant="overline" component="div" sx={(t) => ({ color: t.tokens.primaryInk })}>
+    <div className="mt-4 border-l-[3px] border-primary-ink pl-[18px]">
+      <div className="mb-[2px] flex items-center gap-2 text-primary-ink">
+        {icon ? <Icon name={icon} size={16} /> : null}
+        <div className="text-micro font-semibold uppercase tracking-[.1em] leading-[1.5]">
           {kicker}
-        </Typography>
-      </Box>
-      <Typography variant="h2" component="h2" sx={{ fontSize: FS.h3, mb: '6px' }}>
-        {title}
-      </Typography>
-      <Typography
-        sx={(t) => ({
-          fontSize: FS.base,
-          lineHeight: 1.6,
-          color: t.tokens.muted,
-          maxWidth: '68ch',
-          textWrap: 'pretty',
-        })}
-      >
-        {lead}
-      </Typography>
-    </Box>
+        </div>
+      </div>
+      <h2 className="mb-[6px] font-display text-h3 font-semibold leading-[1.3]">{title}</h2>
+      <p className="max-w-[68ch] text-base leading-[1.6] text-muted text-pretty">{lead}</p>
+    </div>
   );
 }

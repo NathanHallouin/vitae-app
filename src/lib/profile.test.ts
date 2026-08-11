@@ -75,6 +75,7 @@ describe('lecture du profil enregistré', () => {
     daily: 1,
     sessions: 1,
     goal: 'seche',
+    excluded: [],
     updatedAt: '2026-08-03T09:30:00.000Z',
   };
 
@@ -95,6 +96,22 @@ describe('lecture du profil enregistré', () => {
     expect(parseProfile(JSON.stringify({ ...valide, poids: 86 }))).toBeNull(); // nombre, pas chaîne
     const { updatedAt: _, ...sansDate } = valide;
     expect(parseProfile(JSON.stringify(sansDate))).toBeNull();
+  });
+
+  test('un profil v2 est relu tel quel, sans filtre d’ingrédient', () => {
+    const { excluded: _e, ...sansFiltres } = valide;
+    const v2 = { ...sansFiltres, v: 2 };
+    const migré = parseProfile(JSON.stringify(v2));
+    expect(migré?.v).toBe(PROFILE_VERSION);
+    expect(migré?.excluded).toEqual([]);
+    expect(migré?.daily).toBe(1);
+  });
+
+  test('les filtres d’ingrédient sont relus, et les valeurs inconnues ignorées', () => {
+    const avec = { ...valide, excluded: ['poisson', 'inventé', 42, 'vegetarien'] };
+    expect(parseProfile(JSON.stringify(avec))?.excluded).toEqual(['poisson', 'vegetarien']);
+    // Un champ absent ou d'un autre type ne casse rien : on repart sans filtre.
+    expect(parseProfile(JSON.stringify({ ...valide, excluded: 'poisson' }))?.excluded).toEqual([]);
   });
 
   test('un profil v1 est migré vers les deux axes plutôt que perdu', () => {

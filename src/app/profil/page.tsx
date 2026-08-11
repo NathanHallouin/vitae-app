@@ -1,11 +1,10 @@
 'use client';
 
-import Box from '@mui/material/Box';
-import CircularProgress from '@mui/material/CircularProgress';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 import { useProfile } from '@/components/ProfileProvider';
 import ProfilForm from '@/components/screens/ProfilForm';
+import { Spinner } from '@/components/ui/primitives';
 import { formFromProfile } from '@/lib/state';
 
 export default function ProfilPage() {
@@ -18,9 +17,9 @@ export default function ProfilPage() {
 
 function Loading() {
   return (
-    <Box sx={{ display: 'flex', justifyContent: 'center', pt: 8 }}>
-      <CircularProgress aria-label="Chargement" />
-    </Box>
+    <div className="flex justify-center pt-16">
+      <Spinner />
+    </div>
   );
 }
 
@@ -36,10 +35,7 @@ function ProfilPageContent() {
   const initial = formFromProfile(profile, staleWeight, mode);
 
   return (
-    <Box
-      component="main"
-      sx={{ width: '100%', maxWidth: 1200, mx: 'auto', px: { xs: 2, sm: 3 }, pt: 4, pb: 8 }}
-    >
+    <main className="mx-auto w-full max-w-[1200px] px-4 pt-8 pb-16 sm:px-6">
       <ProfilForm
         // Réinitialise le formulaire si le profil enregistré change sous ses pieds.
         key={profile?.updatedAt ?? 'nouveau'}
@@ -55,6 +51,6 @@ function ProfilPageContent() {
           router.push('/');
         }}
       />
-    </Box>
+    </main>
   );
 }

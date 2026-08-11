@@ -13,7 +13,7 @@ import {
   rateAssessment,
 } from './calc';
 import type { GoalKey } from './constants';
-import { buildRecipeSuggestions, MAX_PORTIONS, RECIPES, snackKcal } from './recipes';
+import { buildRecipeSuggestions, EXCLUSIONS, MAX_PORTIONS, RECIPES, snackKcal } from './recipes';
 import { buildWeek } from './training';
 
 /** Éventail de profils : léger / lourd, sédentaire / très actif, les quatre objectifs. */
@@ -200,7 +200,7 @@ describe('recettes proposées', () => {
   });
 
   test('le catalogue ne contient que des liens https exploitables', () => {
-    expect(RECIPES.length).toBeGreaterThanOrEqual(12);
+    expect(RECIPES.length).toBeGreaterThanOrEqual(60);
     for (const recipe of RECIPES) {
       expect(recipe.url.startsWith('https://')).toBe(true);
       expect(recipe.title.length).toBeGreaterThan(0);
@@ -212,9 +212,85 @@ describe('recettes proposées', () => {
     expect(new Set(RECIPES.map((r) => r.url)).size).toBe(RECIPES.length);
   });
 
+  test('le tirage est stable à profil égal : le serveur et le client voient la même chose', () => {
+    forEachProfile((m, _d, _s, goal) => {
+      const a = buildRecipeSuggestions(m, goal).flatMap((r) => r.recipes.map((x) => x.title));
+      const b = buildRecipeSuggestions(m, goal).flatMap((r) => r.recipes.map((x) => x.title));
+      expect(a).toEqual(b);
+    });
+  });
+
+  test('« changer » propose un autre plat, sans toucher aux cinq autres', () => {
+    const m = metricsFor(PROFILS[2], 1, 2, 'seche');
+    const avant = buildRecipeSuggestions(m, 'seche');
+    const cle = avant[1].recipes[0].slotKey;
+    const apres = buildRecipeSuggestions(m, 'seche', { offsets: { [cle]: 1 } });
+
+    expect(apres[1].recipes[0].title).not.toBe(avant[1].recipes[0].title);
+    // Les autres créneaux ne bougent pas : changer un plat n'est pas rebattre la journée.
+    expect(apres[0].recipes.map((r) => r.title)).toEqual(avant[0].recipes.map((r) => r.title));
+    expect(apres[2].recipes.map((r) => r.title)).toEqual(avant[2].recipes.map((r) => r.title));
+  });
+
+  test('« changer » plusieurs fois de suite ne repropose jamais le même plat', () => {
+    const m = metricsFor(PROFILS[1], 1, 2, 'maintien');
+    const cle = buildRecipeSuggestions(m, 'maintien')[1].recipes[0].slotKey;
+    const vus = new Set<string>();
+    for (let i = 0; i < 6; i++) {
+      const meal = buildRecipeSuggestions(m, 'maintien', { offsets: { [cle]: i } })[1];
+      vus.add(meal.recipes[0].title);
+    }
+    expect(vus.size).toBe(6);
+  });
+
+  test('un filtre coché écarte vraiment l’ingrédient, à chaque repas', () => {
+    const m = metricsFor(PROFILS[2], 1, 2, 'seche');
+    for (const { key } of EXCLUSIONS) {
+      for (const meal of buildRecipeSuggestions(m, 'seche', { excluded: [key] })) {
+        expect(meal.recipes.length).toBeGreaterThan(0);
+        for (const r of meal.recipes) {
+          if (key === 'vegetarien') {
+            expect(r.contient).not.toContain('viande');
+            expect(r.contient).not.toContain('poisson');
+          } else {
+            expect(r.contient).not.toContain(key);
+          }
+        }
+      }
+    }
+  });
+
+  test('même tous les filtres cochés, la journée reste complète', () => {
+    const m = metricsFor(PROFILS[0], 0, 0, 'seche');
+    const tous = EXCLUSIONS.map((e) => e.key);
+    for (const meal of buildRecipeSuggestions(m, 'seche', { excluded: tous })) {
+      expect(meal.recipes).toHaveLength(2);
+      for (const r of meal.recipes) {
+        expect(r.contient).not.toContain('viande');
+        expect(r.contient).not.toContain('poisson');
+        expect(r.contient).not.toContain('oeufs');
+      }
+    }
+  });
+
+  test('le catalogue est assez large pour que deux profils ne voient pas la même chose', () => {
+    const titres = new Set<string>();
+    forEachProfile((m, _d, _s, goal) => {
+      for (const meal of buildRecipeSuggestions(m, goal)) {
+        for (const r of meal.recipes) titres.add(r.title);
+      }
+    });
+    // 60 combinaisons de profils et d'objectifs : si le tirage était figé, on verrait 6 titres.
+    expect(titres.size).toBeGreaterThanOrEqual(30);
+  });
+
   test('le catalogue couvre les deux moments de la journée', () => {
-    expect(RECIPES.filter((r) => r.slot === 'matin').length).toBeGreaterThanOrEqual(3);
-    expect(RECIPES.filter((r) => r.slot === 'plat').length).toBeGreaterThanOrEqual(9);
+    expect(RECIPES.filter((r) => r.slot === 'matin').length).toBeGreaterThanOrEqual(12);
+    expect(RECIPES.filter((r) => r.slot === 'plat').length).toBeGreaterThanOrEqual(40);
+    // Plus aucun lien vers un blog : uniquement les deux sites demandés.
+    for (const r of RECIPES) {
+      expect(['Marmiton', 'Femme Actuelle']).toContain(r.source);
+    }
   });
 });
 

@@ -5,12 +5,13 @@ import BottomNav from '@/components/BottomNav';
 import BottomNavSpacer from '@/components/BottomNavSpacer';
 import ProfileProvider from '@/components/ProfileProvider';
 import ThemeRegistry from '@/theme/ThemeRegistry';
+import './globals.css';
 
 /** Titres et grands chiffres. */
 const display = Fraunces({
   subsets: ['latin'],
   display: 'swap',
-  variable: '--font-display',
+  variable: '--font-fraunces',
   // Axe optique adouci : la Fraunces par défaut est très contrastée sur les grands corps.
   axes: ['SOFT'],
 });
@@ -19,7 +20,7 @@ const display = Fraunces({
 const sans = Inter({
   subsets: ['latin'],
   display: 'swap',
-  variable: '--font-sans',
+  variable: '--font-inter',
 });
 
 export const metadata: Metadata = {

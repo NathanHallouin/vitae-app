@@ -1,13 +1,8 @@
 'use client';
 
-import Box from '@mui/material/Box';
-import Paper from '@mui/material/Paper';
-import Typography from '@mui/material/Typography';
 import { buildMacros, proteinBasisNote, rangeBar, rangeCaption, warningText } from '@/lib/calc';
 import { GOALS } from '@/lib/constants';
 import { fmtGap, fmtWeekly, kcal } from '@/lib/format';
-import { useTokens } from '@/theme/ThemeRegistry';
-import { DISPLAY_FONT, FS } from '@/theme/theme';
 import { useProfile } from '../ProfileProvider';
 import PlantDoodle from '../ui/doodles/PlantDoodle';
 import Icon from '../ui/Icon';
@@ -17,154 +12,94 @@ import PageIntro from '../ui/PageIntro';
 import StatTile from '../ui/StatTile';
 import RecipesCard from './RecipesCard';
 
+/**
+ * Les couleurs des macros passent par les variables CSS plutôt que par des valeurs figées : elles
+ * servent en style en ligne (largeur de barre calculée), donc une classe Tailwind ne suffirait
+ * pas, et elles doivent suivre la bascule de thème.
+ */
+const MACRO_COLORS = {
+  prot: 'var(--t-macro-prot)',
+  fat: 'var(--t-macro-fat)',
+  carb: 'var(--t-macro-carb)',
+};
+
 export default function AlimentationScreen() {
   const { metrics, profile, setGoal } = useProfile();
-  const tokens = useTokens();
   if (!metrics || !profile) return null;
 
   const bar = rangeBar(metrics);
   const warning = warningText(metrics);
-  const macros = buildMacros(metrics, {
-    prot: tokens.macroProt,
-    fat: tokens.macroFat,
-    carb: tokens.macroCarb,
-  });
+  const macros = buildMacros(metrics, MACRO_COLORS);
   const gapAtMin = metrics.min - metrics.tdee;
   const gapAtMax = metrics.max - metrics.tdee;
 
   return (
-    <Box>
+    <div>
       <PageIntro
         title="Ce que je mange"
         lead="Combien manger chaque jour pour aller dans le sens de votre objectif, et comment répartir ces calories."
         illustration={<PlantDoodle />}
       />
 
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-        <Paper sx={{ p: 3 }}>
-          <Overline sx={{ mb: '4px' }}>Mon objectif</Overline>
-          <Typography sx={(t) => ({ fontSize: FS.small, color: t.tokens.muted, mb: '14px' })}>
+      <div className="flex flex-col gap-6">
+        <div className="card p-6">
+          <Overline className="mb-1">Mon objectif</Overline>
+          <p className="mb-[14px] text-small text-muted">
             Changez-le quand vous voulez : tous les chiffres du site se recalculent.
-          </Typography>
-          <Box
-            sx={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-              gap: '10px',
-            }}
-          >
+          </p>
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-[10px]">
             {GOALS.map((g) => (
               <OptionButton
                 key={g.key}
                 selected={profile.goal === g.key}
                 onClick={() => setGoal(g.key)}
-                sx={{ p: '14px 16px' }}
+                className="p-[14px_16px]"
               >
-                <Typography sx={{ fontSize: FS.option, fontWeight: 500, color: 'inherit' }}>
-                  {g.label}
-                </Typography>
-                <Typography sx={(t) => ({ fontSize: FS.small, color: t.tokens.muted, mt: '2px' })}>
-                  {g.desc}
-                </Typography>
-                <Typography sx={(t) => ({ fontSize: FS.caption, color: t.tokens.muted })}>
-                  {g.detail}
-                </Typography>
+                <p className="text-option font-medium">{g.label}</p>
+                <p className="mt-[2px] text-small text-muted">{g.desc}</p>
+                <p className="text-caption text-muted">{g.detail}</p>
               </OptionButton>
             ))}
-          </Box>
-        </Paper>
+          </div>
+        </div>
 
-        <Paper sx={{ p: 3 }}>
+        <div className="card p-6">
           <Overline>Votre repère quotidien</Overline>
-          <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1, m: '10px 0 8px' }}>
-            <Typography
-              sx={(t) => ({
-                fontFamily: DISPLAY_FONT,
-                fontSize: FS.display,
-                fontWeight: 600,
-                lineHeight: 1,
-                letterSpacing: '-.02em',
-                color: t.tokens.primaryInk,
-                fontVariantNumeric: 'tabular-nums',
-              })}
-            >
+          <div className="mt-[10px] mb-2 flex items-baseline gap-2">
+            <span className="font-display text-display leading-none font-semibold tracking-[-.02em] text-primary-ink tabular-nums">
               {kcal(metrics.target)}
-            </Typography>
-            <Typography sx={(t) => ({ fontSize: FS.option, color: t.tokens.muted })}>
-              kcal par jour
-            </Typography>
-          </Box>
-          <Typography
-            sx={(t) => ({
-              fontSize: FS.base,
-              lineHeight: 1.6,
-              color: t.tokens.muted,
-              maxWidth: '62ch',
-              textWrap: 'pretty',
-            })}
-          >
+            </span>
+            <span className="text-option text-muted">kcal par jour</span>
+          </div>
+          <p className="max-w-[62ch] text-base leading-[1.6] text-muted text-pretty">
             {metrics.goal.note}
-          </Typography>
+          </p>
 
-          <Box sx={(t) => ({ borderTop: `1px solid ${t.tokens.divider}`, mt: '20px', pt: '18px' })}>
-            <Overline sx={{ mb: '4px' }}>{rangeCaption(metrics.goal.key)}</Overline>
-            <Typography sx={(t) => ({ fontSize: FS.small, color: t.tokens.muted, mb: '16px' })}>
+          <div className="mt-5 border-t border-divider pt-[18px]">
+            <Overline className="mb-1">{rangeCaption(metrics.goal.key)}</Overline>
+            <p className="mb-4 text-small text-muted">
               Inutile de viser juste : tant que vous restez dans cette fourchette, ça marche.
-            </Typography>
+            </p>
 
-            <Box
-              sx={(t) => ({
-                position: 'relative',
-                height: 10,
-                backgroundColor: t.tokens.divider,
-                borderRadius: '5px',
-                mb: '10px',
-              })}
-            >
-              <Box
-                sx={(t) => ({
-                  position: 'absolute',
-                  top: 0,
-                  height: 10,
-                  borderRadius: '5px',
-                  backgroundColor: t.tokens.primaryInk,
-                  opacity: 0.5,
-                  left: `${bar.low}%`,
-                  width: `${bar.width}%`,
-                })}
+            <div className="relative mb-[10px] h-[10px] rounded-[5px] bg-divider">
+              <div
+                className="absolute top-0 h-[10px] rounded-[5px] bg-primary-ink opacity-50"
+                style={{ left: `${bar.low}%`, width: `${bar.width}%` }}
               />
-              <Box
+              {/* Repère de la dépense totale : un trait fin, pour situer la fourchette par rapport
+                  à l'équilibre sans laisser croire à une cible précise. */}
+              <div
                 aria-hidden
-                sx={{
-                  position: 'absolute',
-                  top: -3,
-                  width: 2,
-                  height: 16,
-                  backgroundColor: tokens.marker,
-                  left: `${bar.tdee}%`,
-                }}
+                className="absolute -top-[3px] h-4 w-[2px] bg-marker"
+                style={{ left: `${bar.tdee}%` }}
               />
-            </Box>
-            <Box
-              sx={(t) => ({
-                display: 'flex',
-                justifyContent: 'space-between',
-                fontSize: FS.micro,
-                color: t.tokens.muted2,
-                mb: '18px',
-              })}
-            >
+            </div>
+            <div className="mb-[18px] flex justify-between text-micro text-muted2">
               <span>Ce que vous brûlez au repos</span>
               <span>Ce que vous brûlez en tout</span>
-            </Box>
+            </div>
 
-            <Box
-              sx={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-                gap: '12px',
-              }}
-            >
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-3">
               <StatTile
                 label="Au minimum"
                 value={`${kcal(metrics.min)} kcal`}
@@ -175,102 +110,50 @@ export default function AlimentationScreen() {
                 value={`${kcal(metrics.max)} kcal`}
                 note={`${fmtGap(gapAtMax)} par rapport à votre dépense · ${fmtWeekly(gapAtMax)}`}
               />
-            </Box>
+            </div>
 
             {warning ? (
-              <Box
-                sx={(t) => ({
-                  backgroundColor: t.tokens.warnBg,
-                  color: t.tokens.warnInk,
-                  borderRadius: 1,
-                  p: '12px 14px',
-                  fontSize: FS.small,
-                  lineHeight: 1.55,
-                  mt: '12px',
-                  textWrap: 'pretty',
-                })}
-              >
+              <p className="mt-3 rounded-xl bg-warn-bg p-[12px_14px] text-small leading-[1.55] text-warn-ink text-pretty">
                 {warning}
-              </Box>
+              </p>
             ) : null}
-          </Box>
-        </Paper>
+          </div>
+        </div>
 
-        <Paper sx={{ p: 3 }}>
-          <Overline sx={{ mb: '4px' }}>Comment répartir ces calories</Overline>
-          <Typography
-            sx={(t) => ({
-              fontSize: FS.small,
-              color: t.tokens.muted,
-              mb: '18px',
-              maxWidth: '68ch',
-            })}
-          >
+        <div className="card p-6">
+          <Overline className="mb-1">Comment répartir ces calories</Overline>
+          <p className="mb-[18px] max-w-[68ch] text-small text-muted">
             Des repères, pas des règles. Le plus important reste le total de la journée.{' '}
             {proteinBasisNote(metrics)}
-          </Typography>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          </p>
+          <div className="flex flex-col gap-4">
             {macros.map((m) => (
-              <Box key={m.label}>
-                <Box
-                  sx={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'baseline',
-                    gap: 2,
-                    mb: '6px',
-                    flexWrap: 'wrap',
-                  }}
-                >
-                  <Box component="span" sx={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <Box component="span" sx={{ color: m.color, display: 'flex' }}>
+              <div key={m.label}>
+                <div className="mb-[6px] flex flex-wrap items-baseline justify-between gap-4">
+                  <span className="flex items-center gap-2">
+                    <span className="flex" style={{ color: m.color }}>
                       <Icon name={m.icon} size={19} />
-                    </Box>
-                    <Box component="span" sx={{ fontSize: FS.base, fontWeight: 500 }}>
-                      {m.label}
-                    </Box>
-                    <Box
-                      component="span"
-                      sx={(t) => ({ fontSize: FS.small, color: t.tokens.muted, ml: 1 })}
-                    >
-                      {m.hint}
-                    </Box>
-                  </Box>
-                  <Typography
-                    component="span"
-                    sx={(t) => ({
-                      fontSize: FS.base,
-                      color: t.tokens.muted,
-                      fontVariantNumeric: 'tabular-nums',
-                    })}
-                  >
+                    </span>
+                    <span className="text-base font-medium">{m.label}</span>
+                    <span className="ml-2 text-small text-muted">{m.hint}</span>
+                  </span>
+                  <span className="text-base text-muted tabular-nums">
                     {m.grams} g · {m.kcal} kcal
-                  </Typography>
-                </Box>
-                <Box
-                  sx={(t) => ({
-                    height: 6,
-                    backgroundColor: t.tokens.divider,
-                    borderRadius: '3px',
-                    overflow: 'hidden',
-                  })}
-                >
-                  <Box
-                    sx={{
-                      height: '100%',
-                      borderRadius: '3px',
-                      width: `${m.pct}%`,
-                      backgroundColor: m.color,
-                    }}
+                  </span>
+                </div>
+                <div className="h-[6px] overflow-hidden rounded-[3px] bg-divider">
+                  <div
+                    className="h-full rounded-[3px]"
+                    style={{ width: `${m.pct}%`, backgroundColor: m.color }}
                   />
-                </Box>
-              </Box>
+                </div>
+              </div>
             ))}
-          </Box>
-        </Paper>
+          </div>
+        </div>
 
         <RecipesCard metrics={metrics} goal={profile.goal} />
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 }

@@ -5,11 +5,12 @@
  */
 
 import type { GoalKey, Sexe } from './constants';
+import { EXCLUSIONS, type Exclusion } from './recipes';
 
 // La clé reste inchangée entre les versions : c'est le champ `v` qui porte le format, sinon un
 // profil v1 deviendrait illisible et ne pourrait plus être migré.
 export const PROFILE_KEY = 'vitae.v1.profile';
-export const PROFILE_VERSION = 2;
+export const PROFILE_VERSION = 3;
 
 export interface StoredProfile {
   v: number;
@@ -23,6 +24,8 @@ export interface StoredProfile {
   /** index dans `SESSIONS` : volume d'entraînement */
   sessions: number;
   goal: GoalKey;
+  /** filtres d'ingrédients cochés sur la page « Ce que je mange » */
+  excluded: Exclusion[];
   /** dernière modification, ISO ; sert à décider si le poids est encore d'actualité */
   updatedAt: string;
 }
@@ -47,6 +50,14 @@ function isIndex(value: unknown, max: number): value is number {
   return typeof value === 'number' && Number.isInteger(value) && value >= 0 && value <= max;
 }
 
+const CLES_EXCLUSION: string[] = EXCLUSIONS.map((e) => e.key);
+
+/** Filtres inconnus ignorés un à un : un profil reste lisible même après un renommage. */
+function lireExclusions(value: unknown): Exclusion[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((v): v is Exclusion => typeof v === 'string' && CLES_EXCLUSION.includes(v));
+}
+
 /** Lecture tolérante : toute donnée douteuse renvoie `null` plutôt que de casser l'app. */
 export function parseProfile(raw: string | null): StoredProfile | null {
   if (!raw) return null;
@@ -60,7 +71,7 @@ export function parseProfile(raw: string | null): StoredProfile | null {
   if (typeof data !== 'object' || data === null) return null;
 
   const p = data as Record<string, unknown>;
-  if (p.v !== PROFILE_VERSION && p.v !== 1) return null;
+  if (p.v !== PROFILE_VERSION && p.v !== 1 && p.v !== 2) return null;
   if (p.sexe !== 'femme' && p.sexe !== 'homme') return null;
   if (typeof p.naissance !== 'string' || typeof p.updatedAt !== 'string') return null;
   if (typeof p.taille !== 'string' || typeof p.poids !== 'string') return null;
@@ -74,6 +85,7 @@ export function parseProfile(raw: string | null): StoredProfile | null {
     if (!isIndex(p.daily, 3) || !isIndex(p.sessions, 4)) return null;
     axes = { daily: p.daily, sessions: p.sessions };
   }
+  // v1 et v2 ignoraient les filtres : un profil migré repart sans exclusion.
 
   return {
     v: PROFILE_VERSION,
@@ -84,6 +96,7 @@ export function parseProfile(raw: string | null): StoredProfile | null {
     daily: axes.daily,
     sessions: axes.sessions,
     goal: p.goal as GoalKey,
+    excluded: lireExclusions(p.excluded),
     updatedAt: p.updatedAt,
   };
 }

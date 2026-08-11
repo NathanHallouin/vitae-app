@@ -1,8 +1,7 @@
 'use client';
 
-import ButtonBase from '@mui/material/ButtonBase';
-import type { SxProps, Theme } from '@mui/material/styles';
 import type { ReactNode } from 'react';
+import { cx } from './primitives';
 
 /**
  * Option cliquable (sexe, activité, objectif, poids cible).
@@ -12,36 +11,32 @@ export default function OptionButton({
   selected,
   onClick,
   children,
-  sx,
+  className,
   ariaLabel,
 }: {
   selected: boolean;
   onClick: () => void;
   children: ReactNode;
-  sx?: SxProps<Theme>;
+  className?: string;
   ariaLabel?: string;
 }) {
   return (
-    <ButtonBase
+    <button
+      type="button"
       onClick={onClick}
       aria-pressed={selected}
       aria-label={ariaLabel}
-      sx={[
-        (theme) => ({
-          display: 'block',
-          width: '100%',
-          textAlign: 'left',
-          borderRadius: 1,
-          transition: 'all .15s ease',
-          backgroundColor: selected ? theme.tokens.primaryTint : theme.tokens.surface,
-          border: `1px solid ${selected ? theme.tokens.primaryInk : theme.tokens.border}`,
-          color: selected ? theme.tokens.primaryInk : theme.tokens.text,
-          '&:hover': { borderColor: theme.tokens.primaryInk },
-        }),
-        ...(Array.isArray(sx) ? sx : [sx]),
-      ]}
+      className={cx(
+        'block w-full cursor-pointer rounded-xl border text-left transition-colors',
+        'hover:border-primary-ink focus-visible:outline-2 focus-visible:outline-offset-2',
+        'focus-visible:outline-primary',
+        selected
+          ? 'border-primary-ink bg-primary-tint text-primary-ink'
+          : 'border-line bg-surface text-ink',
+        className,
+      )}
     >
       {children}
-    </ButtonBase>
+    </button>
   );
 }

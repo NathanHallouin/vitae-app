@@ -12,6 +12,7 @@ import {
 import { computeMetrics, type Metrics } from '@/lib/calc';
 import type { GoalKey } from '@/lib/constants';
 import { ageFrom, isWeightStale } from '@/lib/date';
+import type { Exclusion } from '@/lib/recipes';
 import type { StaleWeight } from '@/lib/state';
 import {
   clearProfile,
@@ -37,6 +38,8 @@ interface ProfileValue {
   setTargetKey: (key: string) => void;
   save: (input: ProfileInput) => void;
   setGoal: (goal: GoalKey) => void;
+  /** filtres d'ingrédients, réglés sur la page « Ce que je mange » */
+  setExcluded: (excluded: Exclusion[]) => void;
   reset: () => void;
 }
 
@@ -87,6 +90,16 @@ export default function ProfileProvider({ children }: { children: ReactNode }) {
     [profile],
   );
 
+  const setExcluded = useCallback(
+    (excluded: Exclusion[]) => {
+      if (!profile) return;
+      const { v: _v, updatedAt: _updatedAt, ...rest } = profile;
+      saveProfile({ ...rest, excluded });
+      setProfile(loadProfile());
+    },
+    [profile],
+  );
+
   const reset = useCallback(() => {
     clearProfile();
     setProfile(null);
@@ -121,9 +134,10 @@ export default function ProfileProvider({ children }: { children: ReactNode }) {
       setTargetKey,
       save,
       setGoal,
+      setExcluded,
       reset,
     }),
-    [status, profile, metrics, age, staleWeight, targetKey, save, setGoal, reset],
+    [status, profile, metrics, age, staleWeight, targetKey, save, setGoal, setExcluded, reset],
   );
 
   return <ProfileContext.Provider value={value}>{children}</ProfileContext.Provider>;

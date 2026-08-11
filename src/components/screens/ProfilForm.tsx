@@ -1,12 +1,5 @@
 'use client';
 
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import InputAdornment from '@mui/material/InputAdornment';
-import LinearProgress from '@mui/material/LinearProgress';
-import Paper from '@mui/material/Paper';
-import TextField from '@mui/material/TextField';
-import Typography from '@mui/material/Typography';
 import { useReducer } from 'react';
 import { activityFactor, DAILY, GOALS, SESSIONS, STEP_TITLES } from '@/lib/constants';
 import { ageFrom, formatBirthDate, formatLongDate, todayISO } from '@/lib/date';
@@ -20,16 +13,20 @@ import {
   validate,
 } from '@/lib/state';
 import type { ProfileInput } from '@/lib/storage';
-import { FS } from '@/theme/theme';
 import LivePreview from '../LivePreview';
 import Icon, { type IconName } from '../ui/Icon';
 import OptionButton from '../ui/OptionButton';
 import Overline from '../ui/Overline';
+import { Button, cx, NumberField, ProgressBar } from '../ui/primitives';
 
 const MEASURES = [
   { field: 'taille', label: 'Taille', unit: 'cm', placeholder: '175' },
   { field: 'poids', label: 'Poids', unit: 'kg', placeholder: '70' },
 ] as const;
+
+const INPUT_CLASS =
+  'w-full rounded-[var(--radius-control)] border border-line bg-surface2 px-[14px] py-[14px] ' +
+  'text-input text-ink outline-none hover:border-line-strong focus:border-primary';
 
 export default function ProfilForm({
   initial,
@@ -67,170 +64,132 @@ export default function ProfilForm({
   };
 
   return (
-    <Box>
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'flex-end',
-          gap: 2,
-          mb: '20px',
-          flexWrap: 'wrap',
-        }}
-      >
-        <Box>
-          <Overline sx={{ mb: '4px' }}>{kicker}</Overline>
-          <Typography variant="h2" component="h1">
+    <div>
+      <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <Overline className="mb-1">{kicker}</Overline>
+          <h1 className="font-display text-h2 font-semibold leading-[1.2] tracking-[-.01em]">
             {title}
-          </Typography>
-        </Box>
-        <Button onClick={() => dispatch({ type: 'toggleMode' })} sx={{ fontSize: FS.small, p: 1 }}>
+          </h1>
+        </div>
+        <Button onClick={() => dispatch({ type: 'toggleMode' })} className="p-2 text-small">
           {isWizard ? 'Tout saisir d’un coup' : 'Une question à la fois'}
         </Button>
-      </Box>
+      </div>
 
       {isWizard ? (
-        <LinearProgress
-          variant="determinate"
-          value={((form.step + 1) / 4) * 100}
-          aria-label={`Progression : question ${form.step + 1} sur 4`}
-          sx={{ mb: 3 }}
-        />
+        <div className="mb-6">
+          <ProgressBar
+            value={((form.step + 1) / 4) * 100}
+            label={`Progression : question ${form.step + 1} sur 4`}
+          />
+        </div>
       ) : null}
 
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, alignItems: 'flex-start' }}>
-        <Paper
-          component="form"
-          onSubmit={(e: React.FormEvent) => {
+      <div className="flex flex-wrap items-start gap-6">
+        <form
+          onSubmit={(e) => {
             e.preventDefault();
             submit();
           }}
-          sx={{ flex: '1 1 460px', minWidth: 0, p: 3 }}
+          className="card min-w-0 flex-[1_1_460px] p-6"
         >
           {fields.sex ? (
-            <Box sx={{ mb: 3 }} role="group" aria-labelledby="label-sexe">
-              <FieldLabel id="label-sexe">Vous êtes</FieldLabel>
-              <Box sx={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+            <fieldset className="mb-6">
+              <legend className="mb-[10px] block text-small font-medium text-muted">
+                Vous êtes
+              </legend>
+              <div className="flex flex-wrap gap-3">
                 {(['femme', 'homme'] as const).map((sexe) => (
                   <OptionButton
                     key={sexe}
                     selected={form.sexe === sexe}
                     onClick={() => dispatch({ type: 'setSexe', value: sexe })}
-                    sx={{ flex: 1, minWidth: 130, p: 2, fontSize: FS.option, fontWeight: 500 }}
+                    className="min-w-[130px] flex-1 p-4 text-option font-medium"
                   >
                     {sexe === 'femme' ? 'Une femme' : 'Un homme'}
                   </OptionButton>
                 ))}
-              </Box>
-              <Typography sx={(t) => ({ fontSize: FS.caption, color: t.tokens.muted2, mt: 1 })}>
+              </div>
+              <p className="mt-2 text-caption text-muted2">
                 Le calcul diffère : à poids et taille égaux, un corps féminin et un corps masculin
                 ne consomment pas la même énergie au repos.
-              </Typography>
-            </Box>
+              </p>
+            </fieldset>
           ) : null}
 
           {fields.body && form.staleWeight ? (
-            <Box
+            <p
               role="status"
-              sx={(t) => ({
-                backgroundColor: t.tokens.warnBg,
-                color: t.tokens.warnInk,
-                borderRadius: 1,
-                p: '12px 14px',
-                fontSize: FS.small,
-                lineHeight: 1.55,
-                mb: '20px',
-                textWrap: 'pretty',
-              })}
+              className="mb-5 rounded-xl bg-warn-bg p-[12px_14px] text-small leading-[1.55] text-warn-ink text-pretty"
             >
               Votre dernier poids date du {formatLongDate(form.staleWeight.updatedAt)} (
               {form.staleWeight.previous} kg). Repesez-vous et indiquez votre poids d’aujourd’hui :
               tout le reste en dépend.
-            </Box>
+            </p>
           ) : null}
 
           {fields.body ? (
-            <Box
-              sx={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
-                gap: '20px',
-                mb: 3,
-              }}
-            >
-              <Box>
+            <div className="mb-6 grid grid-cols-[repeat(auto-fit,minmax(160px,1fr))] gap-5">
+              <div>
                 <FieldLabel htmlFor="field-naissance">Date de naissance</FieldLabel>
                 {form.naissanceLocked ? (
                   // Date issue du profil enregistré : lecture seule, et affichée en clair plutôt
                   // qu'en sélecteur de date, pour qu'aucun contrôle natif ne laisse croire
                   // qu'elle est modifiable.
-                  <TextField
+                  <input
                     id="field-naissance"
                     type="text"
-                    fullWidth
+                    readOnly
+                    aria-label="Date de naissance enregistrée"
                     value={formatBirthDate(form.naissance)}
-                    slotProps={{
-                      htmlInput: { readOnly: true, 'aria-label': 'Date de naissance enregistrée' },
-                    }}
-                    sx={(t) => ({
-                      '& .MuiOutlinedInput-root': { backgroundColor: t.tokens.surface2 },
-                      '& .MuiOutlinedInput-input': { color: t.tokens.muted, cursor: 'default' },
-                    })}
+                    className={cx(INPUT_CLASS, 'cursor-default text-muted')}
                   />
                 ) : (
-                  <TextField
+                  <input
                     id="field-naissance"
                     type="date"
-                    fullWidth
+                    max={todayISO()}
+                    aria-label="Date de naissance"
                     value={form.naissance}
                     onChange={(e) =>
                       dispatch({ type: 'setField', field: 'naissance', value: e.target.value })
                     }
-                    slotProps={{
-                      htmlInput: { max: todayISO(), 'aria-label': 'Date de naissance' },
-                    }}
+                    className={INPUT_CLASS}
                   />
                 )}
-                <Typography
-                  sx={(t) => ({ fontSize: FS.caption, color: t.tokens.muted2, mt: '6px' })}
-                >
+                <p className="mt-[6px] text-caption text-muted2">
                   {age === null
                     ? 'Votre âge est calculé tout seul.'
                     : form.naissanceLocked
                       ? `${age} ans · enregistré, « Tout effacer » pour le changer`
                       : `${age} ans aujourd’hui`}
-                </Typography>
-              </Box>
+                </p>
+              </div>
 
               {MEASURES.map((m) => (
-                <Box key={m.field}>
+                <div key={m.field}>
                   <FieldLabel htmlFor={`field-${m.field}`}>{m.label}</FieldLabel>
-                  <TextField
+                  <NumberField
                     id={`field-${m.field}`}
-                    type="number"
-                    fullWidth
+                    unit={m.unit}
                     value={form[m.field]}
                     placeholder={m.placeholder}
+                    aria-label={`${m.label} en ${m.unit}`}
                     onChange={(e) =>
                       dispatch({ type: 'setField', field: m.field, value: e.target.value })
                     }
-                    slotProps={{
-                      htmlInput: { inputMode: 'numeric', 'aria-label': `${m.label} en ${m.unit}` },
-                      input: {
-                        endAdornment: <InputAdornment position="end">{m.unit}</InputAdornment>,
-                      },
-                    }}
                   />
-                </Box>
+                </div>
               ))}
-            </Box>
+            </div>
           ) : null}
 
           {fields.activity ? (
-            <Box sx={{ mb: 3 }}>
-              <Box sx={{ mb: 3 }} role="radiogroup" aria-labelledby="label-daily">
+            <div className="mb-6">
+              <div className="mb-6" role="radiogroup" aria-labelledby="label-daily">
                 <FieldLabel id="label-daily">Votre quotidien, en dehors du sport&nbsp;?</FieldLabel>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                <div className="flex flex-col gap-2">
                   {DAILY.map((d, i) => (
                     <ChoiceRow
                       key={d.label}
@@ -242,14 +201,14 @@ export default function ProfilForm({
                       value={`×${fmtFactor(d.base)}`}
                     />
                   ))}
-                </Box>
-              </Box>
+                </div>
+              </div>
 
-              <Box role="radiogroup" aria-labelledby="label-sessions">
+              <div role="radiogroup" aria-labelledby="label-sessions">
                 <FieldLabel id="label-sessions">
                   Du sport, combien de fois par semaine&nbsp;?
                 </FieldLabel>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                <div className="flex flex-col gap-2">
                   {SESSIONS.map((sess, i) => (
                     <ChoiceRow
                       key={sess.label}
@@ -261,121 +220,82 @@ export default function ProfilForm({
                       value={`+${fmtFactor(sess.add)}`}
                     />
                   ))}
-                </Box>
-              </Box>
+                </div>
+              </div>
 
-              <Typography
-                aria-live="polite"
-                sx={(t) => ({
-                  fontSize: FS.small,
-                  color: t.tokens.muted,
-                  mt: '12px',
-                  fontVariantNumeric: 'tabular-nums',
-                })}
-              >
+              <p aria-live="polite" className="mt-3 text-small text-muted tabular-nums">
                 Facteur d’activité retenu&nbsp;: ×
                 {fmtFactor(activityFactor(form.daily, form.sessions))}
-              </Typography>
-            </Box>
+              </p>
+            </div>
           ) : null}
 
           {fields.goal ? (
-            <Box sx={{ mb: 3 }} role="radiogroup" aria-labelledby="label-goal">
+            <div className="mb-6" role="radiogroup" aria-labelledby="label-goal">
               <FieldLabel id="label-goal">Vous voulez</FieldLabel>
-              <Box
-                sx={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-                  gap: '10px',
-                }}
-              >
+              <div className="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-[10px]">
                 {GOALS.map((g) => (
                   <OptionButton
                     key={g.key}
                     selected={form.goal === g.key}
                     onClick={() => dispatch({ type: 'setGoal', value: g.key })}
-                    sx={{ p: '14px 16px' }}
+                    className="p-[14px_16px]"
                   >
-                    <Box
-                      sx={(t) => ({
-                        color: form.goal === g.key ? t.tokens.primaryInk : t.tokens.muted2,
-                        mb: '6px',
-                      })}
+                    <span
+                      className={cx(
+                        'mb-[6px] block',
+                        form.goal === g.key ? 'text-primary-ink' : 'text-muted2',
+                      )}
                     >
                       <Icon name={g.icon} size={22} />
-                    </Box>
-                    <Typography sx={{ fontSize: FS.option, fontWeight: 500, color: 'inherit' }}>
-                      {g.label}
-                    </Typography>
-                    <Typography
-                      sx={(t) => ({ fontSize: FS.small, color: t.tokens.muted, mt: '2px' })}
-                    >
-                      {g.desc}
-                    </Typography>
-                    <Typography sx={(t) => ({ fontSize: FS.caption, color: t.tokens.muted })}>
-                      {g.detail}
-                    </Typography>
+                    </span>
+                    <p className="text-option font-medium">{g.label}</p>
+                    <p className="mt-[2px] text-small text-muted">{g.desc}</p>
+                    <p className="text-caption text-muted">{g.detail}</p>
                   </OptionButton>
                 ))}
-              </Box>
-            </Box>
+              </div>
+            </div>
           ) : null}
 
           {form.error ? (
-            <Box
+            <p
               role="alert"
-              sx={(t) => ({
-                backgroundColor: t.tokens.errorBg,
-                color: t.tokens.errorInk,
-                borderRadius: 1,
-                p: '12px 16px',
-                fontSize: FS.base,
-                mb: '20px',
-              })}
+              className="mb-5 rounded-xl bg-error-bg p-[12px_16px] text-base text-error-ink"
             >
               {form.error}
-            </Box>
+            </p>
           ) : null}
 
-          <Box
-            sx={(t) => ({
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              gap: '12px',
-              borderTop: `1px solid ${t.tokens.divider}`,
-              pt: '20px',
-            })}
-          >
+          <div className="flex items-center justify-between gap-3 border-t border-divider pt-5">
             <Button
-              type="button"
               onClick={() =>
                 isWizard && form.step > 0 ? dispatch({ type: 'previous' }) : onCancel()
               }
-              sx={(t) => ({
-                color: t.tokens.muted,
-                '&:hover': { backgroundColor: 'rgba(0,0,0,.04)' },
-              })}
+              className="text-muted hover:bg-surface2"
             >
               {backLabel}
             </Button>
-            <Button type="submit" variant="contained" size="large">
+            <button
+              type="submit"
+              className="inline-flex cursor-pointer items-center justify-center rounded-[var(--radius-control)] border border-transparent bg-primary px-[26px] py-[13px] text-option font-semibold text-hero-text transition-colors hover:bg-primary-dark"
+            >
               {nextLabel}
-            </Button>
-          </Box>
-        </Paper>
+            </button>
+          </div>
+        </form>
 
         <LivePreview form={form} age={age} />
-      </Box>
+      </div>
 
       {hasProfile ? (
-        <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
-          <Button onClick={onReset} sx={(t) => ({ color: t.tokens.muted, fontSize: FS.small })}>
+        <div className="mt-6 flex justify-end">
+          <Button onClick={onReset} className="text-small text-muted hover:bg-surface2">
             Tout effacer
           </Button>
-        </Box>
+        </div>
       ) : null}
-    </Box>
+    </div>
   );
 }
 
@@ -388,21 +308,20 @@ function FieldLabel({
   htmlFor?: string;
   id?: string;
 }) {
-  return (
-    <Typography
-      component={htmlFor ? 'label' : 'div'}
-      htmlFor={htmlFor}
-      id={id}
-      sx={(t) => ({
-        display: 'block',
-        fontSize: FS.small,
-        fontWeight: 500,
-        color: t.tokens.muted,
-        mb: htmlFor ? '6px' : '10px',
-      })}
-    >
+  const className = cx(
+    'block text-small font-medium text-muted',
+    htmlFor ? 'mb-[6px]' : 'mb-[10px]',
+  );
+  // Un `<label>` sans `for` ne désigne rien : les groupes de boutons passent par un `div` que
+  // `aria-labelledby` référence.
+  return htmlFor ? (
+    <label htmlFor={htmlFor} className={className}>
       {children}
-    </Typography>
+    </label>
+  ) : (
+    <div id={id} className={className}>
+      {children}
+    </div>
   );
 }
 
@@ -426,55 +345,27 @@ function ChoiceRow({
     <OptionButton
       selected={selected}
       onClick={onClick}
-      sx={{ display: 'flex', alignItems: 'center', gap: '14px', p: '14px 16px' }}
+      className="flex items-center gap-[14px] p-[14px_16px]"
     >
-      <Box
+      <span
         aria-hidden
-        sx={(t) => ({
-          width: 18,
-          height: 18,
-          flex: 'none',
-          borderRadius: '50%',
-          border: `2px solid ${selected ? t.tokens.primaryInk : t.tokens.borderStrong}`,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        })}
+        className={cx(
+          'flex size-[18px] flex-none items-center justify-center rounded-full border-2',
+          selected ? 'border-primary-ink' : 'border-line-strong',
+        )}
       >
-        <Box
-          sx={(t) => ({
-            width: 9,
-            height: 9,
-            borderRadius: '50%',
-            backgroundColor: selected ? t.tokens.primaryInk : 'transparent',
-          })}
+        <span
+          className={cx('size-[9px] rounded-full', selected ? 'bg-primary-ink' : 'bg-transparent')}
         />
-      </Box>
-      <Box
-        sx={(t) => ({
-          color: selected ? t.tokens.primaryInk : t.tokens.muted2,
-          display: 'flex',
-        })}
-      >
+      </span>
+      <span className={cx('flex', selected ? 'text-primary-ink' : 'text-muted2')}>
         <Icon name={icon} size={22} />
-      </Box>
-      <Box sx={{ flex: 1 }}>
-        <Typography sx={{ fontSize: FS.option, fontWeight: 500, color: 'inherit' }}>
-          {label}
-        </Typography>
-        <Typography sx={(t) => ({ fontSize: FS.small, color: t.tokens.muted, mt: '2px' })}>
-          {desc}
-        </Typography>
-      </Box>
-      <Typography
-        sx={(t) => ({
-          fontSize: FS.small,
-          color: t.tokens.muted2,
-          fontVariantNumeric: 'tabular-nums',
-        })}
-      >
-        {value}
-      </Typography>
+      </span>
+      <span className="flex-1">
+        <span className="block text-option font-medium">{label}</span>
+        <span className="mt-[2px] block text-small text-muted">{desc}</span>
+      </span>
+      <span className="text-small text-muted2 tabular-nums">{value}</span>
     </OptionButton>
   );
 }

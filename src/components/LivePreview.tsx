@@ -1,14 +1,11 @@
 'use client';
 
-import Box from '@mui/material/Box';
-import Paper from '@mui/material/Paper';
-import Typography from '@mui/material/Typography';
 import { computeMetrics } from '@/lib/calc';
 import { activityLabel, goalByKey } from '@/lib/constants';
 import { dec, kcal } from '@/lib/format';
 import type { FormState } from '@/lib/state';
-import { FS } from '@/theme/theme';
 import Overline from './ui/Overline';
+import { cx } from './ui/primitives';
 
 /** Panneau latéral : les chiffres se recalculent à chaque frappe. */
 export default function LivePreview({ form, age }: { form: FormState; age: number | null }) {
@@ -50,54 +47,30 @@ export default function LivePreview({ form, age }: { form: FormState; age: numbe
     : 'Répondez aux questions : les chiffres se calculent ici au fur et à mesure.';
 
   return (
-    <Paper
-      component="aside"
+    <aside
       aria-live="polite"
-      sx={{
-        flex: '1 1 280px',
-        maxWidth: { xs: '100%', md: 340 },
-        alignSelf: 'flex-start',
-        position: { xs: 'static', md: 'sticky' },
-        top: 88,
-        p: '20px',
-      }}
+      className="card max-w-full flex-[1_1_280px] self-start p-5 md:sticky md:top-[88px] md:max-w-[340px]"
     >
-      <Overline sx={{ mb: '14px' }}>Vos chiffres en direct</Overline>
-      <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+      <Overline className="mb-[14px]">Vos chiffres en direct</Overline>
+      <div className="flex flex-col">
         {rows.map((row) => (
-          <Box
+          <div
             key={row.label}
-            sx={(t) => ({
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'baseline',
-              gap: '12px',
-              py: '11px',
-              borderTop: `1px solid ${t.tokens.divider}`,
-            })}
+            className="flex items-baseline justify-between gap-3 border-t border-divider py-[11px]"
           >
-            <Typography sx={(t) => ({ fontSize: FS.small, color: t.tokens.muted })}>
-              {row.label}
-            </Typography>
-            <Typography
-              sx={(t) => ({
-                fontSize: FS.body,
-                fontWeight: 500,
-                fontVariantNumeric: 'tabular-nums',
-                color: row.accent ? t.tokens.primaryInk : t.tokens.text,
-                textAlign: 'right',
-              })}
+            <span className="text-small text-muted">{row.label}</span>
+            <span
+              className={cx(
+                'text-right text-body font-medium tabular-nums',
+                row.accent ? 'text-primary-ink' : 'text-ink',
+              )}
             >
               {row.value}
-            </Typography>
-          </Box>
+            </span>
+          </div>
         ))}
-      </Box>
-      <Typography
-        sx={(t) => ({ fontSize: FS.caption, lineHeight: 1.55, color: t.tokens.muted2, mt: '14px' })}
-      >
-        {hint}
-      </Typography>
-    </Paper>
+      </div>
+      <p className="mt-[14px] text-caption leading-[1.55] text-muted2">{hint}</p>
+    </aside>
   );
 }
