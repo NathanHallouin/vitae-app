@@ -104,7 +104,8 @@ export default function ProfileProvider({ children }: { children: ReactNode }) {
       age: String(age),
       taille: profile.taille,
       poids: profile.poids,
-      activity: profile.activity,
+      daily: profile.daily,
+      sessions: profile.sessions,
       goal: profile.goal,
     });
   }, [profile, age]);

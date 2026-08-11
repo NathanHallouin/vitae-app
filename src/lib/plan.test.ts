@@ -35,17 +35,37 @@ const COLORS = { prot: '#2e7d54', fat: '#b06f10', carb: '#3a6ea5' };
 
 const GOALS: GoalKey[] = ['seche', 'recomp', 'masse', 'maintien'];
 
-function metricsFor(p: (typeof PROFILS)[number], activity: number, goal: GoalKey): Metrics {
-  const m = computeMetrics({ ...p, activity, goal });
+function metricsFor(
+  p: (typeof PROFILS)[number],
+  daily: number,
+  sessions: number,
+  goal: GoalKey,
+): Metrics {
+  const m = computeMetrics({ ...p, daily, sessions, goal });
   if (!m) throw new Error('métriques attendues');
   return m;
 }
 
-function forEachProfile(fn: (m: Metrics, activity: number, goal: GoalKey, nom: string) => void) {
+/** Bas, milieu et haut de l'échelle d'activité : facteurs 1,2 · 1,42 · 1,86. */
+const NIVEAUX = [
+  { daily: 0, sessions: 0 },
+  { daily: 1, sessions: 2 },
+  { daily: 3, sessions: 4 },
+];
+
+function forEachProfile(
+  fn: (m: Metrics, daily: number, sessions: number, goal: GoalKey, nom: string) => void,
+) {
   for (const p of PROFILS) {
-    for (const activity of [0, 2, 4]) {
+    for (const { daily, sessions } of NIVEAUX) {
       for (const goal of GOALS) {
-        fn(metricsFor(p, activity, goal), activity, goal, `${p.nom} / act ${activity} / ${goal}`);
+        fn(
+          metricsFor(p, daily, sessions, goal),
+          daily,
+          sessions,
+          goal,
+          `${p.nom} / act ${daily}-${sessions} / ${goal}`,
+        );
       }
     }
   }
@@ -53,7 +73,7 @@ function forEachProfile(fn: (m: Metrics, activity: number, goal: GoalKey, nom: s
 
 describe('macronutriments', () => {
   test('les trois macros couvrent l’apport visé, sans valeur négative', () => {
-    forEachProfile((m, _a, _g, nom) => {
+    forEachProfile((m, _d, _s, _g, nom) => {
       const macros = buildMacros(m, COLORS);
       const total = macros.reduce((sum, x) => sum + x.kcal, 0);
       for (const macro of macros) {
@@ -66,18 +86,18 @@ describe('macronutriments', () => {
   });
 
   test('les protéines se calculent sur un poids ajusté au-delà d’un IMC de 30', () => {
-    const obese = metricsFor(PROFILS[4], 2, 'seche');
+    const obese = metricsFor(PROFILS[4], 1, 2, 'seche');
     expect(obese.bmi).toBeGreaterThan(30);
     const ref = proteinReferenceWeight(obese);
     expect(ref).toBeLessThan(obese.poids);
     expect(ref).toBeGreaterThan(obese.healthyMax);
 
-    const normal = metricsFor(PROFILS[2], 2, 'seche');
+    const normal = metricsFor(PROFILS[2], 1, 2, 'seche');
     expect(proteinReferenceWeight(normal)).toBe(normal.poids);
   });
 
   test('les protéines restent dans une fourchette utilisable (1,2 à 2,4 g/kg de référence)', () => {
-    forEachProfile((m, _a, _g, nom) => {
+    forEachProfile((m, _d, _s, _g, nom) => {
       const [prot] = buildMacros(m, COLORS);
       const gParKg = prot.grams / proteinReferenceWeight(m);
       expect(gParKg).toBeGreaterThanOrEqual(1.2);
@@ -103,7 +123,7 @@ describe('macronutriments', () => {
 
 describe('journée alimentaire', () => {
   test('le menu proposé tombe à moins de 10 % de l’apport visé', () => {
-    forEachProfile((m, _a, _g, nom) => {
+    forEachProfile((m, _d, _s, _g, nom) => {
       const plan = buildDayPlan(m, buildMacros(m, COLORS));
       const ecart = Math.abs(plan.kcal - m.target) / m.target;
       expect(ecart).toBeLessThan(0.1);
@@ -135,7 +155,7 @@ describe('journée alimentaire', () => {
   });
 
   test('les fibres atteignent le repère de 25 g par jour', () => {
-    const m = metricsFor(PROFILS[2], 2, 'seche');
+    const m = metricsFor(PROFILS[2], 1, 2, 'seche');
     const plan = buildDayPlan(m, buildMacros(m, COLORS));
     expect(plan.fibre).toBeGreaterThanOrEqual(20);
   });
@@ -143,8 +163,8 @@ describe('journée alimentaire', () => {
 
 describe('semaine d’entraînement', () => {
   test('toujours au moins deux séances, quatre au maximum', () => {
-    forEachProfile((m, activity, goal) => {
-      const week = buildWeek(m, activity, goal);
+    forEachProfile((m, daily, sessions, goal) => {
+      const week = buildWeek(m, daily, sessions, goal);
       expect(week.strengthPerWeek).toBeGreaterThanOrEqual(2);
       expect(week.strengthPerWeek).toBeLessThanOrEqual(4);
       expect(week.sessions).toHaveLength(week.strengthPerWeek);
@@ -152,15 +172,15 @@ describe('semaine d’entraînement', () => {
   });
 
   test('les séances portent des titres distincts, même quand la rotation se répète', () => {
-    const m = metricsFor(PROFILS[2], 4, 'masse');
-    const week = buildWeek(m, 4, 'masse');
+    const m = metricsFor(PROFILS[2], 3, 4, 'masse');
+    const week = buildWeek(m, 3, 4, 'masse');
     expect(week.strengthPerWeek).toBe(4);
     expect(new Set(week.sessions.map((s) => s.title)).size).toBe(4);
   });
 
   test('chaque exercice propose une version plus facile et une plus difficile', () => {
-    const m = metricsFor(PROFILS[0], 0, 'seche');
-    for (const session of buildWeek(m, 0, 'seche').sessions) {
+    const m = metricsFor(PROFILS[0], 0, 0, 'seche');
+    for (const session of buildWeek(m, 0, 0, 'seche').sessions) {
       expect(session.exercises.length).toBeGreaterThanOrEqual(4);
       for (const ex of session.exercises) {
         expect(ex.easier.length).toBeGreaterThan(0);
@@ -170,16 +190,16 @@ describe('semaine d’entraînement', () => {
   });
 
   test('le cardio n’est proposé que là où il a du sens', () => {
-    const m = metricsFor(PROFILS[3], 0, 'seche');
-    expect(buildWeek(m, 0, 'seche').cardio.join(' ')).toContain('marches rapides');
-    const masse = metricsFor(PROFILS[2], 2, 'masse');
-    expect(buildWeek(masse, 2, 'masse').cardio.join(' ')).toContain('sans creuser');
+    const m = metricsFor(PROFILS[3], 0, 0, 'seche');
+    expect(buildWeek(m, 0, 0, 'seche').cardio.join(' ')).toContain('marches rapides');
+    const masse = metricsFor(PROFILS[2], 1, 2, 'masse');
+    expect(buildWeek(masse, 1, 2, 'masse').cardio.join(' ')).toContain('sans creuser');
   });
 });
 
 describe('lecture du rythme et de la dépense', () => {
   test('au-delà de 1 % du poids par semaine, le rythme est signalé comme rapide', () => {
-    const m = metricsFor(PROFILS[2], 2, 'seche'); // 80 kg
+    const m = metricsFor(PROFILS[2], 1, 2, 'seche'); // 80 kg
     expect(rateAssessment(m, -0.5).level).toBe('bon');
     expect(rateAssessment(m, -1.2).level).toBe('rapide');
     expect(rateAssessment(m, -0.1).level).toBe('lent');

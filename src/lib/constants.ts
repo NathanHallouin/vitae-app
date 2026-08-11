@@ -5,13 +5,29 @@
  * second plan (`detail`) pour ceux qui le connaissent.
  */
 
+import type { IconName } from '@/components/ui/Icon';
+
 export type GoalKey = 'seche' | 'recomp' | 'masse' | 'maintien';
 export type Sexe = '' | 'femme' | 'homme';
 
-export interface Activity {
+/** Mouvement du quotidien, hors sport — le NEAT. */
+export interface Daily {
   label: string;
   desc: string;
-  factor: number;
+  /** facteur d'activité de base, sport exclu */
+  base: number;
+  icon: IconName;
+}
+
+/** Volume d'entraînement, en plus du quotidien. */
+export interface Sessions {
+  label: string;
+  desc: string;
+  /** ce que ces séances ajoutent au facteur de base */
+  add: number;
+  /** nombre de séances représenté, pour les plans d'entraînement */
+  perWeek: number;
+  icon: IconName;
 }
 
 export interface Goal {
@@ -30,6 +46,7 @@ export interface Goal {
   /** protéines en g par kg de poids de corps */
   prot: number;
   note: string;
+  icon: IconName;
 }
 
 export interface BmiBand {
@@ -48,17 +65,108 @@ export interface Move {
   tags: GoalKey[];
 }
 
-export const ACTIVITIES: Activity[] = [
-  { label: 'Sédentaire', desc: 'Travail assis, pas de sport', factor: 1.2 },
-  { label: 'Légèrement actif', desc: '1 à 3 séances par semaine', factor: 1.375 },
-  { label: 'Modérément actif', desc: '3 à 5 séances par semaine', factor: 1.55 },
-  { label: 'Très actif', desc: '6 à 7 séances par semaine', factor: 1.725 },
-  { label: 'Extrêmement actif', desc: 'Travail physique ou double entraînement', factor: 1.9 },
+/**
+ * L'activité est saisie sur deux axes plutôt qu'un seul, parce qu'ils ne varient pas ensemble :
+ * on peut marcher 1 h par jour pour aller travailler sans faire de sport, ou s'entraîner cinq fois
+ * par semaine et rester assis le reste du temps. Le NEAT est d'ailleurs la source de variation la
+ * plus large entre deux personnes de même gabarit.
+ */
+export const DAILY: Daily[] = [
+  {
+    label: 'Assis toute la journée',
+    icon: 'bureau',
+    desc: 'Bureau, trajets en voiture ou assis, peu de marche',
+    base: 1.2,
+  },
+  {
+    label: 'Assis, mais je marche',
+    icon: 'marche',
+    desc: 'Trajets à pied ou à vélo, courses, escaliers',
+    base: 1.3,
+  },
+  {
+    label: 'Debout ou en mouvement',
+    icon: 'debout',
+    desc: 'Commerce, enseignement, soin, service — rarement assis',
+    base: 1.45,
+  },
+  {
+    label: 'Travail physique',
+    icon: 'caisse',
+    desc: 'Manutention, bâtiment, agriculture, livraison',
+    base: 1.6,
+  },
 ];
+
+/**
+ * Les incréments sont volontairement plus bas que ceux des tables classiques : une séance d'une
+ * heure dépense 300 à 400 kcal, soit 150 à 200 kcal par jour une fois lissée sur la semaine pour
+ * trois ou quatre séances — de l'ordre de +0,10 sur le facteur, pas +0,35.
+ */
+export const SESSIONS: Sessions[] = [
+  { label: 'Jamais', desc: 'Aucune séance dédiée', add: 0, perWeek: 0, icon: 'aucun' },
+  {
+    label: '1 à 2 séances',
+    desc: 'Environ une heure en tout',
+    add: 0.05,
+    perWeek: 1.5,
+    icon: 'haltere',
+  },
+  {
+    label: '3 à 4 séances',
+    desc: 'Trois à quatre heures par semaine',
+    add: 0.12,
+    perWeek: 3.5,
+    icon: 'haltere',
+  },
+  {
+    label: '5 à 6 séances',
+    desc: 'Presque tous les jours',
+    add: 0.19,
+    perWeek: 5.5,
+    icon: 'haltere',
+  },
+  {
+    label: '7 ou plus',
+    desc: 'Tous les jours, ou deux fois par jour',
+    add: 0.26,
+    perWeek: 7,
+    icon: 'haltere',
+  },
+];
+
+/** Facteur d'activité complet : mouvement du quotidien + entraînement. */
+export function activityFactor(daily: number, sessions: number): number {
+  const base = (DAILY[daily] ?? DAILY[0]).base;
+  const add = (SESSIONS[sessions] ?? SESSIONS[0]).add;
+  // Arrondi au centième : évite `1.4300000000000002` dans l'affichage et les tests.
+  return Math.round((base + add) * 100) / 100;
+}
+
+/**
+ * Ramène les deux axes à un niveau global 0..4, pour les contenus qui dépendent de la dépense
+ * totale et non d'un axe en particulier (répartition assiette / mouvement, ton des conseils).
+ */
+export function activityLevel(daily: number, sessions: number): number {
+  const f = activityFactor(daily, sessions);
+  if (f < 1.28) return 0;
+  if (f < 1.4) return 1;
+  if (f < 1.55) return 2;
+  if (f < 1.7) return 3;
+  return 4;
+}
+
+/** Résumé d'une ligne, pour les rappels de profil. */
+export function activityLabel(daily: number, sessions: number): string {
+  const d = (DAILY[daily] ?? DAILY[0]).label.toLowerCase();
+  const s = SESSIONS[sessions] ?? SESSIONS[0];
+  return s.perWeek === 0 ? `${d}, sans sport` : `${d}, ${s.label.toLowerCase()} par semaine`;
+}
 
 export const GOALS: Goal[] = [
   {
     key: 'seche',
+    icon: 'flecheBas',
     label: 'Perdre du gras',
     desc: 'Manger un peu moins que ce que vous dépensez',
     detail: 'aussi appelé « sèche » · −10 à −25 %',
@@ -70,6 +178,7 @@ export const GOALS: Goal[] = [
   },
   {
     key: 'recomp',
+    icon: 'flechesOpposees',
     label: 'Perdre du gras et prendre du muscle',
     desc: 'Manger à peu près ce que vous dépensez',
     detail: 'recomposition corporelle · −5 à +5 %',
@@ -81,6 +190,7 @@ export const GOALS: Goal[] = [
   },
   {
     key: 'masse',
+    icon: 'flecheHaut',
     label: 'Prendre du muscle',
     desc: 'Manger un peu plus que ce que vous dépensez',
     detail: 'prise de masse · +5 à +15 %',
@@ -92,6 +202,7 @@ export const GOALS: Goal[] = [
   },
   {
     key: 'maintien',
+    icon: 'egal',
     label: 'Rester à mon poids',
     desc: 'Manger autant que ce que vous dépensez',
     detail: 'maintien · aucun écart',
@@ -196,21 +307,25 @@ export const FLOORS = { homme: 1500, femme: 1200 } as const;
 export const BENEFITS = [
   {
     n: '1',
+    icon: 'flamme' as IconName,
     title: 'Ce que vous brûlez au repos',
     desc: 'L’énergie que votre corps consomme sans rien faire.',
   },
   {
     n: '2',
+    icon: 'eclair' as IconName,
     title: 'Ce que vous brûlez en tout',
     desc: 'En comptant votre travail, vos déplacements et votre sport.',
   },
   {
     n: '3',
+    icon: 'silhouette' as IconName,
     title: 'Votre corpulence',
     desc: 'Où vous vous situez et le poids conseillé pour votre taille.',
   },
   {
     n: '4',
+    icon: 'assiette' as IconName,
     title: 'Combien manger',
     desc: 'Entre combien et combien, selon votre objectif, avec la répartition.',
   },

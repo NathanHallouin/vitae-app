@@ -4,7 +4,7 @@ import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import { computeMetrics } from '@/lib/calc';
-import { ACTIVITIES, goalByKey } from '@/lib/constants';
+import { activityLabel, goalByKey } from '@/lib/constants';
 import { dec, kcal } from '@/lib/format';
 import type { FormState } from '@/lib/state';
 import { FS } from '@/theme/theme';
@@ -17,7 +17,8 @@ export default function LivePreview({ form, age }: { form: FormState; age: numbe
     age: age === null ? '' : String(age),
     taille: form.taille,
     poids: form.poids,
-    activity: form.activity,
+    daily: form.daily,
+    sessions: form.sessions,
     goal: form.goal,
   });
 
@@ -45,7 +46,7 @@ export default function LivePreview({ form, age }: { form: FormState; age: numbe
   ];
 
   const hint = metrics
-    ? `Calculé pour « ${ACTIVITIES[form.activity].label.toLowerCase()} », objectif « ${goalByKey(form.goal).label.toLowerCase()} ». Tout se met à jour pendant que vous tapez.`
+    ? `Calculé pour « ${activityLabel(form.daily, form.sessions)} », objectif « ${goalByKey(form.goal).label.toLowerCase()} ». Tout se met à jour pendant que vous tapez.`
     : 'Répondez aux questions : les chiffres se calculent ici au fur et à mesure.';
 
   return (

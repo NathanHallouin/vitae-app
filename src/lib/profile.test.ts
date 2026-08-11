@@ -72,7 +72,8 @@ describe('lecture du profil enregistré', () => {
     naissance: '1992-03-15',
     taille: '178',
     poids: '86',
-    activity: 1,
+    daily: 1,
+    sessions: 1,
     goal: 'seche',
     updatedAt: '2026-08-03T09:30:00.000Z',
   };
@@ -89,9 +90,36 @@ describe('lecture du profil enregistré', () => {
     expect(parseProfile(JSON.stringify({ ...valide, v: 99 }))).toBeNull(); // version inconnue
     expect(parseProfile(JSON.stringify({ ...valide, sexe: 'autre' }))).toBeNull();
     expect(parseProfile(JSON.stringify({ ...valide, goal: 'inconnu' }))).toBeNull();
-    expect(parseProfile(JSON.stringify({ ...valide, activity: 9 }))).toBeNull();
+    expect(parseProfile(JSON.stringify({ ...valide, daily: 9 }))).toBeNull();
+    expect(parseProfile(JSON.stringify({ ...valide, sessions: 1.5 }))).toBeNull();
     expect(parseProfile(JSON.stringify({ ...valide, poids: 86 }))).toBeNull(); // nombre, pas chaîne
     const { updatedAt: _, ...sansDate } = valide;
     expect(parseProfile(JSON.stringify(sansDate))).toBeNull();
+  });
+
+  test('un profil v1 est migré vers les deux axes plutôt que perdu', () => {
+    const v1 = {
+      v: 1,
+      sexe: 'homme',
+      naissance: '1992-03-15',
+      taille: '178',
+      poids: '86',
+      activity: 3, // « très actif » sur l'ancienne échelle unique
+      goal: 'seche',
+      updatedAt: '2026-08-03T09:30:00.000Z',
+    };
+
+    const migré = parseProfile(JSON.stringify(v1));
+    expect(migré).not.toBeNull();
+    expect(migré?.v).toBe(PROFILE_VERSION);
+    expect(migré?.daily).toBe(2);
+    expect(migré?.sessions).toBe(3);
+    expect(migré?.poids).toBe('86');
+
+    // Les cinq anciens niveaux sont couverts, et un index hors échelle reste rejeté.
+    for (const activity of [0, 1, 2, 3, 4]) {
+      expect(parseProfile(JSON.stringify({ ...v1, activity }))).not.toBeNull();
+    }
+    expect(parseProfile(JSON.stringify({ ...v1, activity: 5 }))).toBeNull();
   });
 });

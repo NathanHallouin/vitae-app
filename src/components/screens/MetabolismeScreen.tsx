@@ -4,10 +4,11 @@ import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import { bmiGaugePosition, energyBreakdown } from '@/lib/calc';
-import { ACTIVITIES, BMI_BANDS, BMI_GAUGE_LABELS } from '@/lib/constants';
+import { activityFactor, activityLabel, BMI_BANDS, BMI_GAUGE_LABELS } from '@/lib/constants';
 import { dec, fmtFactor, kcal } from '@/lib/format';
 import { DISPLAY_FONT, FS } from '@/theme/theme';
 import { useProfile } from '../ProfileProvider';
+import MeditatingDoodle from '../ui/doodles/MeditatingDoodle';
 import Overline from '../ui/Overline';
 import PageIntro from '../ui/PageIntro';
 import StatTile from '../ui/StatTile';
@@ -16,7 +17,7 @@ export default function MetabolismeScreen() {
   const { metrics, profile } = useProfile();
   if (!metrics || !profile) return null;
 
-  const activity = ACTIVITIES[profile.activity];
+  const factor = activityFactor(profile.daily, profile.sessions);
   const gauge = bmiGaugePosition(metrics.bmi);
   const energie = energyBreakdown(metrics);
 
@@ -25,6 +26,7 @@ export default function MetabolismeScreen() {
       <PageIntro
         title="Mon métabolisme"
         lead="Ce que votre corps dépense sur une journée complète, et d’où vient cette dépense."
+        illustration={<MeditatingDoodle />}
       />
 
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
@@ -55,9 +57,9 @@ export default function MetabolismeScreen() {
           </Box>
           <Typography sx={{ fontSize: FS.body, lineHeight: 1.6, opacity: 0.9, maxWidth: '56ch' }}>
             Tout compris : le fonctionnement du corps et tout ce que vous faites bouger. Le calcul
-            tient compte de «&nbsp;{activity.label.toLowerCase()}&nbsp;» (×&nbsp;
-            {fmtFactor(activity.factor)}). Si vous mangez à peu près cette quantité, votre poids ne
-            bouge pas.
+            tient compte de «&nbsp;{activityLabel(profile.daily, profile.sessions)}&nbsp;» (×&nbsp;
+            {fmtFactor(factor)}). Si vous mangez à peu près cette quantité, votre poids ne bouge
+            pas.
           </Typography>
         </Paper>
 

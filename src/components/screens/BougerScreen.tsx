@@ -8,6 +8,7 @@ import { kcal } from '@/lib/format';
 import { buildWeek } from '@/lib/training';
 import { FS } from '@/theme/theme';
 import { useProfile } from '../ProfileProvider';
+import RunningDoodle from '../ui/doodles/RunningDoodle';
 import Overline from '../ui/Overline';
 import PageIntro from '../ui/PageIntro';
 import StatTile from '../ui/StatTile';
@@ -17,14 +18,15 @@ export default function BougerScreen() {
   const { metrics, profile } = useProfile();
   if (!metrics || !profile) return null;
 
-  const plan = buildPlan(metrics, profile.activity, profile.goal);
-  const week = buildWeek(metrics, profile.activity, profile.goal);
+  const plan = buildPlan(metrics, profile.daily, profile.sessions, profile.goal);
+  const week = buildWeek(metrics, profile.daily, profile.sessions, profile.goal);
 
   return (
     <Box>
       <PageIntro
         title="Bouger"
         lead="Tout ne doit pas venir de l’assiette. Voici ce que le mouvement peut prendre en charge, et le programme qui va avec — sans salle ni matériel."
+        illustration={<RunningDoodle />}
       />
 
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>

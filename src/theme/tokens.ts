@@ -40,8 +40,10 @@ export interface Tokens {
   macroCarb: string;
   /** repère de la dépense totale sur la barre de fourchette */
   marker: string;
-  /** pastille du bouton de thème */
-  themeDot: string;
+  /** trait des illustrations Open Doodles */
+  doodleInk: string;
+  /** aplats secondaires des illustrations (peau, vêtements) */
+  doodleAccent: string;
 }
 
 export const lightTokens: Tokens = {
@@ -70,7 +72,8 @@ export const lightTokens: Tokens = {
   macroFat: '#4e7ca1',
   macroCarb: '#3f7d53',
   marker: '#8a7a6b',
-  themeDot: '#084684',
+  doodleInk: '#084684',
+  doodleAccent: '#f0dcc4',
 };
 
 export const darkTokens: Tokens = {
@@ -99,7 +102,8 @@ export const darkTokens: Tokens = {
   macroFat: '#84b0d4',
   macroCarb: '#7fc08f',
   marker: '#9a8b7c',
-  themeDot: '#241809',
+  doodleInk: '#f0ac68',
+  doodleAccent: '#3d3225',
 };
 
 export const tokensFor = (mode: 'light' | 'dark'): Tokens =>

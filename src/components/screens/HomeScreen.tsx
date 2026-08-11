@@ -9,6 +9,8 @@ import { BENEFITS } from '@/lib/constants';
 import { kcal } from '@/lib/format';
 import { FS } from '@/theme/theme';
 import { useProfile } from '../ProfileProvider';
+import HomeIllustration from '../ui/HomeIllustration';
+import Icon from '../ui/Icon';
 import Overline from '../ui/Overline';
 
 export default function HomeScreen() {
@@ -86,49 +88,51 @@ export default function HomeScreen() {
           )}
         </Box>
 
-        <Paper sx={{ p: 3 }}>
-          <Overline sx={{ mb: '20px' }}>Ce que vous obtenez</Overline>
-          {BENEFITS.map((b) => (
-            <Box
-              key={b.n}
-              sx={(t) => ({
-                display: 'flex',
-                gap: 2,
-                py: '12px',
-                borderTop: `1px solid ${t.tokens.divider}`,
-              })}
-            >
+        <Box>
+          <HomeIllustration />
+
+          <Paper sx={{ p: 3, mt: 3 }}>
+            <Overline sx={{ mb: '20px' }}>Ce que vous obtenez</Overline>
+            {BENEFITS.map((b) => (
               <Box
-                aria-hidden
+                key={b.n}
                 sx={(t) => ({
-                  width: 28,
-                  height: 28,
-                  flex: 'none',
-                  borderRadius: '50%',
-                  backgroundColor: t.tokens.primaryTint,
-                  color: t.tokens.primaryInk,
                   display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: FS.small,
-                  fontWeight: 700,
+                  gap: 2,
+                  py: '12px',
+                  borderTop: `1px solid ${t.tokens.divider}`,
                 })}
               >
-                {b.n}
-              </Box>
-              <Box>
-                <Typography sx={{ fontSize: FS.option, fontWeight: 500, mb: '2px' }}>
-                  {b.title}
-                </Typography>
-                <Typography
-                  sx={(t) => ({ fontSize: FS.small, lineHeight: 1.5, color: t.tokens.muted })}
+                <Box
+                  aria-hidden
+                  sx={(t) => ({
+                    width: 28,
+                    height: 28,
+                    flex: 'none',
+                    borderRadius: '50%',
+                    backgroundColor: t.tokens.primaryTint,
+                    color: t.tokens.primaryInk,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  })}
                 >
-                  {b.desc}
-                </Typography>
+                  <Icon name={b.icon} size={18} />
+                </Box>
+                <Box>
+                  <Typography sx={{ fontSize: FS.option, fontWeight: 500, mb: '2px' }}>
+                    {b.title}
+                  </Typography>
+                  <Typography
+                    sx={(t) => ({ fontSize: FS.small, lineHeight: 1.5, color: t.tokens.muted })}
+                  >
+                    {b.desc}
+                  </Typography>
+                </Box>
               </Box>
-            </Box>
-          ))}
-        </Paper>
+            ))}
+          </Paper>
+        </Box>
       </Box>
     </Box>
   );

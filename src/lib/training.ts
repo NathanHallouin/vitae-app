@@ -8,7 +8,7 @@
  */
 
 import type { Metrics } from './calc';
-import type { GoalKey } from './constants';
+import { activityLevel, type GoalKey } from './constants';
 
 export interface Exercise {
   name: string;
@@ -133,17 +133,26 @@ const SESSION_C: Session = {
   exercises: [SQUAT, POMPES, CHAISE, SUPERMAN],
 };
 
-/** Nombre de séances de renforcement, selon l'objectif et le temps déjà consacré au sport. */
-function strengthCount(goal: GoalKey, activity: number): number {
-  if (goal === 'masse') return activity >= 3 ? 4 : 3;
+/**
+ * Nombre de séances de renforcement, selon l'objectif et le volume d'entraînement déjà en place.
+ * On se cale sur `sessions` seul : un métier physique fatigue, il ne remplace pas le renforcement.
+ */
+function strengthCount(goal: GoalKey, sessions: number): number {
+  if (goal === 'masse') return sessions >= 3 ? 4 : 3;
   if (goal === 'recomp') return 3;
-  if (goal === 'maintien') return activity <= 1 ? 2 : 3;
+  if (goal === 'maintien') return sessions <= 1 ? 2 : 3;
   // Perte de gras : deux séances suffisent à protéger le muscle, le reste passe par le mouvement.
-  return activity >= 3 ? 3 : 2;
+  return sessions >= 3 ? 3 : 2;
 }
 
-export function buildWeek(metrics: Metrics, activity: number, goal: GoalKey): WeekPlan {
-  const strengthPerWeek = strengthCount(goal, activity);
+export function buildWeek(
+  metrics: Metrics,
+  daily: number,
+  sessions: number,
+  goal: GoalKey,
+): WeekPlan {
+  const strengthPerWeek = strengthCount(goal, sessions);
+  const level = activityLevel(daily, sessions);
   const rotation =
     strengthPerWeek >= 4
       ? [SESSION_A, SESSION_B, SESSION_A, SESSION_B]
@@ -152,7 +161,7 @@ export function buildWeek(metrics: Metrics, activity: number, goal: GoalKey): We
         : [SESSION_A, SESSION_B];
 
   // Numérotées dans l'ordre de la semaine : une rotation peut repasser sur la même séance.
-  const sessions = rotation.map((session, i) => ({
+  const weekSessions = rotation.map((session, i) => ({
     ...session,
     title: `Séance ${i + 1} — ${session.title.toLowerCase()}`,
   }));
@@ -167,7 +176,7 @@ export function buildWeek(metrics: Metrics, activity: number, goal: GoalKey): We
   const cardio: string[] = [];
   const perteDeGras = goal === 'seche' || goal === 'recomp';
 
-  if (perteDeGras && activity <= 1) {
+  if (perteDeGras && level <= 1) {
     cardio.push(
       '2 à 3 marches rapides de 30 min dans la semaine, en plus des séances : peu fatigant, facile à tenir.',
       'Une séance courte et intense (10 min de montées d’escaliers ou de corde à sauter) si le temps manque.',
@@ -185,8 +194,9 @@ export function buildWeek(metrics: Metrics, activity: number, goal: GoalKey): We
     cardio.push('150 min d’activité modérée par semaine, réparties comme vous voulez.');
   }
 
+  // Les pas relèvent du quotidien, pas des séances : c'est `daily` qui décide, pas `sessions`.
   const steps =
-    activity <= 1
+    daily <= 0
       ? 'Objectif 7 000 à 8 000 pas par jour pour commencer, puis 10 000.'
       : 'Maintenez 8 000 à 10 000 pas par jour, y compris les jours de repos.';
 
@@ -204,5 +214,5 @@ export function buildWeek(metrics: Metrics, activity: number, goal: GoalKey): We
         ? `Ces ${strengthPerWeek} séances ne servent pas d’abord à brûler des calories — une séance en dépense 150 à 250 — mais à garder le muscle pendant que le poids baisse. Sans elles, une partie de ce que vous perdez serait du muscle.`
         : `Ces ${strengthPerWeek} séances entretiennent la masse musculaire, qui est justement ce qui maintient votre métabolisme à ${Math.round(metrics.bmr)} kcal au repos.`;
 
-  return { strengthPerWeek, sessions, schedule, cardio, steps, progression, note };
+  return { strengthPerWeek, sessions: weekSessions, schedule, cardio, steps, progression, note };
 }

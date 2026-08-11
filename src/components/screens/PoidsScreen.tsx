@@ -8,6 +8,7 @@ import { dec, fmtKg, fmtWeekly, kcal, monthIn } from '@/lib/format';
 import { FS } from '@/theme/theme';
 import { useProfile } from '../ProfileProvider';
 import ProjectionChart from '../result/ProjectionChart';
+import LevitateDoodle from '../ui/doodles/LevitateDoodle';
 import OptionButton from '../ui/OptionButton';
 import Overline from '../ui/Overline';
 import PageIntro from '../ui/PageIntro';
@@ -25,6 +26,7 @@ export default function PoidsScreen() {
       <PageIntro
         title="Mon poids"
         lead={`Vous êtes à ${dec(metrics.poids)} kg. Voici où vous pourriez aller, et en combien de temps si vous mangez ${kcal(metrics.target)} kcal par jour.`}
+        illustration={<LevitateDoodle />}
       />
 
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>

@@ -24,7 +24,10 @@ export interface FormState {
   naissance: string;
   taille: string;
   poids: string;
-  activity: number;
+  /** index dans `DAILY` : mouvement du quotidien, hors sport */
+  daily: number;
+  /** index dans `SESSIONS` : volume d'entraînement */
+  sessions: number;
   goal: GoalKey;
   /** défini quand le profil enregistré avait un poids de plus d'une semaine */
   staleWeight: StaleWeight | null;
@@ -40,7 +43,8 @@ export const emptyForm: FormState = {
   naissance: '',
   taille: '',
   poids: '',
-  activity: 2,
+  daily: 1,
+  sessions: 1,
   goal: 'seche',
   staleWeight: null,
   naissanceLocked: false,
@@ -62,7 +66,8 @@ export function formFromProfile(
     taille: profile.taille,
     // Poids périmé : on vide le champ pour forcer une saisie à jour.
     poids: staleWeight ? '' : profile.poids,
-    activity: profile.activity,
+    daily: profile.daily,
+    sessions: profile.sessions,
     goal: profile.goal,
     staleWeight,
     // Une date de naissance enregistrée est figée : « Recommencer » est la seule sortie.
@@ -78,7 +83,8 @@ export function profileFromForm(state: FormState): ProfileInput | null {
     naissance: state.naissance,
     taille: state.taille,
     poids: state.poids,
-    activity: state.activity,
+    daily: state.daily,
+    sessions: state.sessions,
     goal: state.goal,
   };
 }
@@ -89,7 +95,8 @@ export type Action =
   | { type: 'toggleMode' }
   | { type: 'setSexe'; value: Exclude<Sexe, ''> }
   | { type: 'setField'; field: MeasureField; value: string }
-  | { type: 'setActivity'; value: number }
+  | { type: 'setDaily'; value: number }
+  | { type: 'setSessions'; value: number }
   | { type: 'setGoal'; value: GoalKey }
   | { type: 'next' }
   | { type: 'previous' }
@@ -150,8 +157,10 @@ export function reducer(state: FormState, action: Action): FormState {
         // Le rappel de poids périmé disparaît dès qu'un nouveau poids est saisi.
         staleWeight: action.field === 'poids' ? null : state.staleWeight,
       };
-    case 'setActivity':
-      return { ...clear, activity: action.value };
+    case 'setDaily':
+      return { ...clear, daily: action.value };
+    case 'setSessions':
+      return { ...clear, sessions: action.value };
     case 'setGoal':
       return { ...clear, goal: action.value };
     case 'next':

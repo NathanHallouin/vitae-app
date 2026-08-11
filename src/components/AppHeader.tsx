@@ -10,6 +10,7 @@ import { usePathname } from 'next/navigation';
 import { useColorMode } from '@/theme/ThemeRegistry';
 import { DISPLAY_FONT, FS } from '@/theme/theme';
 import { useProfile } from './ProfileProvider';
+import Icon from './ui/Icon';
 
 export default function AppHeader() {
   const { mode, toggle } = useColorMode();
@@ -121,16 +122,9 @@ export default function AppHeader() {
             gap: 1,
             flex: 'none',
             '&:hover': { backgroundColor: t.tokens.surface2, color: t.tokens.text },
-            '& .dot': {
-              width: 12,
-              height: 12,
-              borderRadius: '50%',
-              backgroundColor: t.tokens.themeDot,
-              border: `1px solid ${t.tokens.borderStrong}`,
-            },
           })}
         >
-          <Box component="span" className="dot" aria-hidden />
+          <Icon name={mode === 'dark' ? 'soleil' : 'lune'} size={16} />
           <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
             {label}
           </Box>

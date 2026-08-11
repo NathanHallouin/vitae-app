@@ -27,17 +27,41 @@ Femme : MB = 10 × poids(kg) + 6,25 × taille(cm) − 5 × âge − 161
 
 ### Dépense énergétique totale
 
-`DET = MB × facteur d'activité`
+`DET = MB × facteur d'activité`, avec `facteur = base du quotidien + apport des séances`.
 
-| Niveau | Libellé UI | Description UI | Facteur |
+L'activité est saisie sur **deux axes**, parce qu'ils ne varient pas ensemble : on peut marcher
+une heure par jour pour aller travailler sans faire de sport, ou s'entraîner cinq fois par semaine
+et rester assis le reste du temps. Le NEAT est d'ailleurs la source de variation la plus large
+entre deux personnes de même gabarit.
+
+`DAILY` — mouvement du quotidien, sport exclu :
+
+| Index | Libellé UI | Description UI | Base |
 |---|---|---|---|
-| 0 | Sédentaire | Travail assis, pas de sport | 1.2 |
-| 1 | Légèrement actif | 1 à 3 séances par semaine | 1.375 |
-| 2 | Modérément actif | 3 à 5 séances par semaine | 1.55 |
-| 3 | Très actif | 6 à 7 séances par semaine | 1.725 |
-| 4 | Extrêmement actif | Travail physique ou double entraînement | 1.9 |
+| 0 | Assis toute la journée | Bureau, trajets en voiture ou assis, peu de marche | 1.20 |
+| 1 | Assis, mais je marche | Trajets à pied ou à vélo, courses, escaliers | 1.30 |
+| 2 | Debout ou en mouvement | Commerce, enseignement, soin, service — rarement assis | 1.45 |
+| 3 | Travail physique | Manutention, bâtiment, agriculture, livraison | 1.60 |
 
-Valeur par défaut : niveau 2.
+`SESSIONS` — entraînement, en plus du quotidien :
+
+| Index | Libellé UI | Description UI | Apport | Séances/sem. |
+|---|---|---|---|---|
+| 0 | Jamais | Aucune séance dédiée | +0 | 0 |
+| 1 | 1 à 2 séances | Environ une heure en tout | +0.05 | 1.5 |
+| 2 | 3 à 4 séances | Trois à quatre heures par semaine | +0.12 | 3.5 |
+| 3 | 5 à 6 séances | Presque tous les jours | +0.19 | 5.5 |
+| 4 | 7 ou plus | Tous les jours, ou deux fois par jour | +0.26 | 7 |
+
+Les apports sont volontairement plus bas que ceux des tables classiques (qui surestiment) : une
+séance d'une heure dépense 300 à 400 kcal, soit 150 à 200 kcal par jour une fois lissée sur la
+semaine pour trois ou quatre séances — de l'ordre de +0,10 sur le facteur, pas +0,35.
+
+Facteur résultant : **1,20 à 1,86**. Valeur par défaut : `daily` 1, `sessions` 1 (×1,35).
+
+`activityLevel(daily, sessions)` ramène les deux axes à un niveau global 0..4 (bandes de facteur
+< 1,28 · < 1,40 · < 1,55 · < 1,70 · au-delà), pour les contenus qui dépendent de la dépense totale
+et non d'un axe en particulier : répartition assiette / mouvement, ton des conseils.
 
 ### Objectifs, fourchettes et protéines
 
@@ -167,7 +191,7 @@ Conseils anti-sédentarité, selon le niveau d'activité (0, 1, ou ≥ 2) : voir
 - **Mode formulaire** : les 4 groupes affichés d'un coup, surtitre « Formulaire complet », titre « Vos informations », bouton « CALCULER ».
 - **Sexe** : deux boutons 130 px min, padding 16 px. Sélection = fond `--primary-tint`, bordure `--primary-ink`, texte `--primary-ink` ; non sélectionné = fond `--surface`, bordure `--border`, texte `--text`.
 - **Mesures** : grille `repeat(auto-fit, minmax(160px, 1fr))`, gap 20 px. Champs numériques avec suffixe (`ans`, `cm`, `kg`), bordure 1 px `--border-strong`, rayon 4 px, hauteur de saisie 14 px de padding vertical, texte 16 px. Spinners masqués.
-- **Activité** : 5 lignes radio pleine largeur, pastille 18 px, libellé 15 px / 500, description 13 px `--muted2`, facteur aligné à droite en `--faint` (`×1,2`…).
+- **Activité** : deux groupes radio successifs — « Votre quotidien, en dehors du sport ? » (4 lignes) puis « Du sport, combien de fois par semaine ? » (5 lignes). Lignes pleine largeur, pastille 18 px, libellé 15 px / 500, description 13 px `--muted2`, valeur alignée à droite en `--faint` (`×1,2` pour la base, `+0,12` pour l'apport, `—` si aucune séance). Sous les deux listes, le facteur retenu est rappelé en `aria-live`.
 - **Objectif** : grille `repeat(auto-fit, minmax(180px, 1fr))`, gap 10 px, cartes cliquables titre + description.
 - **Validation** (messages exacts) : sexe manquant → « Sélectionnez un sexe biologique pour appliquer la bonne équation. » ; champ vide → « Renseignez l'âge, la taille et le poids. » ; âge hors [15, 100] → « L'âge doit être compris entre 15 et 100 ans. » ; taille hors [120, 230] → « La taille doit être comprise entre 120 et 230 cm. » ; poids hors [30, 300] → « Le poids doit être compris entre 30 et 300 kg. » Encart d'erreur : fond `--error-bg`, texte `--error-ink`, 14 px, rayon 4 px.
 - **Pied de carte** : `border-top 1px --divider`, bouton texte « RETOUR » / « ANNULER » à gauche, bouton contained « CONTINUER » / « CALCULER » à droite.
@@ -207,7 +231,8 @@ mode        : "wizard" | "form"
 step        : 0..3
 sexe        : "" | "femme" | "homme"
 age, taille, poids : string (champs contrôlés)
-activity    : 0..4        (défaut 2)
+daily       : 0..3        (défaut 1)  quotidien hors sport
+sessions    : 0..4        (défaut 1)  séances par semaine
 goal        : "seche" | "recomp" | "masse" | "maintien"   (défaut "seche")
 targetKey   : string | null   (poids cible choisi ; null = automatique)
 theme       : "light" | "dark" | null (null = valeur par défaut)
@@ -324,6 +349,55 @@ enregistré.
 
 Les tokens sont exposés via `theme.tokens` (augmentation de type MUI) : `sx={(t) => ({ color: t.tokens.muted })}`.
 
+### Icônes et illustration
+
+Aucune bibliothèque d'icônes : `src/components/ui/Icon.tsx` porte un jeu maison d'une vingtaine de
+tracés sur grille 24 px, au trait de 1,6 px, en `currentColor` — donc une seule version pour les
+deux thèmes. Les icônes sont décoratives et toujours doublées d'un libellé lisible : elles sont
+masquées aux lecteurs d'écran (`aria-hidden`) sauf si un `title` est passé explicitement.
+
+| Emplacement | Icônes |
+|---|---|
+| Onglets de résultats | `flamme` · `assiette` · `balance` · `course` |
+| Bascule de thème | `soleil` / `lune` (remplace l'ancienne pastille de couleur) |
+| Quotidien (`DAILY`) | `bureau` · `marche` · `debout` · `caisse` |
+| Séances (`SESSIONS`) | `aucun` pour « Jamais », `haltere` au-delà |
+| Objectifs (`GOALS`) | `flecheBas` · `flechesOpposees` · `flecheHaut` · `egal` |
+| Macronutriments | `oeuf` · `goutte` · `ble`, teintés par la couleur du macro |
+| Accueil, « Ce que vous obtenez » | `flamme` · `eclair` · `silhouette` · `assiette` |
+
+#### Illustrations
+
+`src/components/ui/HomeIllustration.tsx` est dessinée sur mesure : une jauge d'énergie surmontée
+d'une flamme, au-dessus du rythme de la dépense sur la journée. Sans texte, donc rien à traduire
+ni à faire grossir avec la largeur. Elle lit les tokens via `useTokens()`, comme `ProjectionChart`.
+
+`src/components/ui/doodles/` contient quatre illustrations d'**Open Doodles**
+(<https://www.opendoodles.com>, Pablo Stanley), **domaine public CC0** : usage commercial libre,
+sans attribution requise. Une par page de résultats, passée à `PageIntro` via la prop
+`illustration` et masquée sous `md` — elle est décorative, le texte prime sur mobile.
+
+| Page | Illustration | Poids gzip |
+|---|---|---|
+| Mon métabolisme | `Meditating` — la dépense au repos | 18 Ko |
+| Ce que je mange | `Plant` | 46 Ko |
+| Mon poids | `Levitate` | 6 Ko |
+| Bouger | `Running` | 10 Ko |
+
+Points d'attention si l'on en ajoute :
+
+- **unDraw est exclu** : sa licence interdit explicitement de « link, embed, scrape, search or
+  download the assets » par un moyen automatisé. Les fichiers doivent être récupérés à la main.
+- **Ne pas arrondir les coordonnées.** Ces tracés sont en commandes relatives : l'erreur
+  s'accumule d'un segment au suivant et le dessin part en morceaux. Un arrondi à une décimale,
+  qui divisait le poids par deux, détruisait l'illustration.
+- **Un fichier par illustration**, jamais un module commun : Next découpe par route, chaque page
+  ne paie ainsi que son propre tracé.
+- Les deux couleurs amont (`ink`, `accent`) sont câblées sur les tokens `doodleInk` et
+  `doodleAccent`, sinon le bleu marine disparaît sur le fond du thème sombre.
+- `Plant` est de loin la plus lourde (46 Ko gzip, dix tracés sans dominante isolable) : à
+  remplacer par une plus légère si le poids de `/alimentation` devient un sujet.
+
 ### Direction visuelle
 
 La maquette a servi de base fonctionnelle, mais l'habillage a été refait pour correspondre au
@@ -385,8 +459,8 @@ Deux notes d'implémentation :
 - **Repères nutritionnels vérifiés** : au-delà d'un IMC de 30, les protéines sont calculées sur un
   poids ajusté (haut du poids santé + 25 % de l'excès) plutôt que sur le poids total ; les lipides
   ne descendent jamais sous 0,6 g/kg ; il reste toujours au moins 10 % de l'énergie en glucides.
-  `src/lib/plan.test.ts` vérifie ces bornes sur 60 combinaisons de profils, d'activités et
-  d'objectifs.
+  `src/lib/plan.test.ts` vérifie ces bornes sur 60 combinaisons de profils, de niveaux d'activité
+  et d'objectifs.
 - **Journée alimentaire générée**, pas rédigée : les portions découlent des macros, avec un
   plafond par aliment et un rééquilibrage final sur les féculents. Le menu tombe à moins de 1 % de
   l'apport visé sur tous les profils testés.

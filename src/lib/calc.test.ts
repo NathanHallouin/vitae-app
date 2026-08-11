@@ -12,6 +12,7 @@ import {
   computeMetrics,
   rangeBar,
 } from './calc';
+import { DAILY, SESSIONS } from './constants';
 import { fmtGap, fmtKg, fmtWeekly, kcal } from './format';
 import { emptyForm, formFromProfile, profileFromForm, reducer, validate } from './state';
 
@@ -20,22 +21,24 @@ const HOMME = {
   age: '30',
   taille: '175',
   poids: '70',
-  activity: 2,
+  // « assis mais je marche » + 3 à 4 séances : facteur 1,42
+  daily: 1,
+  sessions: 2,
   goal: 'seche',
 } as const;
 
 const COLORS = { prot: '#2e7d54', fat: '#b06f10', carb: '#3a6ea5' };
 
 describe('computeMetrics', () => {
-  test('Mifflin-St Jeor, DET et fourchette (homme 30 ans, 175 cm, 70 kg, modéré, sèche)', () => {
+  test('Mifflin-St Jeor, DET et fourchette (homme 30 ans, 175 cm, 70 kg, ×1,42, sèche)', () => {
     const m = computeMetrics(HOMME);
     expect(m).not.toBeNull();
     if (!m) return;
     expect(m.bmr).toBe(1649);
-    expect(m.tdee).toBe(2556);
-    expect(m.min).toBe(1917);
-    expect(m.max).toBe(2300);
-    expect(m.target).toBe(2096);
+    expect(m.tdee).toBe(2341); // 1 648,75 × 1,42
+    expect(m.min).toBe(1756);
+    expect(m.max).toBe(2107);
+    expect(m.target).toBe(1920);
     expect(m.healthyMin).toBe(57);
     expect(m.healthyMax).toBe(76);
     expect(m.band.label).toBe('Corpulence normale');
@@ -52,7 +55,8 @@ describe('computeMetrics', () => {
       age: '25',
       taille: '160',
       poids: '50',
-      activity: 0,
+      daily: 0,
+      sessions: 0,
       goal: 'seche',
     });
     if (!m) throw new Error('métriques attendues');
@@ -64,11 +68,13 @@ describe('computeMetrics', () => {
 
   test('le recommandé reste borné dans [min, max] pour chaque objectif', () => {
     for (const goal of ['seche', 'recomp', 'masse', 'maintien'] as const) {
-      for (const activity of [0, 1, 2, 3, 4]) {
-        const m = computeMetrics({ ...HOMME, goal, activity });
-        if (!m) throw new Error('métriques attendues');
-        expect(m.target).toBeGreaterThanOrEqual(m.min);
-        expect(m.target).toBeLessThanOrEqual(m.max);
+      for (let daily = 0; daily < DAILY.length; daily++) {
+        for (let sessions = 0; sessions < SESSIONS.length; sessions++) {
+          const m = computeMetrics({ ...HOMME, goal, daily, sessions });
+          if (!m) throw new Error('métriques attendues');
+          expect(m.target).toBeGreaterThanOrEqual(m.min);
+          expect(m.target).toBeLessThanOrEqual(m.max);
+        }
       }
     }
   });
@@ -97,9 +103,9 @@ describe('projection', () => {
     expect(p.key).toBe('cut');
     expect(p.selected.w).toBe(66.5);
     expect(p.coherent).toBe(true);
-    expect(p.weeks).toBe(9);
-    expect(p.points).toHaveLength(10); // horizon = 9 semaines, un point par semaine
-    expect(p.ticks.map((t) => t.label)).toEqual(['S0', 'S2', 'S4', 'S6', 'S8']);
+    expect(p.weeks).toBe(10); // 3,5 kg à −0,38 kg / semaine
+    expect(p.points).toHaveLength(11); // horizon = 10 semaines, un point par semaine
+    expect(p.ticks.map((t) => t.label)).toEqual(['S0', 'S2', 'S4', 'S6', 'S8', 'S10']);
   });
 
   test('pas de projection si la cible va contre l’objectif calorique', () => {
@@ -125,15 +131,15 @@ describe('macros et plan', () => {
     if (!m) throw new Error('métriques attendues');
     const [prot, fat, carb] = buildMacros(m, COLORS);
     expect(prot.grams).toBe(140); // 70 kg × 2,0 g/kg
-    expect(fat.grams).toBe(65); // 28 % des kcal / 9
-    expect(carb.grams).toBe(238);
+    expect(fat.grams).toBe(60); // 28 % des kcal / 9
+    expect(carb.grams).toBe(205);
     expect(prot.kcal + fat.kcal + carb.kcal).toBeLessThanOrEqual(m.target + 4);
   });
 
   test('répartition de l’écart mouvement / assiette', () => {
     const m = computeMetrics(HOMME);
     if (!m) throw new Error('métriques attendues');
-    const plan = buildPlan(m, 2, 'seche');
+    const plan = buildPlan(m, 1, 2, 'seche');
     expect(plan.title).toBe('Comment créer cet écart');
     expect(plan.movePct).toBe(25);
     expect(plan.foodPct).toBe(75);
@@ -142,9 +148,9 @@ describe('macros et plan', () => {
   });
 
   test('5 exercices et conseils NEAT pour les profils sédentaires', () => {
-    const m = computeMetrics({ ...HOMME, activity: 0 });
+    const m = computeMetrics({ ...HOMME, daily: 0, sessions: 0 });
     if (!m) throw new Error('métriques attendues');
-    const plan = buildPlan(m, 0, 'seche');
+    const plan = buildPlan(m, 0, 0, 'seche');
     expect(plan.moves).toHaveLength(5);
     expect(plan.tips[0]).toContain('Levez-vous 3 min par heure');
   });
@@ -152,7 +158,7 @@ describe('macros et plan', () => {
   test('prise de masse : surplus et libellés inversés', () => {
     const m = computeMetrics({ ...HOMME, goal: 'masse' });
     if (!m) throw new Error('métriques attendues');
-    const plan = buildPlan(m, 2, 'masse');
+    const plan = buildPlan(m, 1, 2, 'masse');
     expect(plan.title).toBe('Comment utiliser ce surplus');
     expect(plan.splitLabel).toBe('Où mettre ce surplus chaque jour');
     expect(plan.foodLabel).toBe('En mangeant un peu plus');
@@ -187,12 +193,13 @@ describe('formulaire et validation', () => {
   const NOW = new Date(2026, 7, 10); // 10 août 2026
 
   const PROFIL = {
-    v: 1,
+    v: 2,
     sexe: 'homme' as const,
     naissance: '1992-03-15',
     taille: '178',
     poids: '86',
-    activity: 1,
+    daily: 1,
+    sessions: 1,
     goal: 'seche' as const,
     updatedAt: '2026-08-09T10:00:00.000Z',
   };
@@ -275,7 +282,8 @@ describe('formulaire et validation', () => {
       naissance: '1992-03-15',
       taille: '178',
       poids: '86',
-      activity: 1,
+      daily: 1,
+      sessions: 1,
       goal: 'seche',
     });
   });

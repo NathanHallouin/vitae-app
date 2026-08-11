@@ -4,7 +4,7 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Link from 'next/link';
-import { ACTIVITIES } from '@/lib/constants';
+import { activityLabel } from '@/lib/constants';
 import { FS } from '@/theme/theme';
 import { useProfile } from './ProfileProvider';
 
@@ -18,7 +18,7 @@ export default function ProfileBar() {
     age === null ? null : `${age} ans`,
     `${profile.taille} cm`,
     `${profile.poids} kg`,
-    ACTIVITIES[profile.activity].label.toLowerCase(),
+    activityLabel(profile.daily, profile.sessions),
     metrics.goal.label.toLowerCase(),
   ].filter(Boolean);
 

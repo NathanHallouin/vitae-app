@@ -9,6 +9,8 @@ import { fmtGap, fmtWeekly, kcal } from '@/lib/format';
 import { useTokens } from '@/theme/ThemeRegistry';
 import { DISPLAY_FONT, FS } from '@/theme/theme';
 import { useProfile } from '../ProfileProvider';
+import PlantDoodle from '../ui/doodles/PlantDoodle';
+import Icon from '../ui/Icon';
 import OptionButton from '../ui/OptionButton';
 import Overline from '../ui/Overline';
 import PageIntro from '../ui/PageIntro';
@@ -35,6 +37,7 @@ export default function AlimentationScreen() {
       <PageIntro
         title="Ce que je mange"
         lead="Combien manger chaque jour pour aller dans le sens de votre objectif, et comment répartir ces calories."
+        illustration={<PlantDoodle />}
       />
 
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
@@ -219,7 +222,10 @@ export default function AlimentationScreen() {
                     flexWrap: 'wrap',
                   }}
                 >
-                  <Box component="span">
+                  <Box component="span" sx={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Box component="span" sx={{ color: m.color, display: 'flex' }}>
+                      <Icon name={m.icon} size={19} />
+                    </Box>
                     <Box component="span" sx={{ fontSize: FS.base, fontWeight: 500 }}>
                       {m.label}
                     </Box>

@@ -3,8 +3,11 @@
  * projection et répartition de l'écart. Fonctions pures, sans dépendance à React.
  */
 
+import type { IconName } from '@/components/ui/Icon';
 import {
-  ACTIVITIES,
+  activityFactor,
+  activityLabel,
+  activityLevel,
   BMI_BANDS,
   type BmiBand,
   FLOORS,
@@ -51,7 +54,10 @@ export function computeMetrics(input: {
   age: string;
   taille: string;
   poids: string;
-  activity: number;
+  /** index dans `DAILY` : mouvement du quotidien, hors sport */
+  daily: number;
+  /** index dans `SESSIONS` : volume d'entraînement */
+  sessions: number;
   goal: GoalKey;
 }): Metrics | null {
   const p = parseFloat(input.poids);
@@ -60,7 +66,7 @@ export function computeMetrics(input: {
   if (!p || !t || !a || !input.sexe) return null;
 
   const base = 10 * p + 6.25 * t - 5 * a + (input.sexe === 'homme' ? 5 : -161);
-  const factor = ACTIVITIES[input.activity].factor;
+  const factor = activityFactor(input.daily, input.sessions);
   const goal = goalByKey(input.goal);
   const tdee = base * factor;
   const floor = input.sexe === 'homme' ? FLOORS.homme : FLOORS.femme;
@@ -124,6 +130,7 @@ export interface Macro {
   kcal: number;
   pct: number;
   color: string;
+  icon: IconName;
 }
 
 /**
@@ -162,6 +169,7 @@ export function buildMacros(m: Metrics, colors: MacroColors): Macro[] {
   const rows = [
     {
       label: 'Protéines',
+      icon: 'oeuf' as IconName,
       hint: 'pour garder vos muscles',
       grams: protG,
       kcal: protG * 4,
@@ -169,6 +177,7 @@ export function buildMacros(m: Metrics, colors: MacroColors): Macro[] {
     },
     {
       label: 'Lipides',
+      icon: 'goutte' as IconName,
       hint: 'pour les hormones et les vitamines',
       grams: fatG,
       kcal: fatG * 9,
@@ -176,6 +185,7 @@ export function buildMacros(m: Metrics, colors: MacroColors): Macro[] {
     },
     {
       label: 'Glucides',
+      icon: 'ble' as IconName,
       hint: 'le carburant de la journée et de l’effort',
       grams: carbG,
       kcal: carbG * 4,
@@ -442,13 +452,14 @@ export interface Plan {
   tips: string[];
 }
 
-export function buildPlan(m: Metrics, activity: number, goal: GoalKey): Plan {
-  const share = MOVE_SHARES[activity];
+export function buildPlan(m: Metrics, daily: number, sessions: number, goal: GoalKey): Plan {
+  const level = activityLevel(daily, sessions);
+  const share = MOVE_SHARES[level];
   const gap = m.tdee - m.target;
   const isSurplus = gap < -20;
 
   const moves = MOVES.filter((mv) => mv.tags.includes(goal) || goal === 'maintien')
-    .slice(0, activity <= 1 ? 5 : 4)
+    .slice(0, level <= 1 ? 5 : 4)
     .map((mv) => ({
       label: mv.label,
       detail: mv.detail,
@@ -459,7 +470,7 @@ export function buildPlan(m: Metrics, activity: number, goal: GoalKey): Plan {
 
   return {
     title: goal === 'masse' ? 'Comment utiliser ce surplus' : 'Comment créer cet écart',
-    note: planNote(goal, activity),
+    note: planNote(goal, daily, sessions),
     hasSplit: gap > 20 || isSurplus,
     splitLabel: isSurplus ? 'Où mettre ce surplus chaque jour' : 'Où prendre cet écart chaque jour',
     moveLabel: isSurplus ? 'Dépensé à l’entraînement' : 'En bougeant plus',
@@ -469,19 +480,19 @@ export function buildPlan(m: Metrics, activity: number, goal: GoalKey): Plan {
     movePct,
     foodPct: 100 - movePct,
     moves,
-    tips: NEAT[activity] ?? NEAT_ACTIVE,
+    tips: NEAT[level] ?? NEAT_ACTIVE,
   };
 }
 
-function planNote(goal: GoalKey, activity: number): string {
+function planNote(goal: GoalKey, daily: number, sessions: number): string {
   if (goal === 'masse') {
     return 'Ici, le sport ne sert pas à brûler des calories mais à envoyer ce que vous mangez vers le muscle plutôt que vers la graisse. Comptez 3 à 4 séances de renforcement par semaine, en augmentant peu à peu les charges ou les répétitions.';
   }
-  if (activity <= 1) {
+  if (activityLevel(daily, sessions) <= 1) {
     return (
-      'Vous êtes ' +
-      ACTIVITIES[activity].label.toLowerCase() +
-      " : une bonne partie de l'écart peut venir du mouvement, plutôt que de manger encore moins. Bouger dans la journée dépense aussi beaucoup, sans vous fatiguer."
+      'Votre profil — ' +
+      activityLabel(daily, sessions) +
+      " — laisse de la marge : une bonne partie de l'écart peut venir du mouvement, plutôt que de manger encore moins. Bouger dans la journée dépense aussi beaucoup, sans vous fatiguer."
     );
   }
   return "Vous bougez déjà beaucoup : l'écart doit surtout venir de l'assiette. En ajouter encore à l'entraînement se paierait en fatigue et en baisse de performance.";

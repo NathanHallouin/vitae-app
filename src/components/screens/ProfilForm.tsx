@@ -8,7 +8,7 @@ import Paper from '@mui/material/Paper';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { useReducer } from 'react';
-import { ACTIVITIES, GOALS, STEP_TITLES } from '@/lib/constants';
+import { activityFactor, DAILY, GOALS, SESSIONS, STEP_TITLES } from '@/lib/constants';
 import { ageFrom, formatBirthDate, formatLongDate, todayISO } from '@/lib/date';
 import { fmtFactor } from '@/lib/format';
 import {
@@ -22,6 +22,7 @@ import {
 import type { ProfileInput } from '@/lib/storage';
 import { FS } from '@/theme/theme';
 import LivePreview from '../LivePreview';
+import Icon, { type IconName } from '../ui/Icon';
 import OptionButton from '../ui/OptionButton';
 import Overline from '../ui/Overline';
 
@@ -226,63 +227,55 @@ export default function ProfilForm({
           ) : null}
 
           {fields.activity ? (
-            <Box sx={{ mb: 3 }} role="radiogroup" aria-labelledby="label-activity">
-              <FieldLabel id="label-activity">Vous bougez combien&nbsp;?</FieldLabel>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                {ACTIVITIES.map((a, i) => {
-                  const selected = form.activity === i;
-                  return (
-                    <OptionButton
-                      key={a.label}
-                      selected={selected}
-                      onClick={() => dispatch({ type: 'setActivity', value: i })}
-                      sx={{ display: 'flex', alignItems: 'center', gap: '14px', p: '14px 16px' }}
-                    >
-                      <Box
-                        aria-hidden
-                        sx={(t) => ({
-                          width: 18,
-                          height: 18,
-                          flex: 'none',
-                          borderRadius: '50%',
-                          border: `2px solid ${selected ? t.tokens.primaryInk : t.tokens.borderStrong}`,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                        })}
-                      >
-                        <Box
-                          sx={(t) => ({
-                            width: 9,
-                            height: 9,
-                            borderRadius: '50%',
-                            backgroundColor: selected ? t.tokens.primaryInk : 'transparent',
-                          })}
-                        />
-                      </Box>
-                      <Box sx={{ flex: 1 }}>
-                        <Typography sx={{ fontSize: FS.option, fontWeight: 500, color: 'inherit' }}>
-                          {a.label}
-                        </Typography>
-                        <Typography
-                          sx={(t) => ({ fontSize: FS.small, color: t.tokens.muted, mt: '2px' })}
-                        >
-                          {a.desc}
-                        </Typography>
-                      </Box>
-                      <Typography
-                        sx={(t) => ({
-                          fontSize: FS.small,
-                          color: t.tokens.muted2,
-                          fontVariantNumeric: 'tabular-nums',
-                        })}
-                      >
-                        ×{fmtFactor(a.factor)}
-                      </Typography>
-                    </OptionButton>
-                  );
-                })}
+            <Box sx={{ mb: 3 }}>
+              <Box sx={{ mb: 3 }} role="radiogroup" aria-labelledby="label-daily">
+                <FieldLabel id="label-daily">Votre quotidien, en dehors du sport&nbsp;?</FieldLabel>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                  {DAILY.map((d, i) => (
+                    <ChoiceRow
+                      key={d.label}
+                      selected={form.daily === i}
+                      onClick={() => dispatch({ type: 'setDaily', value: i })}
+                      icon={d.icon}
+                      label={d.label}
+                      desc={d.desc}
+                      value={`×${fmtFactor(d.base)}`}
+                    />
+                  ))}
+                </Box>
               </Box>
+
+              <Box role="radiogroup" aria-labelledby="label-sessions">
+                <FieldLabel id="label-sessions">
+                  Du sport, combien de fois par semaine&nbsp;?
+                </FieldLabel>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                  {SESSIONS.map((sess, i) => (
+                    <ChoiceRow
+                      key={sess.label}
+                      selected={form.sessions === i}
+                      onClick={() => dispatch({ type: 'setSessions', value: i })}
+                      icon={sess.icon}
+                      label={sess.label}
+                      desc={sess.desc}
+                      value={sess.add === 0 ? '—' : `+${fmtFactor(sess.add)}`}
+                    />
+                  ))}
+                </Box>
+              </Box>
+
+              <Typography
+                aria-live="polite"
+                sx={(t) => ({
+                  fontSize: FS.small,
+                  color: t.tokens.muted,
+                  mt: '12px',
+                  fontVariantNumeric: 'tabular-nums',
+                })}
+              >
+                Facteur d’activité retenu&nbsp;: ×
+                {fmtFactor(activityFactor(form.daily, form.sessions))}
+              </Typography>
             </Box>
           ) : null}
 
@@ -303,6 +296,14 @@ export default function ProfilForm({
                     onClick={() => dispatch({ type: 'setGoal', value: g.key })}
                     sx={{ p: '14px 16px' }}
                   >
+                    <Box
+                      sx={(t) => ({
+                        color: form.goal === g.key ? t.tokens.primaryInk : t.tokens.muted2,
+                        mb: '6px',
+                      })}
+                    >
+                      <Icon name={g.icon} size={22} />
+                    </Box>
                     <Typography sx={{ fontSize: FS.option, fontWeight: 500, color: 'inherit' }}>
                       {g.label}
                     </Typography>
@@ -402,5 +403,78 @@ function FieldLabel({
     >
       {children}
     </Typography>
+  );
+}
+
+/** Ligne d'un choix unique : puce ronde, icône, libellé, précision, et valeur alignée à droite. */
+function ChoiceRow({
+  selected,
+  onClick,
+  icon,
+  label,
+  desc,
+  value,
+}: {
+  selected: boolean;
+  onClick: () => void;
+  icon: IconName;
+  label: string;
+  desc: string;
+  value: string;
+}) {
+  return (
+    <OptionButton
+      selected={selected}
+      onClick={onClick}
+      sx={{ display: 'flex', alignItems: 'center', gap: '14px', p: '14px 16px' }}
+    >
+      <Box
+        aria-hidden
+        sx={(t) => ({
+          width: 18,
+          height: 18,
+          flex: 'none',
+          borderRadius: '50%',
+          border: `2px solid ${selected ? t.tokens.primaryInk : t.tokens.borderStrong}`,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        })}
+      >
+        <Box
+          sx={(t) => ({
+            width: 9,
+            height: 9,
+            borderRadius: '50%',
+            backgroundColor: selected ? t.tokens.primaryInk : 'transparent',
+          })}
+        />
+      </Box>
+      <Box
+        sx={(t) => ({
+          color: selected ? t.tokens.primaryInk : t.tokens.muted2,
+          display: 'flex',
+        })}
+      >
+        <Icon name={icon} size={22} />
+      </Box>
+      <Box sx={{ flex: 1 }}>
+        <Typography sx={{ fontSize: FS.option, fontWeight: 500, color: 'inherit' }}>
+          {label}
+        </Typography>
+        <Typography sx={(t) => ({ fontSize: FS.small, color: t.tokens.muted, mt: '2px' })}>
+          {desc}
+        </Typography>
+      </Box>
+      <Typography
+        sx={(t) => ({
+          fontSize: FS.small,
+          color: t.tokens.muted2,
+          fontVariantNumeric: 'tabular-nums',
+        })}
+      >
+        {value}
+      </Typography>
+    </OptionButton>
   );
 }
