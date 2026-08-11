@@ -5,9 +5,8 @@ import { kcal } from '@/lib/format';
 import { buildNeat, movementSplit } from '@/lib/neat';
 import { buildWeek } from '@/lib/training';
 import { useProfile } from '../ProfileProvider';
-import RunningDoodle from '../ui/doodles/RunningDoodle';
+import CalculPrompt from '../ui/CalculPrompt';
 import Overline from '../ui/Overline';
-import PageIntro from '../ui/PageIntro';
 import { SplitBar } from '../ui/primitives';
 import SectionHeading from '../ui/SectionHeading';
 import StatTile from '../ui/StatTile';
@@ -22,7 +21,10 @@ import WeekPlanCard from './WeekPlanCard';
  */
 export default function BougerScreen() {
   const { metrics, profile } = useProfile();
-  if (!metrics || !profile) return null;
+  if (!metrics || !profile)
+    return (
+      <CalculPrompt quoi="La part de l'écart que le mouvement peut prendre en charge, et votre programme." />
+    );
 
   const plan = buildPlan(metrics, profile.daily, profile.sessions, profile.goal);
   const neat = buildNeat(metrics, profile.daily, profile.goal);
@@ -31,12 +33,6 @@ export default function BougerScreen() {
 
   return (
     <div>
-      <PageIntro
-        title="Bouger"
-        lead="Tout ne doit pas venir de l’assiette. Deux leviers, à ne pas confondre : ce que vous bougez dans la journée, et vos séances, sans salle ni matériel."
-        illustration={<RunningDoodle />}
-      />
-
       <div className="flex flex-col gap-6">
         <div className="card p-6">
           <Overline className="mb-[10px]">{plan.title}</Overline>

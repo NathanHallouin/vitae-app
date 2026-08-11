@@ -4,15 +4,15 @@ import { buildProjection, rateAssessment } from '@/lib/calc';
 import { dec, fmtKg, fmtWeekly, kcal, monthIn } from '@/lib/format';
 import { useProfile } from '../ProfileProvider';
 import ProjectionChart from '../result/ProjectionChart';
-import LevitateDoodle from '../ui/doodles/LevitateDoodle';
+import CalculPrompt from '../ui/CalculPrompt';
 import OptionButton from '../ui/OptionButton';
 import Overline from '../ui/Overline';
-import PageIntro from '../ui/PageIntro';
 import { cx } from '../ui/primitives';
 
 export default function PoidsScreen() {
   const { metrics, profile, targetKey, setTargetKey } = useProfile();
-  if (!metrics || !profile) return null;
+  if (!metrics || !profile)
+    return <CalculPrompt quoi="Le poids que vous pourriez viser, et en combien de temps." />;
 
   const projection = buildProjection(metrics, profile.goal, targetKey);
   const cible = `${dec(projection.selected.w)} kg`;
@@ -20,12 +20,6 @@ export default function PoidsScreen() {
 
   return (
     <div>
-      <PageIntro
-        title="Mon poids"
-        lead={`Vous êtes à ${dec(metrics.poids)} kg. Voici où vous pourriez aller, et en combien de temps si vous mangez ${kcal(metrics.target)} kcal par jour.`}
-        illustration={<LevitateDoodle />}
-      />
-
       <div className="flex flex-col gap-6">
         <div className="card p-6">
           <Overline className="mb-1">Quel poids viser&nbsp;?</Overline>
@@ -107,48 +101,10 @@ export default function PoidsScreen() {
             </p>
           ) : null}
         </div>
-
-        <div className="card p-6">
-          <Overline className="mb-3">À quoi vous attendre en chemin</Overline>
-          <div className="flex flex-col gap-3">
-            {ATTENTES.map((item) => (
-              <div key={item.titre}>
-                <p className="mb-[2px] text-option font-medium">{item.titre}</p>
-                <p className="max-w-[72ch] text-base leading-[1.55] text-muted text-pretty">
-                  {item.texte}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
     </div>
   );
 }
-
-/** Ce que la courbe ne montre pas, et qui fait abandonner quand on ne s'y attend pas. */
-const ATTENTES = [
-  {
-    titre: 'La balance monte et descend de 1 à 2 kg sans raison',
-    texte:
-      'Ce sont surtout de l’eau et le contenu du tube digestif : un repas salé, des glucides, les règles, une séance intense. Pesez-vous une fois par semaine dans les mêmes conditions, ou faites la moyenne de plusieurs pesées.',
-  },
-  {
-    titre: 'Les premiers kilos partent vite, puis ça ralentit',
-    texte:
-      'La première semaine fait souvent perdre plus : c’est l’eau liée aux réserves de glucides. Le rythme réel apparaît à partir de la troisième semaine.',
-  },
-  {
-    titre: 'Un palier de 2 à 3 semaines est normal',
-    texte:
-      'Le corps s’adapte : vous bougez un peu moins sans vous en rendre compte et vous dépensez un peu moins. Vérifiez d’abord vos portions et vos pas avant de baisser encore les calories.',
-  },
-  {
-    titre: 'Refaites le calcul tous les 4 à 5 kg',
-    texte:
-      'Vos besoins baissent avec votre poids. Mettre à jour votre poids sur cette page suffit à recalculer l’ensemble.',
-  },
-];
 
 function Stat({ label, value, note }: { label: string; value: string; note?: string }) {
   return (

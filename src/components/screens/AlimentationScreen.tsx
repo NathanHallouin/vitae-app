@@ -4,11 +4,10 @@ import { buildMacros, proteinBasisNote, rangeBar, rangeCaption, warningText } fr
 import { GOALS } from '@/lib/constants';
 import { fmtGap, fmtWeekly, kcal } from '@/lib/format';
 import { useProfile } from '../ProfileProvider';
-import PlantDoodle from '../ui/doodles/PlantDoodle';
+import CalculPrompt from '../ui/CalculPrompt';
 import Icon from '../ui/Icon';
 import OptionButton from '../ui/OptionButton';
 import Overline from '../ui/Overline';
-import PageIntro from '../ui/PageIntro';
 import StatTile from '../ui/StatTile';
 import RecipesCard from './RecipesCard';
 
@@ -25,7 +24,10 @@ const MACRO_COLORS = {
 
 export default function AlimentationScreen() {
   const { metrics, profile, setGoal } = useProfile();
-  if (!metrics || !profile) return null;
+  if (!metrics || !profile)
+    return (
+      <CalculPrompt quoi="Combien manger chaque jour selon votre objectif, et comment répartir ces calories." />
+    );
 
   const bar = rangeBar(metrics);
   const warning = warningText(metrics);
@@ -35,12 +37,6 @@ export default function AlimentationScreen() {
 
   return (
     <div>
-      <PageIntro
-        title="Ce que je mange"
-        lead="Combien manger chaque jour pour aller dans le sens de votre objectif, et comment répartir ces calories."
-        illustration={<PlantDoodle />}
-      />
-
       <div className="flex flex-col gap-6">
         <div className="card p-6">
           <Overline className="mb-1">Mon objectif</Overline>

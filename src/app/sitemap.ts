@@ -5,9 +5,8 @@ import { SITE_URL } from '@/lib/site';
 /**
  * Sitemap généré à la compilation.
  *
- * Les pages de résultats n'y figurent pas : elles n'ont de sens qu'avec un profil enregistré dans
- * le navigateur et n'affichent rien d'indexable sans lui. Les y mettre reviendrait à proposer aux
- * moteurs des pages vides.
+ * Les pages de résultats y figurent : leurs explications sont rendues côté serveur, seuls les
+ * chiffres dépendent du profil enregistré dans le navigateur.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const recettes = await getAllRecipes();
@@ -15,6 +14,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     { url: SITE_URL, changeFrequency: 'monthly', priority: 1 },
     { url: `${SITE_URL}/recettes`, changeFrequency: 'weekly', priority: 0.8 },
+    ...['metabolisme', 'alimentation', 'poids', 'bouger'].map((r) => ({
+      url: `${SITE_URL}/${r}`,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    })),
     { url: `${SITE_URL}/profil`, changeFrequency: 'yearly', priority: 0.5 },
     ...recettes.map((r) => ({
       url: `${SITE_URL}/recettes/${r.slug}`,

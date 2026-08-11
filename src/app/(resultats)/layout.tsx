@@ -1,29 +1,18 @@
-'use client';
-
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
 import ProfileBar from '@/components/ProfileBar';
-import { useProfile } from '@/components/ProfileProvider';
 import ResultTabs from '@/components/ResultTabs';
-import { Spinner } from '@/components/ui/primitives';
 
-/** Toutes les pages de résultats supposent un profil enregistré : sinon, retour à la saisie. */
+/**
+ * Cadre des pages de résultats.
+ *
+ * Il ne bloque plus l'affichage en l'absence de profil, et ne redirige plus vers la saisie. Deux
+ * raisons : ces pages contiennent des explications qui valent d'être lues sans avoir rien calculé,
+ * et tant que tout était bloqué derrière le profil du navigateur, un moteur de recherche ne
+ * recevait que 28 caractères — l'en-tête, et rien d'autre.
+ *
+ * Ce qui dépend du profil est isolé dans des composants clients, qui proposent la saisie quand ils
+ * n'ont rien à afficher.
+ */
 export default function ResultsLayout({ children }: { children: React.ReactNode }) {
-  const { status, metrics } = useProfile();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (status === 'empty') router.replace('/profil');
-  }, [status, router]);
-
-  if (status !== 'ready' || !metrics) {
-    return (
-      <div className="flex justify-center pt-16">
-        <Spinner label="Chargement de vos résultats" />
-      </div>
-    );
-  }
-
   return (
     <>
       <ResultTabs />

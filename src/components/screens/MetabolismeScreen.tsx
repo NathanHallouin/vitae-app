@@ -4,14 +4,16 @@ import { bmiGaugePosition, energyBreakdown } from '@/lib/calc';
 import { activityFactor, activityLabel, BMI_BANDS, BMI_GAUGE_LABELS } from '@/lib/constants';
 import { dec, fmtFactor, kcal } from '@/lib/format';
 import { useProfile } from '../ProfileProvider';
-import MeditatingDoodle from '../ui/doodles/MeditatingDoodle';
+import CalculPrompt from '../ui/CalculPrompt';
 import Overline from '../ui/Overline';
-import PageIntro from '../ui/PageIntro';
 import StatTile from '../ui/StatTile';
 
 export default function MetabolismeScreen() {
   const { metrics, profile } = useProfile();
-  if (!metrics || !profile) return null;
+  if (!metrics || !profile)
+    return (
+      <CalculPrompt quoi="Le calcul de votre métabolisme et de votre dépense sur une journée." />
+    );
 
   const factor = activityFactor(profile.daily, profile.sessions);
   const gauge = bmiGaugePosition(metrics.bmi);
@@ -19,12 +21,6 @@ export default function MetabolismeScreen() {
 
   return (
     <div>
-      <PageIntro
-        title="Mon métabolisme"
-        lead="Ce que votre corps dépense sur une journée complète, et d’où vient cette dépense."
-        illustration={<MeditatingDoodle />}
-      />
-
       <div className="flex flex-col gap-6">
         <div className="hero-gradient rounded-[var(--radius-card)] p-6 sm:p-8">
           <Overline onDark>Votre dépense sur une journée</Overline>
@@ -76,13 +72,6 @@ export default function MetabolismeScreen() {
               note="Environ 10 % de ce que vous mangez, déjà compté dans le total ci-dessus."
             />
           </div>
-
-          <p className="mt-4 max-w-[68ch] text-small leading-[1.6] text-muted text-pretty">
-            Ce qui fait varier votre métabolisme, par ordre d’importance : la quantité de muscle
-            (chaque kilo consomme environ 13 kcal par jour au repos, contre 4,5 pour un kilo de
-            graisse), l’âge, le sommeil et le stress. Les «&nbsp;aliments brûle-graisses&nbsp;»,
-            eux, ne pèsent rien dans ce calcul.
-          </p>
         </div>
 
         <div className="card p-6">
@@ -122,12 +111,6 @@ export default function MetabolismeScreen() {
               <span key={label}>{label}</span>
             ))}
           </div>
-
-          <p className="max-w-[62ch] text-base leading-[1.6] text-muted text-pretty">
-            L’IMC compare simplement votre poids à votre taille. C’est un repère de population, pas
-            un diagnostic : il ne fait pas la différence entre muscle et graisse, et il classe donc
-            en «&nbsp;surpoids&nbsp;» des personnes très musclées qui vont très bien.
-          </p>
         </div>
       </div>
     </div>
