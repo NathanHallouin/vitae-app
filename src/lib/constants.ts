@@ -10,7 +10,7 @@ import type { IconName } from '@/components/ui/Icon';
 export type GoalKey = 'seche' | 'recomp' | 'masse' | 'maintien';
 export type Sexe = '' | 'femme' | 'homme';
 
-/** Mouvement du quotidien, hors sport — le NEAT. */
+/** Mouvement du quotidien, hors sport : le NEAT. */
 export interface Daily {
   label: string;
   desc: string;
@@ -55,14 +55,20 @@ export interface BmiBand {
   color: string;
 }
 
-export interface Move {
+/**
+ * Une brique de mouvement du quotidien : du NEAT, pas une séance.
+ * Ce qui la distingue : elle ne demande ni tenue, ni créneau, ni récupération, et elle se répète
+ * tous les jours. C'est ce cumul quotidien qui pèse sur la dépense, pas son intensité.
+ */
+export interface NeatAction {
   label: string;
   detail: string;
   /** équivalent métabolique */
   met: number;
-  /** durée en minutes */
+  /** durée en minutes, sur une journée */
   min: number;
-  tags: GoalKey[];
+  /** indices de `DAILY` auxquels le conseil s'adresse : inutile de faire marcher un livreur */
+  daily: number[];
 }
 
 /**
@@ -87,7 +93,7 @@ export const DAILY: Daily[] = [
   {
     label: 'Debout ou en mouvement',
     icon: 'debout',
-    desc: 'Commerce, enseignement, soin, service — rarement assis',
+    desc: 'Commerce, enseignement, soin, service : rarement assis',
     base: 1.45,
   },
   {
@@ -101,7 +107,7 @@ export const DAILY: Daily[] = [
 /**
  * Les incréments sont volontairement plus bas que ceux des tables classiques : une séance d'une
  * heure dépense 300 à 400 kcal, soit 150 à 200 kcal par jour une fois lissée sur la semaine pour
- * trois ou quatre séances — de l'ordre de +0,10 sur le facteur, pas +0,35.
+ * trois ou quatre séances, soit de l'ordre de +0,10 sur le facteur, pas +0,35.
  */
 export const SESSIONS: Sessions[] = [
   { label: 'Jamais', desc: 'Aucune séance dédiée', add: 0, perWeek: 0, icon: 'aucun' },
@@ -226,77 +232,89 @@ export const BMI_BANDS: BmiBand[] = [
 /** Les 4 segments affichés sur la jauge (les bandes d'obésité sont regroupées en « > 30 »). */
 export const BMI_GAUGE_LABELS = ['< 18,5', '18,5 – 25', '25 – 30', '> 30'];
 
-export const MOVES: Move[] = [
+/**
+ * Le catalogue NEAT. Aucun exercice ici : ce sont des gestes du quotidien, à répéter tous les
+ * jours, y compris les jours de séance. Les MET viennent du Compendium of Physical Activities.
+ */
+export const NEAT_ACTIONS: NeatAction[] = [
   {
-    label: '3 × 15 squats au poids du corps',
-    detail: 'Le plus rentable : les cuisses et les fessiers sont vos plus gros muscles.',
-    met: 5,
-    min: 6,
-    tags: ['seche', 'recomp', 'masse'],
-  },
-  {
-    label: '3 × 12 fentes par jambe',
-    detail: "Sollicite l'équilibre et complète les squats.",
-    met: 5,
-    min: 7,
-    tags: ['seche', 'recomp', 'masse'],
-  },
-  {
-    label: '3 × 10 pompes',
-    detail: "Genoux au sol si besoin, l'important est l'amplitude complète.",
-    met: 3.8,
-    min: 5,
-    tags: ['seche', 'recomp', 'masse'],
-  },
-  {
-    label: '3 × 45 s de gainage',
-    detail: 'Protège le dos, indispensable quand on est assis toute la journée.',
-    met: 3,
-    min: 4,
-    tags: ['seche', 'recomp', 'masse'],
-  },
-  {
-    label: "10 min de montées d'escaliers",
-    detail: "À la place de l'ascenseur, fractionné dans la journée.",
-    met: 8,
-    min: 10,
-    tags: ['seche', 'recomp'],
-  },
-  {
-    label: '30 min de marche rapide',
-    detail: 'Le pilier du déficit : peu fatigant, facile à répéter tous les jours.',
+    label: 'Marcher 30 min de plus dans la journée',
+    detail: 'En une fois ou en trois : descendre un arrêt plus tôt, faire le tour du pâté à midi.',
     met: 4.3,
     min: 30,
-    tags: ['seche', 'recomp'],
+    daily: [0, 1, 2],
   },
   {
-    label: '10 min de corde à sauter ou burpees',
-    detail: 'Option courte et intense les jours sans temps.',
-    met: 11,
+    label: 'Se lever 3 min par heure',
+    detail: 'Huit fois dans une journée de bureau. C’est ce qui casse le mieux la sédentarité.',
+    met: 2,
+    min: 24,
+    daily: [0, 1],
+  },
+  {
+    label: 'Prendre les escaliers, 10 min cumulées',
+    detail: 'Réparti sur la journée, à la place de l’ascenseur ou de l’escalator.',
+    met: 8,
     min: 10,
-    tags: ['seche'],
+    daily: [0, 1, 2],
+  },
+  {
+    label: 'Passer les appels debout ou en marchant',
+    detail: 'Debout, vous dépensez environ 50 % de plus qu’assis, sans effort perçu.',
+    met: 2.5,
+    min: 30,
+    daily: [0, 1],
+  },
+  {
+    label: 'Faire les trajets courts à vélo',
+    detail: 'Moins de 3 km : à cette distance, le vélo va souvent aussi vite que la voiture.',
+    met: 6.8,
+    min: 20,
+    daily: [0, 1, 2],
+  },
+  {
+    label: 'Ménage, courses, jardinage',
+    detail: 'Compté nulle part et pourtant bien réel : porter, monter, ranger, pousser.',
+    met: 3.5,
+    min: 30,
+    daily: [0, 1, 2, 3],
+  },
+  {
+    label: 'Une marche de 15 min après le repas',
+    detail: 'Aide en plus à faire redescendre la glycémie après un repas copieux.',
+    met: 3.5,
+    min: 15,
+    daily: [1, 2, 3],
   },
 ];
 
-/** Conseils anti-sédentarité par niveau d'activité (0 et 1 ; ≥ 2 utilise NEAT_ACTIVE). */
-export const NEAT: Record<number, string[]> = {
+/**
+ * Conseils NEAT par niveau de mouvement quotidien, indexés sur `DAILY` seul.
+ * Le nombre de séances n'entre pas ici : s'entraîner cinq fois par semaine ne change rien au fait
+ * de rester assis les vingt-trois autres heures.
+ */
+export const NEAT_TIPS: Record<number, string[]> = {
   0: [
-    'Levez-vous 3 min par heure : 8 fois par jour, cela représente à peu près 100 kcal sans y penser.',
-    "Visez 7 000 à 8 000 pas quotidiens avant d'ajouter des séances.",
-    'Prenez les appels debout ou en marchant.',
+    'Commencez par le temps assis, pas par le sport : une pause debout par heure change davantage votre dépense qu’une séance ajoutée.',
+    'Visez 7 000 à 8 000 pas par jour avant d’augmenter le volume d’entraînement.',
+    'Placez le mouvement dans des trajets déjà existants : c’est ce qui tient dans le temps.',
   ],
   1: [
-    'Ajoutez une séance de renforcement par semaine à ce que vous faites déjà.',
-    'Portez vos pas à 9 000 par jour les jours sans entraînement.',
-    'Étirez le temps assis : une pause active toutes les 90 min.',
+    'Vous avez déjà l’habitude de marcher : la marge est dans les journées de bureau, pas dans les week-ends.',
+    'Portez vos pas à 9 000 par jour, y compris les jours de séance.',
+    'Une pause active toutes les 90 min suffit à couper les longues assises.',
+  ],
+  2: [
+    'Votre métier vous fait déjà bouger : inutile d’en rajouter, protégez plutôt cette base les jours de repos.',
+    'Maintenez 9 000 à 10 000 pas les jours sans travail : c’est là que le NEAT s’effondre.',
+    'Debout longtemps n’est pas dépenser beaucoup : gardez de la marche franche dans la journée.',
+  ],
+  3: [
+    'Votre NEAT est déjà élevé : il n’y a rien à y gagner de plus, et beaucoup à perdre en fatigue.',
+    'L’écart doit venir de l’assiette, pas d’un mouvement supplémentaire.',
+    'Surveillez le sommeil : une nuit courte fait chuter la dépense du lendemain, séance ou pas.',
   ],
 };
-
-export const NEAT_ACTIVE: string[] = [
-  "Vous bougez déjà beaucoup : l'écart doit venir surtout de l'assiette, pas d'un volume d'entraînement supplémentaire.",
-  'Gardez 2 séances de renforcement par semaine pour protéger le muscle.',
-  'Surveillez la récupération : un sommeil court fait chuter la dépense quotidienne.',
-];
 
 /** Part de l'écart calorique attribuée au mouvement, par niveau d'activité. */
 export const MOVE_SHARES = [0.45, 0.35, 0.25, 0.15, 0.1];

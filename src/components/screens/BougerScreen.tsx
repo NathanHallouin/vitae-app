@@ -5,27 +5,38 @@ import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import { buildPlan } from '@/lib/calc';
 import { kcal } from '@/lib/format';
+import { buildNeat, movementSplit } from '@/lib/neat';
 import { buildWeek } from '@/lib/training';
 import { FS } from '@/theme/theme';
 import { useProfile } from '../ProfileProvider';
 import RunningDoodle from '../ui/doodles/RunningDoodle';
 import Overline from '../ui/Overline';
 import PageIntro from '../ui/PageIntro';
+import SectionHeading from '../ui/SectionHeading';
 import StatTile from '../ui/StatTile';
+import NeatCard from './NeatCard';
 import WeekPlanCard from './WeekPlanCard';
 
+/**
+ * La page « Bouger » distingue deux choses qu'on additionne d'ordinaire à tort :
+ * le mouvement du quotidien (NEAT), qui se répète tous les jours et ne se récupère pas, et les
+ * séances, qui sont un stimulus à doser selon la personne. Elles ne se règlent pas de la même
+ * façon et ne servent pas au même objectif : la page les traite donc l'une après l'autre.
+ */
 export default function BougerScreen() {
   const { metrics, profile } = useProfile();
   if (!metrics || !profile) return null;
 
   const plan = buildPlan(metrics, profile.daily, profile.sessions, profile.goal);
+  const neat = buildNeat(metrics, profile.daily, profile.goal);
   const week = buildWeek(metrics, profile.daily, profile.sessions, profile.goal);
+  const split = movementSplit(metrics, profile.daily, profile.sessions);
 
   return (
     <Box>
       <PageIntro
         title="Bouger"
-        lead="Tout ne doit pas venir de l’assiette. Voici ce que le mouvement peut prendre en charge, et le programme qui va avec — sans salle ni matériel."
+        lead="Tout ne doit pas venir de l’assiette. Deux leviers, à ne pas confondre : ce que vous bougez dans la journée, et vos séances, sans salle ni matériel."
         illustration={<RunningDoodle />}
       />
 
@@ -93,107 +104,86 @@ export default function BougerScreen() {
           ) : null}
         </Paper>
 
-        <WeekPlanCard week={week} />
+        <Paper sx={{ p: 3 }}>
+          <Overline sx={{ mb: '4px' }}>D’où vient le mouvement, chez vous</Overline>
+          <Typography
+            sx={(t) => ({
+              fontSize: FS.base,
+              lineHeight: 1.6,
+              color: t.tokens.muted,
+              maxWidth: '68ch',
+              textWrap: 'pretty',
+              mb: '16px',
+            })}
+          >
+            Sur les {kcal(metrics.tdee - metrics.bmr)} kcal que vous dépensez chaque jour en plus de
+            votre métabolisme de base, voici ce qui revient à vos journées et ce qui revient à vos
+            séances, une fois celles-ci lissées sur la semaine.
+          </Typography>
 
-        <Box
-          sx={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-            gap: 3,
-            alignItems: 'start',
-          }}
-        >
-          <Paper sx={{ p: 3 }}>
-            <Overline sx={{ mb: '4px' }}>Ce que dépense chaque exercice</Overline>
-            <Typography sx={(t) => ({ fontSize: FS.small, color: t.tokens.muted, mb: '6px' })}>
-              Les calories indiquées sont estimées pour votre poids actuel.
-            </Typography>
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              {plan.moves.map((m) => (
-                <Box
-                  key={m.label}
-                  sx={(t) => ({
-                    display: 'flex',
-                    gap: 2,
-                    alignItems: 'flex-start',
-                    py: '12px',
-                    borderTop: `1px solid ${t.tokens.divider}`,
-                  })}
-                >
-                  <Box sx={{ flex: 1 }}>
-                    <Typography sx={{ fontSize: FS.option, fontWeight: 500, mb: '2px' }}>
-                      {m.label}
-                    </Typography>
-                    <Typography
-                      sx={(t) => ({ fontSize: FS.small, lineHeight: 1.5, color: t.tokens.muted })}
-                    >
-                      {m.detail}
-                    </Typography>
-                  </Box>
-                  <Typography
-                    sx={(t) => ({
-                      flex: 'none',
-                      fontSize: FS.small,
-                      fontWeight: 500,
-                      color: t.tokens.primaryInk,
-                      fontVariantNumeric: 'tabular-nums',
-                      whiteSpace: 'nowrap',
-                      pt: '1px',
-                    })}
-                  >
-                    ≈ {m.kcal} kcal
-                  </Typography>
-                </Box>
-              ))}
-            </Box>
-            <Typography
+          <Box
+            sx={{
+              display: 'flex',
+              height: 10,
+              borderRadius: '5px',
+              overflow: 'hidden',
+              mb: '12px',
+            }}
+          >
+            <Box
               sx={(t) => ({
-                fontSize: FS.caption,
-                lineHeight: 1.6,
-                color: t.tokens.muted2,
-                mt: '12px',
+                height: 10,
+                backgroundColor: t.tokens.primaryInk,
+                width: `${split.neatPct}%`,
               })}
-            >
-              Comptez large : on a souvent plus faim après l’effort, ce qui annule une partie de ce
-              qui a été dépensé.
-            </Typography>
-          </Paper>
+            />
+            <Box
+              sx={(t) => ({
+                height: 10,
+                backgroundColor: t.tokens.divider,
+                width: `${split.sessionsPct}%`,
+              })}
+            />
+          </Box>
 
-          <Paper sx={{ p: 3 }}>
-            <Overline sx={{ mb: '4px' }}>Bouger sans y penser</Overline>
-            <Typography sx={(t) => ({ fontSize: FS.small, color: t.tokens.muted, mb: '14px' })}>
-              Ce que vous faites hors séance compte autant que les séances.
-            </Typography>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {[week.steps, ...plan.tips].map((tip) => (
-                <Box
-                  key={tip}
-                  sx={(t) => ({
-                    display: 'flex',
-                    gap: '12px',
-                    alignItems: 'flex-start',
-                    backgroundColor: t.tokens.surface2,
-                    borderRadius: 1,
-                    p: '14px',
-                  })}
-                >
-                  <Box
-                    aria-hidden
-                    sx={(t) => ({
-                      width: 6,
-                      height: 6,
-                      borderRadius: '50%',
-                      backgroundColor: t.tokens.primaryInk,
-                      flex: 'none',
-                      mt: '7px',
-                    })}
-                  />
-                  <Typography sx={{ fontSize: FS.base, lineHeight: 1.55 }}>{tip}</Typography>
-                </Box>
-              ))}
-            </Box>
-          </Paper>
-        </Box>
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+              gap: '12px',
+            }}
+          >
+            <StatTile
+              label={`Le quotidien · ${split.neatPct} %`}
+              value={`${kcal(split.neat)} kcal`}
+              note="tous les jours, sans récupération"
+              accent
+            />
+            <StatTile
+              label={`Les séances · ${split.sessionsPct} %`}
+              value={`${kcal(split.sessions)} kcal`}
+              note="lissées sur les sept jours"
+            />
+          </Box>
+        </Paper>
+
+        <SectionHeading
+          icon="marche"
+          kicker="Premier levier · tous les jours"
+          title="Le mouvement du quotidien"
+          lead="Marcher, monter, porter, rester debout. Ce n’est pas du sport : c’est ce que fait votre corps entre les séances, et c’est ce qui creuse le plus grand écart entre deux personnes du même gabarit."
+        />
+
+        <NeatCard neat={neat} />
+
+        <SectionHeading
+          icon="haltere"
+          kicker="Second levier · deux à quatre fois par semaine"
+          title="Vos séances"
+          lead={`Un stimulus, pas un moyen de brûler des calories. Le programme ci-dessous est calculé pour ${metrics.age} ans, ${Math.round(metrics.poids)} kg et votre objectif : volume, repos et variantes en découlent.`}
+        />
+
+        <WeekPlanCard week={week} />
       </Box>
     </Box>
   );

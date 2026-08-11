@@ -3,7 +3,7 @@
 import { useTokens } from '@/theme/ThemeRegistry';
 
 /**
- * Illustration « Plant » d'Open Doodles (opendoodles.com), Pablo Stanley — domaine public CC0 :
+ * Illustration « Plant » d'Open Doodles (opendoodles.com), Pablo Stanley, domaine public CC0 :
  * usage commercial libre, sans attribution requise. Recolorée avec les tokens du thème pour
  * tenir en clair comme en sombre. Illustre l’assiette.
  */

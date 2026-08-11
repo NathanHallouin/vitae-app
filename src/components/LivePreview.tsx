@@ -25,22 +25,22 @@ export default function LivePreview({ form, age }: { form: FormState; age: numbe
   const rows = [
     {
       label: 'Au repos, vous brûlez',
-      value: metrics ? `${kcal(metrics.bmr)} kcal` : '—',
+      value: metrics ? `${kcal(metrics.bmr)} kcal` : '…',
       accent: false,
     },
     {
       label: 'Avec votre activité',
-      value: metrics ? `${kcal(metrics.tdee)} kcal` : '—',
+      value: metrics ? `${kcal(metrics.tdee)} kcal` : '…',
       accent: false,
     },
     {
       label: 'À manger par jour',
-      value: metrics ? `${kcal(metrics.target)} kcal` : '—',
+      value: metrics ? `${kcal(metrics.target)} kcal` : '…',
       accent: true,
     },
     {
       label: 'Corpulence (IMC)',
-      value: metrics ? `${dec(metrics.bmi)} · ${metrics.band.label}` : '—',
+      value: metrics ? `${dec(metrics.bmi)} · ${metrics.band.label}` : '…',
       accent: false,
     },
   ];

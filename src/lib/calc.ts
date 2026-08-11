@@ -15,9 +15,7 @@ import {
   type GoalKey,
   goalByKey,
   MOVE_SHARES,
-  MOVES,
-  NEAT,
-  NEAT_ACTIVE,
+  type Sexe,
 } from './constants';
 import { dec, kcal } from './format';
 
@@ -28,6 +26,9 @@ export interface Metrics {
   tdee: number;
   poids: number;
   taille: number;
+  /** en années révolues, les séances s'y adaptent (récupération, impact, équilibre) */
+  age: number;
+  sexe: Exclude<Sexe, ''>;
   goal: Goal;
   /** borne basse de la fourchette, jamais sous le MB */
   min: number;
@@ -85,6 +86,8 @@ export function computeMetrics(input: {
     tdee: Math.round(tdee),
     poids: p,
     taille: t,
+    age: a,
+    sexe: input.sexe === 'homme' ? 'homme' : 'femme',
     goal,
     min: Math.round(safeMin),
     max: Math.round(safeMax),
@@ -430,12 +433,6 @@ function projectionNote(coherent: boolean, rate: number): string {
   return "Ce poids cible va dans le sens inverse de ce que vous mangez : vous ne pouvez pas grossir en mangeant moins, ni maigrir en mangeant plus. Changez la cible ou l'objectif.";
 }
 
-export interface PlanMove {
-  label: string;
-  detail: string;
-  kcal: number;
-}
-
 export interface Plan {
   title: string;
   note: string;
@@ -448,24 +445,12 @@ export interface Plan {
   foodKcal: number;
   movePct: number;
   foodPct: number;
-  moves: PlanMove[];
-  tips: string[];
 }
 
 export function buildPlan(m: Metrics, daily: number, sessions: number, goal: GoalKey): Plan {
-  const level = activityLevel(daily, sessions);
-  const share = MOVE_SHARES[level];
+  const share = MOVE_SHARES[activityLevel(daily, sessions)];
   const gap = m.tdee - m.target;
   const isSurplus = gap < -20;
-
-  const moves = MOVES.filter((mv) => mv.tags.includes(goal) || goal === 'maintien')
-    .slice(0, level <= 1 ? 5 : 4)
-    .map((mv) => ({
-      label: mv.label,
-      detail: mv.detail,
-      kcal: Math.round((mv.met * m.poids * mv.min) / 60 / 5) * 5,
-    }));
-
   const movePct = Math.round(share * 100);
 
   return {
@@ -479,8 +464,6 @@ export function buildPlan(m: Metrics, daily: number, sessions: number, goal: Goa
     foodKcal: Math.round(Math.abs(gap) * (1 - share)),
     movePct,
     foodPct: 100 - movePct,
-    moves,
-    tips: NEAT[level] ?? NEAT_ACTIVE,
   };
 }
 
@@ -490,9 +473,9 @@ function planNote(goal: GoalKey, daily: number, sessions: number): string {
   }
   if (activityLevel(daily, sessions) <= 1) {
     return (
-      'Votre profil — ' +
+      'Votre profil (' +
       activityLabel(daily, sessions) +
-      " — laisse de la marge : une bonne partie de l'écart peut venir du mouvement, plutôt que de manger encore moins. Bouger dans la journée dépense aussi beaucoup, sans vous fatiguer."
+      ") laisse de la marge : une bonne partie de l'écart peut venir du mouvement, plutôt que de manger encore moins. Bouger dans la journée dépense aussi beaucoup, sans vous fatiguer."
     );
   }
   return "Vous bougez déjà beaucoup : l'écart doit surtout venir de l'assiette. En ajouter encore à l'entraînement se paierait en fatigue et en baisse de performance.";

@@ -1,5 +1,5 @@
 /**
- * Design tokens — registre santé / nutrition.
+ * Design tokens : registre santé / nutrition.
  *
  * Thème clair : bleu profond `#084684`. Thème sombre : abricot `#F7B97B`.
  * `primary` sert d'aplat (cartes principales, états sélectionnés, boutons) ; `heroText` est la

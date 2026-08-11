@@ -23,7 +23,7 @@ export interface StoredProfile {
   /** index dans `SESSIONS` : volume d'entraînement */
   sessions: number;
   goal: GoalKey;
-  /** dernière modification, ISO — sert à décider si le poids est encore d'actualité */
+  /** dernière modification, ISO ; sert à décider si le poids est encore d'actualité */
   updatedAt: string;
 }
 

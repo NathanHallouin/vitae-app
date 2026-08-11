@@ -122,7 +122,7 @@ export function buildTheme(mode: 'light' | 'dark'): Theme {
           sizeMedium: { fontSize: FS.base, padding: '10px 18px' },
         },
         // MUI 9 n'émet plus de classe combinée `textPrimary` : les surcharges par couleur
-        // passent par `variants`, sinon le texte reste sur `palette.primary.main` — ici un
+        // passent par `variants`, sinon le texte reste sur `palette.primary.main`, ici un
         // abricot clair illisible sur fond blanc.
         variants: [
           {

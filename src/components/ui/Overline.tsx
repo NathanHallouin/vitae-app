@@ -4,7 +4,7 @@ import type { SxProps, Theme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import type { ReactNode } from 'react';
 
-/** Surtitre 12 px majuscules, gris `muted2` — utilisé en tête de chaque carte. */
+/** Surtitre 12 px majuscules, gris `muted2`, utilisé en tête de chaque carte. */
 export default function Overline({
   children,
   sx,

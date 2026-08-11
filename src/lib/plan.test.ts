@@ -13,7 +13,7 @@ import {
   rateAssessment,
 } from './calc';
 import type { GoalKey } from './constants';
-import { buildDayPlan } from './nutrition';
+import { buildRecipeSuggestions, MAX_PORTIONS, RECIPES, snackKcal } from './recipes';
 import { buildWeek } from './training';
 
 /** Éventail de profils : léger / lourd, sédentaire / très actif, les quatre objectifs. */
@@ -121,43 +121,100 @@ describe('macronutriments', () => {
   });
 });
 
-describe('journée alimentaire', () => {
-  test('le menu proposé tombe à moins de 10 % de l’apport visé', () => {
-    forEachProfile((m, _d, _s, _g, nom) => {
-      const plan = buildDayPlan(m, buildMacros(m, COLORS));
-      const ecart = Math.abs(plan.kcal - m.target) / m.target;
-      expect(ecart).toBeLessThan(0.1);
+describe('recettes proposées', () => {
+  test('chaque repas propose deux recettes, sans jamais répéter la même', () => {
+    forEachProfile((m, _d, _s, goal, nom) => {
+      const meals = buildRecipeSuggestions(m, goal);
+      expect(meals).toHaveLength(3);
+      const urls = meals.flatMap((meal) => meal.recipes.map((r) => r.url));
+      expect(urls).toHaveLength(6);
+      expect(new Set(urls).size).toBe(6);
       expect(nom).toBeTruthy();
     });
   });
 
-  test('les protéines du menu approchent la cible', () => {
-    forEachProfile((m) => {
-      const macros = buildMacros(m, COLORS);
-      const plan = buildDayPlan(m, macros);
-      expect(plan.prot).toBeGreaterThan(macros[0].grams * 0.85);
-      expect(plan.prot).toBeLessThan(macros[0].grams * 1.2);
+  test('les deux recettes d’un même repas ne reposent jamais sur le même ingrédient', () => {
+    forEachProfile((m, _d, _s, goal, nom) => {
+      for (const meal of buildRecipeSuggestions(m, goal)) {
+        const bases = meal.recipes.map((r) => r.base);
+        expect(new Set(bases).size).toBe(bases.length);
+        expect(nom).toBeTruthy();
+      }
     });
   });
 
-  test('toutes les portions sont réalistes', () => {
-    forEachProfile((m) => {
-      const plan = buildDayPlan(m, buildMacros(m, COLORS));
-      expect(plan.meals).toHaveLength(4);
-      for (const meal of plan.meals) {
-        for (const item of meal.items) {
-          expect(Number.isFinite(item.grams)).toBe(true);
-          expect(item.grams).toBeGreaterThanOrEqual(0);
-          expect(item.grams).toBeLessThanOrEqual(500);
+  test('les plats de midi et du soir se répartissent sur quatre ingrédients distincts', () => {
+    forEachProfile((m, _d, _s, goal) => {
+      const bases = buildRecipeSuggestions(m, goal)
+        .filter((meal) => meal.name !== 'Petit-déjeuner')
+        .flatMap((meal) => meal.recipes.map((r) => r.base));
+      expect(new Set(bases).size).toBe(4);
+    });
+  });
+
+  test('les budgets des repas couvrent 90 % de l’apport visé', () => {
+    forEachProfile((m, _d, _s, goal) => {
+      const total = buildRecipeSuggestions(m, goal).reduce((sum, meal) => sum + meal.budget, 0);
+      // Somme des parts (25 + 35 + 30 %), aux arrondis près.
+      expect(Math.abs(total - m.target * 0.9)).toBeLessThanOrEqual(3);
+      expect(snackKcal(m)).toBeGreaterThan(0);
+    });
+  });
+
+  test('les portions rapprochent chaque recette du budget de son repas', () => {
+    forEachProfile((m, _d, _s, goal) => {
+      for (const meal of buildRecipeSuggestions(m, goal)) {
+        for (const recipe of meal.recipes) {
+          expect(recipe.portions).toBeGreaterThanOrEqual(0.5);
+          expect(recipe.portions).toBeLessThanOrEqual(MAX_PORTIONS);
+          // Sauf butée de portions, l'écart au budget reste sous une demi-portion.
+          if (recipe.portions > 0.5 && recipe.portions < MAX_PORTIONS) {
+            expect(Math.abs(recipe.totalKcal - meal.budget)).toBeLessThan(recipe.kcal * 0.5 + 1);
+          }
+          // Le manque est annoncé dès qu'il dépasse le bruit des tables, jamais passé sous silence.
+          const manque = meal.budget - recipe.totalKcal;
+          expect(recipe.missingKcal).toBe(manque >= 80 ? manque : 0);
         }
       }
     });
   });
 
-  test('les fibres atteignent le repère de 25 g par jour', () => {
+  test('en déficit, les recettes retenues sont les plus denses en protéines', () => {
     const m = metricsFor(PROFILS[2], 1, 2, 'seche');
-    const plan = buildDayPlan(m, buildMacros(m, COLORS));
-    expect(plan.fibre).toBeGreaterThanOrEqual(20);
+    const plats = buildRecipeSuggestions(m, 'seche')
+      .filter((meal) => meal.name !== 'Petit-déjeuner')
+      .flatMap((meal) => meal.recipes);
+    for (const recipe of plats) {
+      expect(recipe.prot / recipe.kcal).toBeGreaterThan(0.07);
+    }
+  });
+
+  test('en prise de masse, les recettes retenues sont les plus caloriques', () => {
+    const m = metricsFor(PROFILS[2], 1, 2, 'masse');
+    const plats = buildRecipeSuggestions(m, 'masse')
+      .filter((meal) => meal.name !== 'Petit-déjeuner')
+      .flatMap((meal) => meal.recipes);
+    for (const recipe of plats) {
+      expect(recipe.kcal).toBeGreaterThanOrEqual(350);
+    }
+  });
+
+  test('le catalogue ne contient que des liens https exploitables', () => {
+    expect(RECIPES.length).toBeGreaterThanOrEqual(12);
+    for (const recipe of RECIPES) {
+      expect(recipe.url.startsWith('https://')).toBe(true);
+      expect(recipe.title.length).toBeGreaterThan(0);
+      expect(recipe.source.length).toBeGreaterThan(0);
+      expect(recipe.kcal).toBeGreaterThan(0);
+      expect(recipe.prot).toBeGreaterThan(0);
+    }
+    // Chaque URL n'apparaît qu'une fois : un doublon fausserait la déduplication par repas.
+    expect(new Set(RECIPES.map((r) => r.url)).size).toBe(RECIPES.length);
+  });
+
+  test('le catalogue couvre les deux moments de la journée', () => {
+    expect(RECIPES.filter((r) => r.slot === 'matin').length).toBeGreaterThanOrEqual(3);
+    expect(RECIPES.filter((r) => r.slot === 'plat').length).toBeGreaterThanOrEqual(9);
   });
 });
 

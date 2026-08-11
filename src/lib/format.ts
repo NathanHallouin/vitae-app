@@ -4,7 +4,7 @@ const MINUS = '−';
 
 /**
  * `toLocaleString('fr-FR')` sépare les milliers par une espace fine insécable (U+202F), que
- * beaucoup de polices — dont celles utilisées ici — ne dessinent pas. On la remplace par une
+ * beaucoup de polices (dont celles utilisées ici) ne dessinent pas. On la remplace par une
  * espace insécable classique.
  */
 export function kcal(n: number): string {
@@ -36,6 +36,11 @@ export function fmtWeekly(kcalDelta: number): string {
   const kg = (Math.abs(kcalDelta) * 7) / 7700;
   if (kg < 0.05) return 'poids stable';
   return `${kcalDelta < 0 ? MINUS : '+'}${dec(kg, 2)} kg / semaine`;
+}
+
+/** Nombre de portions : 1,5 reste « 1,5 », mais 2 s'écrit « 2 » et non « 2,0 ». */
+export function fmtPortions(n: number): string {
+  return Number.isInteger(n) ? String(n) : dec(n);
 }
 
 /** « octobre 2026 » */

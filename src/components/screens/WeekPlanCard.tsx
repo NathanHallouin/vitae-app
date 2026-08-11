@@ -44,6 +44,45 @@ export default function WeekPlanCard({ week }: { week: WeekPlan }) {
         <Typography sx={(t) => ({ fontSize: FS.small, color: t.tokens.muted2, mt: '10px' })}>
           Répartition conseillée : {week.schedule}
         </Typography>
+        <Typography sx={(t) => ({ fontSize: FS.small, color: t.tokens.muted2, mt: '6px' })}>
+          Échauffement : {week.warmup}
+        </Typography>
+      </Paper>
+
+      <Paper sx={{ p: 3 }}>
+        <Overline sx={{ mb: '4px' }}>Pourquoi ce programme-là</Overline>
+        <Typography sx={(t) => ({ fontSize: FS.small, color: t.tokens.muted, mb: '14px' })}>
+          Ce que votre profil a changé par rapport au programme de base, et pour quelle raison.
+        </Typography>
+        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+          {week.adaptations.map((a) => (
+            <Box
+              key={a.label}
+              sx={(t) => ({ py: '12px', borderTop: `1px solid ${t.tokens.divider}` })}
+            >
+              <Typography
+                sx={(t) => ({
+                  fontSize: FS.option,
+                  fontWeight: 500,
+                  color: t.tokens.primaryInk,
+                  mb: '2px',
+                })}
+              >
+                {a.label}
+              </Typography>
+              <Typography
+                sx={(t) => ({
+                  fontSize: FS.small,
+                  lineHeight: 1.55,
+                  color: t.tokens.muted,
+                  maxWidth: '72ch',
+                })}
+              >
+                {a.reason}
+              </Typography>
+            </Box>
+          ))}
+        </Box>
       </Paper>
 
       {week.sessions.map((session) => (
@@ -62,7 +101,7 @@ export default function WeekPlanCard({ week }: { week: WeekPlan }) {
               {session.title}
             </Typography>
             <Typography sx={(t) => ({ fontSize: FS.small, color: t.tokens.muted2 })}>
-              {session.focus} · {session.duration}
+              {session.focus} · {session.duration} · ≈ {session.kcal} kcal
             </Typography>
           </Box>
 

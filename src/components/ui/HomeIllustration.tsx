@@ -5,7 +5,7 @@ import { useTokens } from '@/theme/ThemeRegistry';
 
 /**
  * Illustration d'accueil : une jauge d'énergie, la flamme du métabolisme au centre, et le rythme
- * de la dépense sur la journée en dessous. Purement graphique — aucun texte, donc rien à traduire
+ * de la dépense sur la journée en dessous. Purement graphique : aucun texte, donc rien à traduire
  * ni à faire grossir avec la largeur d'affichage.
  *
  * La jauge est tracée en deux temps : la piste complète, puis la portion remplie par-dessus. Sans

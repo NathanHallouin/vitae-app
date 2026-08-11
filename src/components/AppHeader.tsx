@@ -7,6 +7,7 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { FROM_NAV } from '@/lib/nav';
 import { useColorMode } from '@/theme/ThemeRegistry';
 import { DISPLAY_FONT, FS } from '@/theme/theme';
 import { useProfile } from './ProfileProvider';
@@ -36,10 +37,13 @@ export default function AppHeader() {
           maxWidth: 1200,
           width: '100%',
           mx: 'auto',
-          px: { xs: 2, sm: 3 },
-          minHeight: 64,
-          height: 64,
-          gap: { xs: 0.75, sm: 2 },
+          px: 2,
+          // Un peu plus bas sur mobile : la navigation est passée en bas de l'écran, l'en-tête
+          // n'a plus à porter que la marque et la bascule de thème.
+          minHeight: 56,
+          height: 56,
+          gap: 0.75,
+          [FROM_NAV]: { px: 3, minHeight: 64, height: 64, gap: 2 },
         }}
       >
         <Box
@@ -48,7 +52,8 @@ export default function AppHeader() {
           sx={{
             display: 'flex',
             alignItems: 'center',
-            gap: { xs: 0.75, sm: 2 },
+            gap: 0.75,
+            [FROM_NAV]: { gap: 2 },
             color: 'inherit',
             textDecoration: 'none',
             flex: 1,
@@ -58,8 +63,9 @@ export default function AppHeader() {
           <Box
             aria-hidden
             sx={(t) => ({
-              width: { xs: 30, sm: 34 },
-              height: { xs: 30, sm: 34 },
+              width: 30,
+              height: 30,
+              [FROM_NAV]: { width: 34, height: 34 },
               flex: 'none',
               borderRadius: '30%',
               background: t.tokens.heroGradient,
@@ -79,7 +85,8 @@ export default function AppHeader() {
             noWrap
             sx={{
               fontFamily: DISPLAY_FONT,
-              fontSize: { xs: FS.option, sm: FS.h3 },
+              fontSize: FS.option,
+              [FROM_NAV]: { fontSize: FS.h3 },
               fontWeight: 600,
               letterSpacing: '-.01em',
               minWidth: 0,
@@ -89,14 +96,18 @@ export default function AppHeader() {
           </Typography>
         </Box>
 
+        {/* Masqué sur mobile : la barre du bas porte déjà « Profil », et deux entrées pour la
+            même page à deux endroits de l'écran brouillent plus qu'elles n'aident. */}
         {showProfileLink ? (
           <Button
             component={Link}
             href="/profil"
             sx={(t) => ({
+              display: 'none',
+              [FROM_NAV]: { display: 'inline-flex' },
               color: t.tokens.muted,
-              fontSize: { xs: FS.caption, sm: FS.base },
-              px: { xs: '8px', sm: '14px' },
+              fontSize: FS.base,
+              px: '14px',
               py: 1,
               flex: 'none',
               minWidth: 0,
@@ -116,7 +127,8 @@ export default function AppHeader() {
             border: `1px solid ${t.tokens.border}`,
             borderRadius: 999,
             fontSize: FS.small,
-            px: { xs: '10px', sm: '14px' },
+            px: '10px',
+            [FROM_NAV]: { px: '14px' },
             py: '6px',
             minWidth: 0,
             gap: 1,
@@ -125,7 +137,7 @@ export default function AppHeader() {
           })}
         >
           <Icon name={mode === 'dark' ? 'soleil' : 'lune'} size={16} />
-          <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
+          <Box component="span" sx={{ display: 'none', [FROM_NAV]: { display: 'inline' } }}>
             {label}
           </Box>
         </Button>

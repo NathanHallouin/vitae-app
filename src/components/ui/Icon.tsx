@@ -131,6 +131,15 @@ const PATHS = {
     </>
   ),
 
+  // Lien sortant : flèche hors du cadre, convention établie pour « ouvre un autre site »
+  lienExterne: (
+    <>
+      <path d="M14 4.5h5.5V10" />
+      <path d="M19.5 4.5 11 13" />
+      <path d="M18 14v4.5a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6H10" />
+    </>
+  ),
+
   // Page d'accueil
   eclair: <path d="M13 2.5 5 13.5h6l-1 8 8-11h-6l1-8Z" />,
   silhouette: (

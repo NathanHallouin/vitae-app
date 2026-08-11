@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from 'next';
 import { Fraunces, Inter } from 'next/font/google';
 import AppHeader from '@/components/AppHeader';
+import BottomNav from '@/components/BottomNav';
+import BottomNavSpacer from '@/components/BottomNavSpacer';
 import ProfileProvider from '@/components/ProfileProvider';
 import ThemeRegistry from '@/theme/ThemeRegistry';
 
@@ -21,7 +23,7 @@ const sans = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'Métabolisme de base — combien de calories votre corps dépense',
+  title: 'Métabolisme de base : combien de calories votre corps dépense',
   description:
     'Calculez ce que votre corps dépense au repos et dans la journée, votre IMC, et combien manger selon votre objectif. Expliqué simplement, sans compte à créer.',
 };
@@ -40,6 +42,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <ProfileProvider>
             <AppHeader />
             {children}
+            {/* Dégage la hauteur de la barre du bas : sinon elle recouvrirait la fin de page. */}
+            <BottomNavSpacer />
+            <BottomNav />
           </ProfileProvider>
         </ThemeRegistry>
       </body>

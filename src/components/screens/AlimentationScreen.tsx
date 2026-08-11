@@ -15,7 +15,7 @@ import OptionButton from '../ui/OptionButton';
 import Overline from '../ui/Overline';
 import PageIntro from '../ui/PageIntro';
 import StatTile from '../ui/StatTile';
-import DayPlanCard from './DayPlanCard';
+import RecipesCard from './RecipesCard';
 
 export default function AlimentationScreen() {
   const { metrics, profile, setGoal } = useProfile();
@@ -269,7 +269,7 @@ export default function AlimentationScreen() {
           </Box>
         </Paper>
 
-        <DayPlanCard metrics={metrics} macros={macros} />
+        <RecipesCard metrics={metrics} goal={profile.goal} />
       </Box>
     </Box>
   );

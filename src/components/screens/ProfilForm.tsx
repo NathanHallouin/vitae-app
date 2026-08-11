@@ -258,7 +258,7 @@ export default function ProfilForm({
                       icon={sess.icon}
                       label={sess.label}
                       desc={sess.desc}
-                      value={sess.add === 0 ? '—' : `+${fmtFactor(sess.add)}`}
+                      value={`+${fmtFactor(sess.add)}`}
                     />
                   ))}
                 </Box>

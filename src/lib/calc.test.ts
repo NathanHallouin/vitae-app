@@ -144,15 +144,6 @@ describe('macros et plan', () => {
     expect(plan.movePct).toBe(25);
     expect(plan.foodPct).toBe(75);
     expect(plan.moveKcal + plan.foodKcal).toBe(m.tdee - m.target);
-    expect(plan.moves).toHaveLength(4); // 5 exercices seulement si activité ≤ 1
-  });
-
-  test('5 exercices et conseils NEAT pour les profils sédentaires', () => {
-    const m = computeMetrics({ ...HOMME, daily: 0, sessions: 0 });
-    if (!m) throw new Error('métriques attendues');
-    const plan = buildPlan(m, 0, 0, 'seche');
-    expect(plan.moves).toHaveLength(5);
-    expect(plan.tips[0]).toContain('Levez-vous 3 min par heure');
   });
 
   test('prise de masse : surplus et libellés inversés', () => {
