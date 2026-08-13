@@ -1,0 +1,79 @@
+# Ce qui garde le vert entre deux commits.
+#
+# L'ordre n'est pas indifférent : les fichiers engendrés viennent en premier, parce que le reste en
+# dépend. `recettes.generated.ts` est importé par les écrans, et la feuille de jetons par
+# NativeWind — sans eux, la vérification de types échoue pour une raison qui n'a rien à voir avec
+# le code écrit.
+#
+# La dernière étape vérifie que les fichiers engendrés committés correspondent bien à leur source.
+# Sans elle, une recette modifiée sans recompilation passerait la CI et sortirait absente du
+# paquet.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verification:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.14
+
+      - run: bun install --frozen-lockfile
+
+      - name: Fichiers engendrés
+        run: bun run generate
+
+      - name: Format et règles
+        run: bun run check
+
+      - name: Types
+        run: bun run typecheck
+
+      - name: Tests
+        run: bun test packages/core
+
+      - name: Export du site
+        run: bun run --cwd apps/app export:web
+
+      - name: Le HTML livré contient bien le contenu
+        # Une page vide passerait toutes les étapes précédentes : c'est exactement ce qui est arrivé
+        # au premier export, quand la racine attendait des polices qui ne se chargent jamais dans
+        # Node. Le pré-rendu se vérifie sur le fichier produit, pas sur le code.
+        run: |
+          verifie() {
+            page="apps/app/dist/$1"
+            grep -q "<title[^>]*>." "$page" || { echo "titre vide dans $page"; exit 1; }
+            grep -q 'rel="canonical"' "$page" || { echo "canonique absente de $page"; exit 1; }
+            grep -q "$2" "$page" || { echo "contenu absent de $page"; exit 1; }
+          }
+          # L'accueil en premier : c'est la page la plus visitée, et celle qui est sortie vide
+          # le jour où `/` n'était qu'une redirection.
+          verifie index.html 'Combien votre corps'
+          verifie metabolisme.html 'Mon métabolisme'
+          verifie recettes/index.html 'Recettes'
+          verifie confidentialite.html 'aucune donnée'
+
+          recette=apps/app/dist/recettes/omelette-aux-champignons.html
+          verifie recettes/omelette-aux-champignons.html 'Omelette aux champignons'
+          grep -q 'application/ld+json' "$recette" || { echo "JSON-LD absent de $recette"; exit 1; }
+
+      - name: Les fichiers engendrés sont à jour
+        run: |
+          if ! git diff --quiet -- packages/content/src/recettes.generated.ts; then
+            echo "packages/content/src/recettes.generated.ts ne correspond pas aux Markdown."
+            echo "Lancer 'bun run content' et committer le résultat."
+            git --no-pager diff --stat -- packages/content/src/recettes.generated.ts
+            exit 1
+          fi

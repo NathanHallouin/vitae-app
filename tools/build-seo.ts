@@ -38,6 +38,7 @@ function entrees(): Entree[] {
       (r): Entree => ({ chemin: `/${r}`, frequence: 'monthly', priorite: 0.7 }),
     ),
     { chemin: '/profil', frequence: 'yearly', priorite: 0.5 },
+    { chemin: '/confidentialite', frequence: 'yearly', priorite: 0.3 },
     ...getAllRecipes().map(
       (r): Entree => ({
         chemin: `/recettes/${r.slug}`,

@@ -51,7 +51,24 @@ const config: ExpoConfig = {
     },
     // Liste vide et non absente : Expo n'ajoute alors aucune permission facultative.
     permissions: [],
-    blockedPermissions: ['android.permission.RECORD_AUDIO', 'android.permission.CAMERA'],
+    /**
+     * Ce que les modules embarqués déclarent d'office, et dont l'application ne se sert pas.
+     *
+     * Le manifeste assemblé en réclamait sept ; il n'en reste qu'`INTERNET`, nécessaire pour
+     * ouvrir les recettes du site de cuisine. Les autres se retirent, et ce n'est pas cosmétique :
+     * « Afficher par-dessus d'autres applications » et l'accès au stockage sont des permissions
+     * sensibles qu'il faudrait justifier auprès de Google, pour des fonctions que l'application
+     * n'a pas. Une seule permission, c'est aussi ce qui rend défendable la déclaration « aucune
+     * donnée collectée ».
+     */
+    blockedPermissions: [
+      'android.permission.CAMERA',
+      'android.permission.RECORD_AUDIO',
+      'android.permission.READ_EXTERNAL_STORAGE',
+      'android.permission.WRITE_EXTERNAL_STORAGE',
+      'android.permission.SYSTEM_ALERT_WINDOW',
+      'android.permission.VIBRATE',
+    ],
   },
 
   plugins: [

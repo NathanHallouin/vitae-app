@@ -1,20 +1,21 @@
-# Handoff : calculateur de métabolisme de base (Next.js 16.3.0 + MUI)
+# Calculateur de métabolisme de base
 
-## Vue d'ensemble
+Application universelle : **iOS, Android et web, depuis une seule base de code Expo**. Elle calcule
+le métabolisme de base (MB), la dépense énergétique totale (DET), l'IMC, une fourchette d'apport
+calorique selon l'objectif (sèche, recomposition, prise de masse, maintien), une répartition des
+macronutriments, un poids cible avec projection dans le temps, un programme d'entraînement au poids
+du corps, et un catalogue de recettes.
 
-Application grand public qui calcule le métabolisme de base (MB), la dépense énergétique totale (DET), l'IMC, une fourchette d'apport calorique min/max selon l'objectif (sèche, recomposition corporelle, prise de masse, maintien), une répartition des macronutriments, un poids cible avec projection dans le temps, et des recommandations d'exercices au poids du corps expliquant comment répartir l'écart calorique entre mouvement et alimentation.
+Langue de l'interface : français. Deux modes de saisie : guidé en quatre étapes et formulaire
+complet, permutables à tout moment.
 
-Langue de l'interface : français. Cible : desktop et mobile. Deux modes de saisie : guidé en 4 étapes et formulaire complet, permutables à tout moment.
+**Aucun compte, aucun serveur, aucune base de données.** Le profil vit sur l'appareil — MMKV en
+natif, `localStorage` sur le web — et tous les calculs sont locaux. C'est cette contrainte qui rend
+la navigation instantanée : il n'y a jamais rien à attendre.
 
-## À propos des fichiers de design
-
-Les fichiers de ce dossier sont des **références de design réalisées en HTML** : un prototype montrant l'apparence et le comportement attendus, pas du code de production à copier tel quel.
-
-Le travail consiste à **recréer ces écrans dans l'environnement cible** (ici Next.js 16.3.0 avec MUI) en utilisant ses conventions : `createTheme`, `CssBaseline`, composants `Box`/`Stack`/`Grid`/`Card`/`TextField`/`ToggleButtonGroup`/`LinearProgress`, `useMediaQuery` pour le responsive. Le prototype n'utilise volontairement aucune dépendance : tous les styles sont inline et pilotés par des variables CSS, ce qui donne une correspondance directe avec un thème MUI (voir « Correspondance MUI » plus bas).
-
-## Fidélité
-
-**Haute fidélité.** Couleurs, typographie, espacements, états et copies sont définitifs et donnés ci-dessous en valeurs exactes. Les libellés français sont à reprendre à l'identique. La grille et les rayons suivent Material Design (rayon 4 px, ombres MUI elevation 1 et 3), donc les composants MUI par défaut conviennent sans surcharge lourde.
+Ce fichier sert deux usages. La première moitié est la **référence du métier** : formules, tables
+de valeurs, copies françaises, jetons de design. Elle fait autorité et n'a pas changé avec le
+portage. La seconde décrit **l'architecture** telle qu'elle est aujourd'hui.
 
 ## Formules de calcul (le cœur métier)
 
@@ -147,7 +148,7 @@ date d'atteinte = aujourd'hui + semaines×7  →  format fr-FR { month: 'long', 
 
 Courbe : horizon = `clamp(semaines, 4, 78)`, un point par semaine, `poids(t) = poids + rythme × t` borné au poids cible. Échelle Y = [min(poids, cible) − 1,5 ; max(...) + 1,5]. Repères X toutes les 2 / 4 / 8 / 13 semaines selon l'horizon (> 12 → 4, > 26 → 8, > 52 → 13).
 
-**Contrainte technique constatée** : dans le prototype, les libellés d'axes ne pouvaient pas vivre dans le `<svg>` ; ils sont rendus en HTML positionné en pourcentage sous le graphique. En React/MUI cette contrainte n'existe pas : utilisez des `<text>` SVG ou une lib de graphique (MUI X Charts `LineChart` convient parfaitement pour cette projection, avec une ligne de référence pour la cible).
+Les libellés d'axe sont des `<text>` à l'intérieur du SVG. La maquette devait les positionner en HTML sous le graphique, faute de pouvoir les y mettre ; la contrainte n'existe plus, et `react-native-svg` les rend de la même façon sur les trois plateformes.
 
 ### Répartition de l'écart (mouvement / alimentation)
 
@@ -284,7 +285,7 @@ Ligne flex `gap: 24px`, `flex-wrap: wrap`.
 - Sélection d'un objectif → réinitialise le poids cible choisi manuellement.
 - Aucune animation complexe : transitions `all .15s ease` sur les options, `width .3s ease` sur la barre de progression.
 - Validation à la soumission de l'étape, pas à la frappe ; l'aperçu en direct, lui, se met à jour à chaque frappe.
-- Responsive : tout est fluide via `flex-wrap` et `repeat(auto-fit, minmax())`, sans media query. En MUI, préférez `Grid` avec breakpoints ou `useMediaQuery('(min-width:900px)')` pour le passage une/deux colonnes et pour désactiver le `position: sticky` en mobile.
+- Responsive : l'essentiel tient dans une colonne qui s'étire, sans point de rupture. Le seul seuil est 768 px, au-delà duquel les illustrations d'écran apparaissent — une décision de contenu, pas de gabarit.
 - Mode sombre : bouton pilule dans l'en-tête (pastille + libellé « Clair » / « Sombre »).
 
 ## État
@@ -303,7 +304,7 @@ theme       : "light" | "dark" | null (null = valeur par défaut)
 error       : string
 ```
 
-Tout est dérivé de cet état, aucune donnée distante. En Next.js : un composant client unique suffit, ou un `useReducer` + contexte si vous découpez par écran. Persistance optionnelle en `localStorage` (profil + thème), non implémentée dans le prototype.
+Tout est dérivé de cet état, aucune donnée distante. En pratique : un `useReducer` pour le formulaire de saisie (`packages/core/src/state.ts`) et un contexte unique pour le profil enregistré (`ProfileProvider`), dont les écrans ne tirent que des calculs purs.
 
 ## Design tokens
 
@@ -338,203 +339,176 @@ Rayons : 4 px (cartes, champs, boutons), 16 px (chips et bouton de thème), 50 %
 
 Formats numériques : `toLocaleString('fr-FR')` pour les kcal (espace insécable comme séparateur de milliers), virgule décimale pour IMC, kg et rythme, `−` (U+2212) pour les valeurs négatives.
 
-## Correspondance MUI
-
-- Tokens → `createTheme({ palette: { mode, primary: { main: '#1976d2', dark: '#1565c0' }, background: { default: '#f4f6f8', paper: '#fff' }, text: { primary: '#212121', secondary: '#5f6368' }, divider: '#eceff1' }, shape: { borderRadius: 4 }, typography: { fontFamily: 'Roboto, Helvetica, Arial, sans-serif' } })`, avec un second thème pour le mode sombre. `--primary-ink` correspond à `theme.palette.primary.dark` en clair et à `primary.light` (#90caf9) en sombre.
-- En-tête → `AppBar` + `Toolbar` (`position: sticky`, elevation 4 visuelle).
-- Cartes → `Paper elevation={1}` (elevation 3 pour la carte principale colorée, dont le fond est `primary.main`).
-- Champs → `TextField` avec `InputProps={{ endAdornment: <InputAdornment>kg</InputAdornment> }}`, `type="number"`, spinners masqués.
-- Sexe / objectifs / poids cible → `ToggleButtonGroup` ou `Card` cliquables ; activité → `RadioGroup` avec `FormControlLabel` personnalisé.
-- Progression → `LinearProgress variant="determinate"`.
-- Barres de macros et de fourchette → `LinearProgress` ou `Box` avec largeurs en pourcentage.
-- Graphique de projection → MUI X Charts `LineChart` (série de poids par semaine + `ChartsReferenceLine` pour la cible), ou SVG maison.
-- Chips de récapitulatif → `Chip`.
-
-## Assets
-
-Aucun. Pas d'image, pas d'icône externe : la marque est un cercle avec les initiales « MB », les pastilles et puces sont des `div` ronds. Police Roboto via Google Fonts (ou `next/font/google`).
-
-## Fichiers de ce dossier
-
-- `Calculateur MB.dc.html`, le prototype complet : les trois écrans, toute la logique de calcul (classe `Component`, méthodes `compute`, `weightTargets`, `projection`, `renderVals`), les données de référence (`ACTIVITIES`, `GOALS`, `BMI_BANDS`, `MOVES`, `NEAT`) et les tokens de thème dans le bloc `<style>` du `<helmet>`. C'est la source de vérité pour les valeurs numériques et les copies françaises.
-- `support.js`, runtime du prototype, sans intérêt pour l'implémentation.
-
-Ouvrir le HTML directement dans un navigateur pour parcourir les écrans.
-
 ---
 
-## Implémentation (Next.js 16.3.0 + MUI 9)
+## Architecture
 
-L'application de ce dépôt est la mise en œuvre de ce handoff. La maquette reste dans `maquette/`
-comme source de vérité pour les valeurs et les copies.
+Un dépôt, quatre paquets, deux cibles de livraison.
 
-Outillage : **Bun** (installation, scripts, tests) et **Biome** (lint + format).
-
-```bash
-bun install
-bun run dev        # http://localhost:3000
-bun run build      # build de production
-bun test           # tests du métier (src/lib/calc.test.ts)
-bun run check      # Biome : lint + format + imports (lecture seule)
-bun run check:fix  # Biome : applique les corrections sûres
-bun run typecheck  # tsc --noEmit
+```
+apps/app/            application Expo — iOS, Android, et le site par export statique
+packages/core/       métier pur : calculs, plan, entraînement, recettes, persistance, textes
+packages/content/    recettes en Markdown, compilées en module TypeScript
+tools/               scripts de génération (jetons, icônes, sitemap)
+store/               fiches App Store et Play Store, conformité
 ```
 
-### Organisation
+### Pourquoi une seule base de code
 
-| Chemin | Rôle |
+Le site était auparavant une application Next.js distincte. Deux interfaces pour un même produit,
+c'est deux fois la charge de maintenance et une divergence garantie à moyen terme. Expo Router sait
+rendre les mêmes écrans en natif et les exporter en HTML statique : le site est désormais un mode
+de livraison de l'application, pas un projet parallèle.
+
+Ce que le changement coûte, et qu'il faut assumer : le HTML produit est celui de
+`react-native-web`, donc une pile de `<div>` plutôt qu'un balisage sémantique riche, et le paquet
+JavaScript est plus lourd qu'un rendu serveur React. Ce que le changement rapporte : un seul écran
+à écrire, un seul jeu de textes, un seul thème.
+
+Ce qui a été préservé de l'ancien site, parce que l'acquisition en dépend : chaque route est
+**pré-rendue en HTML** à la compilation, une page par recette comprise. Titres, descriptions,
+canoniques et données structurées `Recipe` sont dans le fichier livré, lisibles sans exécuter une
+ligne de JavaScript. La CI le vérifie sur le fichier produit, pas sur l'intention.
+
+### Métier partagé (`packages/core`)
+
+| Module | Rôle |
 |---|---|
-| `src/lib/constants.ts` | données de référence et libellés en langage courant |
-| `src/lib/calc.ts` | métier pur : Mifflin-St Jeor, DET, fourchettes, IMC, macros, poids cible, projection, répartition assiette / mouvement |
-| `src/lib/format.ts` | formats français (espace insécable, virgule décimale, `−` U+2212) |
-| `src/lib/date.ts` | âge calculé depuis la date de naissance, fraîcheur du poids (7 jours) |
-| `src/lib/storage.ts` | profil en `localStorage`, clé versionnée `vitae.v1.profile` |
-| `src/lib/state.ts` | état du formulaire de saisie + validation (la navigation est au routeur) |
-| `src/lib/nutrition.ts` | conseils alimentaires selon l'objectif |
-| `src/lib/recipes.ts` | catalogue de plats, filtres d'ingrédients et tirage par repas |
-| `src/lib/training.ts` | séances de renforcement, adaptées à l'âge, au sexe, au poids, au métabolisme et à l'objectif |
-| `src/lib/neat.ts` | mouvement du quotidien (NEAT), tenu à part des séances |
-| `src/lib/nav.ts` | plan de navigation et seuil `NAV_BREAKPOINT`, partagés par les deux barres |
-| `src/theme/` | tokens clair/sombre → `createTheme`, exposés via `theme.tokens` |
-| `src/components/ProfileProvider.tsx` | profil chargé au montage, métriques dérivées, partagées par toutes les pages |
-| `src/components/ResultTabs.tsx` | onglets du haut, à partir de 700 px |
-| `src/components/BottomNav.tsx` | barre de navigation fixe en bas, sous 700 px |
-| `src/components/screens/` | un composant par page |
+| `calc.ts` | Mifflin-St Jeor, DET, fourchettes, IMC, macros, poids cible, projection, répartition assiette / mouvement |
+| `constants.ts` | données de référence et libellés en langage courant |
+| `training.ts` | séances de renforcement, adaptées à l'âge, au sexe, au poids, au métabolisme et à l'objectif |
+| `neat.ts` | mouvement du quotidien (NEAT), tenu à part des séances |
+| `recipes.ts` | catalogue de plats, filtres d'ingrédients et tirage par repas |
+| `nutrition.ts` | conseils alimentaires selon l'objectif |
+| `quantites.ts` | mise à l'échelle des quantités d'une recette |
+| `state.ts` | état du formulaire de saisie et validation |
+| `storage.ts` | profil versionné (`vitae.v1.profile`), support de stockage **injecté** |
+| `format.ts` | formats français (espace insécable, virgule décimale, `−` U+2212) |
+| `date.ts` | âge calculé depuis la date de naissance, fraîcheur du poids (7 jours) |
+| `tokens.ts` | palette claire et sombre, échelle typographique, rayons |
+| `icons.ts` | le nom des icônes, pas leur tracé |
+| `nav.ts` | plan de navigation, partagé par la barre d'onglets |
+| `explainers.ts` | les textes d'explication des quatre écrans de résultats |
+| `legal.ts` | politique de confidentialité |
 
-### Pages
+Rien ici n'importe React, ni `react-native`, ni `node:fs`. C'est ce qui permet aux 93 tests de
+tourner sous `bun test` sans environnement de rendu.
 
-| Route | Contenu |
-|---|---|
-| `/` | accueil : à quoi sert le calcul, et reprise du profil s'il existe |
-| `/profil` | saisie guidée (4 questions) ou formulaire complet, avec aperçu en direct |
-| `/metabolisme` | dépense au repos, dépense totale, IMC |
-| `/alimentation` | objectif, combien manger, fourchette, répartition des macros |
-| `/poids` | poids cible et projection dans le temps |
-| `/bouger` | répartition mouvement / assiette, exercices, anti-sédentarité |
+Trois choix méritent d'être connus avant de toucher au code :
 
-Les quatre dernières partagent un layout (`src/app/(resultats)/layout.tsx`) qui porte les onglets,
-le rappel du profil et l'avertissement médical, et renvoie vers `/profil` si aucun profil n'est
-enregistré.
+- **`storage.ts` ne connaît aucun support.** Il expose un contrat synchrone et l'application lui
+  injecte MMKV ou `localStorage` au démarrage. Sans cela, il faudrait une branche de plateforme
+  dans un module qui doit rester pur.
+- **Le nom des icônes est du métier.** `constants.ts` et `nav.ts` désignent une icône par option
+  d'activité et par écran ; le tracé, lui, vit dans l'interface. `Record<IconName, ReactNode>` fait
+  échouer la compilation si le jeu dessiné et le jeu désigné divergent.
+- **Les textes d'explication et les jetons de couleur sont des données.** Ils étaient du JSX et du
+  CSS recopiés ; ils sont désormais engendrés (`tools/build-tokens.ts`) ou lus directement.
 
-Les tokens sont exposés via `theme.tokens` (augmentation de type MUI) : `sx={(t) => ({ color: t.tokens.muted })}`.
+### Application (`apps/app`)
 
-### Icônes et illustration
+Expo SDK 57, React Native 0.87, expo-router en routes typées, NativeWind 4, `react-native-svg`,
+MMKV, Reanimated.
 
-Aucune bibliothèque d'icônes : `src/components/ui/Icon.tsx` porte un jeu maison d'une vingtaine de
-tracés sur grille 24 px, au trait de 1,6 px, en `currentColor`, donc une seule version pour les
-deux thèmes. Les icônes sont décoratives et toujours doublées d'un libellé lisible : elles sont
-masquées aux lecteurs d'écran (`aria-hidden`) sauf si un `title` est passé explicitement.
+```
+app/
+  _layout.tsx           polices, thème, profil, pile de navigation
+  +html.tsx             le document HTML — web uniquement, rendu à la compilation
+  index.tsx             redirection : les chiffres si un profil existe, la présentation sinon
+  accueil.tsx           présentation
+  confidentialite.tsx   politique de confidentialité
+  (tabs)/               les cinq onglets, tirés de `MOBILE_PAGES`
+  recettes/            index et détail, `generateStaticParams` pour le pré-rendu
+src/
+  components/           écrans, cartes, primitives, icônes, illustrations
+  theme/                bascule clair / sombre, palette du thème courant
+  lib/store.ts          MMKV — et `store.web.ts`, que Metro choisit sur le web
+```
 
-| Emplacement | Icônes |
-|---|---|
-| Onglets de résultats | `flamme` · `assiette` · `balance` · `course` |
-| Bascule de thème | `soleil` / `lune` (remplace l'ancienne pastille de couleur) |
-| Quotidien (`DAILY`) | `bureau` · `marche` · `debout` · `caisse` |
-| Séances (`SESSIONS`) | `aucun` pour « Jamais », `haltere` au-delà |
-| Objectifs (`GOALS`) | `flecheBas` · `flechesOpposees` · `flecheHaut` · `egal` |
-| Macronutriments | `oeuf` · `goutte` · `ble`, teintés par la couleur du macro |
-| Accueil, « Ce que vous obtenez » | `flamme` · `eclair` · `silhouette` · `assiette` |
+### D'où vient la navigation instantanée
 
-#### Illustrations
+Ce n'est pas un réglage mais une conséquence, et chaque point compte :
 
-`src/components/ui/HomeIllustration.tsx` est dessinée sur mesure : une jauge d'énergie surmontée
-d'une flamme, au-dessus du rythme de la dépense sur la journée. Sans texte, donc rien à traduire
-ni à faire grossir avec la largeur. Elle lit les tokens via `useTokens()`, comme `ProjectionChart`.
+1. **Rien n'est chargé.** Le profil est en mémoire, les calculs sont des fonctions pures mémoïsées
+   dans `ProfileProvider`, les recettes sont compilées dans le paquet. Aucun écran n'a d'état de
+   chargement, parce qu'aucun écran n'a rien à attendre.
+2. **MMKV lit de façon synchrone.** Le profil est disponible dès l'initialisation de l'état, donc
+   l'application s'ouvre sur les chiffres et non sur un écran vide qui se remplit après coup.
+   `AsyncStorage` aurait imposé un rendu vide à chaque démarrage.
+3. **Les écrans restent montés.** Les onglets ne sont jamais démontés, seulement gelés hors écran
+   (`enableFreeze`, `freezeOnBlur`) : y revenir n'est qu'un changement de visibilité, et le
+   défilement est retrouvé là où on l'avait laissé.
+4. **Les transitions sont natives.** `react-native-screens` les rend au niveau du système : elles
+   ne passent pas par le fil JavaScript et restent fluides même pendant un recalcul.
+5. **Les polices sont attendues avant le premier rendu**, en natif seulement. Le splash tient
+   l'écran pendant ce temps : pas d'écran blanc, et pas de saut de police — un défaut que l'œil lit
+   comme de la lenteur alors que tout est déjà là.
 
-`src/components/ui/doodles/` contient quatre illustrations d'**Open Doodles**
-(<https://www.opendoodles.com>, Pablo Stanley), **domaine public CC0** : usage commercial libre,
-sans attribution requise. Une par page de résultats, passée à `PageIntro` via la prop
-`illustration` et masquée sous `md` : elle est décorative, le texte prime sur mobile.
+### La seule concession de plateforme
 
-| Page | Illustration | Poids gzip |
-|---|---|---|
-| Mon métabolisme | `Meditating`, la dépense au repos | 18 Ko |
-| Ce que je mange | `Plant` | 46 Ko |
-| Mon poids | `Levitate` | 6 Ko |
-| Bouger | `Running` | 10 Ko |
+Le moment de la lecture du stockage, et rien d'autre. En natif, MMKV lit tout de suite. Sur le web,
+les pages sont pré-rendues par Node, où `localStorage` n'existe pas : lire au premier rendu
+produirait un balisage différent de celui qui a été livré, et React refuserait l'hydratation.
 
-Points d'attention si l'on en ajoute :
+`LECTURE_IMMEDIATE`, exporté par `src/lib/store.ts` et `src/lib/store.web.ts`, porte cette
+différence — décidée par le fichier que Metro choisit, pas par un test à l'exécution.
 
-- **unDraw est exclu** : sa licence interdit explicitement de « link, embed, scrape, search or
-  download the assets » par un moyen automatisé. Les fichiers doivent être récupérés à la main.
-- **Ne pas arrondir les coordonnées.** Ces tracés sont en commandes relatives : l'erreur
-  s'accumule d'un segment au suivant et le dessin part en morceaux. Un arrondi à une décimale,
-  qui divisait le poids par deux, détruisait l'illustration.
-- **Un fichier par illustration**, jamais un module commun : Next découpe par route, chaque page
-  ne paie ainsi que son propre tracé.
-- Les deux couleurs amont (`ink`, `accent`) sont câblées sur les tokens `doodleInk` et
-  `doodleAccent`, sinon le bleu marine disparaît sur le fond du thème sombre.
-- `Plant` est de loin la plus lourde (46 Ko gzip, dix tracés sans dominante isolable) : à
-  remplacer par une plus légère si le poids de `/alimentation` devient un sujet.
+## Commandes
 
-### Direction visuelle
+```sh
+bun install
 
-La maquette a servi de base fonctionnelle, mais l'habillage a été refait pour correspondre au
-secteur (santé / nutrition) :
+bun run dev             # Expo, choix de la plateforme au lancement
+bun run dev:web         # directement dans le navigateur
 
-- **Palette** : bleu profond `#084684` en thème clair, abricot `#f7b97b` en thème sombre, sur des
-  fonds chauds plutôt que gris neutres. `primary` ne sert **qu'en aplat** (carte principale, états
-  sélectionnés, boutons pleins) ; le texte posé dessus (`heroText`) suit sa clarté. Pour les textes
-  et bordures accentués, le token `primaryInk` (`#084684` en clair, 9,4:1 sur blanc) tient
-  largement le 4,5:1. Les macronutriments utilisent un trio
-  orange / bleu / vert, distinguable en cas de daltonisme.
-- **Typographie** : *Fraunces* (serif, axe `SOFT` adouci) pour les titres et les grands chiffres,
-  *Inter* pour l'interface. Les chiffres restent en `tabular-nums`.
-- **Formes** : cartes de rayon 16 px avec bordure fine et ombre diffuse, boutons de rayon 10 px
-  sans majuscules, onglets en pastilles, champs sur fond `surface2`.
-- **En-tête clair** au lieu de la barre pleine couleur, pour laisser la carte principale porter
-  la couleur.
-- **Contraste** : vérifié par mesure dans le navigateur, tous les textes passent le seuil WCAG AA
-  dans les deux thèmes (4,5:1, ou 3:1 pour les grands corps). Le `faint` de la maquette
-  (`#9e9e9e`, 2,7:1) ne passait pas.
+bun run generate        # jetons, icônes, recettes, sitemap — à lancer avant tout build
+bun run build:web       # export statique du site → apps/app/dist
+bun run prebuild        # projets natifs ios/ et android/
 
-Deux notes d'implémentation :
+bun test packages/core  # 93 tests du métier
+bun run typecheck
+bun run check           # Biome : format, règles, imports
+bun run check:fix
+```
 
-- `toLocaleString('fr-FR')` sépare les milliers par une espace fine insécable (U+202F) que ni
-  Inter ni Fraunces ne dessinent. `kcal()` la remplace par une espace insécable classique.
-- MUI 9 n'émet plus les classes combinées `MuiButton-textPrimary` : les surcharges de bouton par
-  couleur passent par `components.MuiButton.variants`, sinon elles sont silencieusement ignorées
-  et le texte reste sur `palette.primary.main`.
+Les fichiers engendrés sont committés (`recettes.generated.ts`, `tokens.generated.css`) ; la CI
+vérifie qu'ils correspondent bien à leur source.
 
-### Choix d'implémentation
+## Publier
 
-- **Écart assumé avec la maquette : les résultats sont découpés en quatre pages** au lieu d'un
-  écran unique, avec une URL par sujet et des onglets. Le profil étant persisté, chaque page se
-  recharge et se partage indépendamment.
-- **Écart assumé : les textes ont été réécrits en langage courant.** Les termes techniques
-  restent accessibles en second plan (« Perdre du gras » avec « aussi appelé sèche · −10 à −25 % »).
-  Les valeurs numériques, elles, restent celles de la maquette.
-- Le profil est chargé une fois par `ProfileProvider` ; les pages n'en dérivent que des calculs
-  purs. Aucune donnée distante.
-- Le graphique de projection est un SVG maison qui reprend la géométrie du prototype
-  (`viewBox` 600 × 196, `x0=6`, `x1=594`, `y0=10`, `y1=170`), avec les libellés d'axe en `<text>`
-  SVG : la contrainte du prototype n'existe plus ici, MUI X Charts n'est donc pas nécessaire.
-- Responsive sans media query pour l'essentiel (`flex-wrap`, `repeat(auto-fit, minmax())`) ;
-  `sx` avec breakpoints uniquement pour désactiver le `position: sticky` sous `md` et compacter
-  l'en-tête sur mobile (sous 360 px de large, le titre est tronqué avec une ellipse).
-- `biome.json` remplace ESLint et Prettier : `preset: recommended`, guillemets simples,
-  largeur 100, imports organisés automatiquement. Les règles spécifiques à Next.js
-  (`eslint-config-next`) n'ont pas d'équivalent Biome ; `bun run build` reste le garde-fou
-  pour les erreurs propres au framework.
-- **Écart assumé avec la maquette : la saisie demande une date de naissance, pas un âge.**
-  L'âge est recalculé à chaque affichage (`ageFrom`), donc un profil enregistré ne vieillit pas
-  faux. Les copies concernées ont été adaptées : « Renseignez la date de naissance, la taille et
-  le poids. » et le libellé du champ. Le message sur les bornes d'âge reste inchangé.
-- **Profil persisté en `localStorage`**, sans base de données : le profil complet est enregistré à
-  chaque saisie avec sa date de modification. Au retour sur l'app, il est restauré ; si le poids
-  date de plus de 7 jours, le champ est vidé et un rappel indique le dernier poids connu. La date
-  de naissance restaurée passe en lecture seule ; « Recommencer » efface le profil et la rend à
-  nouveau saisissable.
-- **Repères nutritionnels vérifiés** : au-delà d'un IMC de 30, les protéines sont calculées sur un
-  poids ajusté (haut du poids santé + 25 % de l'excès) plutôt que sur le poids total ; les lipides
-  ne descendent jamais sous 0,6 g/kg ; il reste toujours au moins 10 % de l'énergie en glucides.
-  `src/lib/plan.test.ts` vérifie ces bornes sur 60 combinaisons de profils, de niveaux d'activité
-  et d'objectifs.
-- **Journée alimentaire générée**, pas rédigée : les portions découlent des macros, avec un
+Voir [`store/README.md`](store/README.md) : ouverture des comptes, création du projet EAS, build,
+envoi. Les fiches et les réponses aux questionnaires de conformité sont dans
+[`store/app-store.md`](store/app-store.md) et [`store/play-store.md`](store/play-store.md).
+
+Le chemin critique est l'**ouverture des comptes développeur** — plusieurs jours chez Apple, et
+14 jours de test fermé chez Google si le compte est personnel. Tout le reste est prêt.
+
+## Écarts assumés avec la maquette
+
+- **Les résultats sont découpés en quatre écrans** au lieu d'un écran unique, avec une adresse par
+  sujet. Le profil étant persisté, chaque écran s'ouvre et se partage indépendamment.
+- **Les textes ont été réécrits en langage courant.** Les termes techniques restent accessibles en
+  second plan (« Perdre du gras », puis « aussi appelé sèche · −10 à −25 % »). Les valeurs
+  numériques, elles, restent celles de la maquette.
+- **La saisie demande une date de naissance, pas un âge.** L'âge est recalculé à chaque affichage,
+  donc un profil enregistré ne vieillit pas faux. Une date de naissance enregistrée passe en
+  lecture seule ; « Tout effacer » est la seule sortie.
+- **Les illustrations d'écran ne s'affichent qu'au-delà de 768 px.** Sur un téléphone, la largeur
+  revient au texte — c'est la règle qu'appliquait déjà le site.
+- **Les groupes d'options annoncent `radio` et non `bouton pressé`.** Le site ne le faisait pas, et
+  le portage était l'occasion de ne pas reconduire le défaut.
+
+## Repères vérifiés par les tests
+
+- Au-delà d'un IMC de 30, les protéines sont calculées sur un poids ajusté (haut du poids santé
+  + 25 % de l'excès) plutôt que sur le poids total ; les lipides ne descendent jamais sous
+  0,6 g/kg ; il reste toujours au moins 10 % de l'énergie en glucides. `plan.test.ts` vérifie ces
+  bornes sur 60 combinaisons de profils, de niveaux d'activité et d'objectifs.
+- La journée alimentaire est engendrée, pas rédigée : les portions découlent des macros, avec un
   plafond par aliment et un rééquilibrage final sur les féculents. Le menu tombe à moins de 1 % de
   l'apport visé sur tous les profils testés.
-- **Semaine d'entraînement** construite sur les repères usuels : au moins deux séances de
-  renforcement (OMS), 48 h entre deux séances des mêmes muscles, progression par répétitions avant
-  progression par difficulté, arrêt des séries 2 à 3 répétitions avant l'échec.
+- La semaine d'entraînement suit les repères usuels : au moins deux séances de renforcement (OMS),
+  48 h entre deux séances des mêmes muscles, progression par répétitions avant progression par
+  difficulté, arrêt des séries deux à trois répétitions avant l'échec.
 - Les garde-fous de la fourchette (`safeMin`, recommandé borné) et le positionnement par morceaux
-  du curseur IMC sont implémentés tels que décrits, avec commentaires dans `src/lib/calc.ts`.
+  du curseur IMC sont implémentés tels que décrits, avec commentaires dans `calc.ts`.

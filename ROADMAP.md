@@ -1,17 +1,51 @@
 # Roadmap
 
-État de référence : calculateur complet découpé en quatre pages thématiques (`/metabolisme`,
-`/alimentation`, `/poids`, `/bouger`) plus `/profil`, métier isolé dans `src/lib`, profil persisté
-en `localStorage`, textes en langage courant, thème clair/sombre. Bun + Biome, 31 tests,
-déploiement Vercel.
+État de référence : une seule base de code Expo qui rend l'application sur iOS et Android et, par
+export statique, produit le site. Six écrans (`/metabolisme`, `/alimentation`, `/poids`,
+`/bouger`, `/profil`, `/recettes`) plus l'accueil et la confidentialité. Métier isolé dans
+`packages/core`, recettes compilées depuis le Markdown, profil persisté sur l'appareil, textes en
+langage courant, thème clair/sombre retenu d'un lancement à l'autre. Bun + Biome, 93 tests.
 
 Estimations en jours-homme. L'ordre à l'intérieur d'un jalon est un ordre de priorité.
 
 **Contrainte structurante : pas de base de données ni de comptes utilisateurs pour l'instant.**
-L'app reste entièrement cliente et déployable en statique sur Vercel. Toute donnée persistée vit
-dans le navigateur (`localStorage`), et la portabilité entre appareils passe par un export / import
-de fichier, pas par une synchronisation. Les chantiers qui exigeraient un backend sont listés en
-fin de document avec le signal qui justifierait de rouvrir la question.
+Toute donnée persistée vit sur l'appareil — MMKV en natif, `localStorage` sur le web — et la
+portabilité entre appareils passe par un export / import de fichier, pas par une synchronisation.
+C'est aussi ce qui autorise la déclaration « aucune donnée collectée » chez Apple comme chez
+Google, la plus simple à défendre. Les chantiers qui exigeraient un backend sont listés en fin de
+document avec le signal qui justifierait de rouvrir la question.
+
+## v1.0 : Sortir sur les magasins (≈ 4 j, hors délais administratifs)
+
+Le chemin critique n'est pas technique. Voir `store/README.md` pour le détail.
+
+### 1. Ouvrir les comptes développeur : bloquant
+
+Rien ne peut être publié avant. Apple : 99 $/an, 24 h à 7 jours de vérification. Google : 25 $ une
+fois, plus **12 testeurs pendant 14 jours consécutifs** si le compte est personnel. À lancer en
+premier, tout le reste attend.
+
+### 2. Mettre le site en ligne : 0,5 j
+
+Les deux magasins exigent une URL de politique de confidentialité joignable au moment de l'examen.
+`bun run build:web` produit `apps/app/dist`, à servir en statique.
+
+### 3. Captures d'écran : 1 j
+
+Quatre écrans, en clair et en sombre, aux formats exigés par chaque magasin. À prendre sur un build
+réel, pas sur une maquette.
+
+### 4. Premier build et envoi : 0,5 j
+
+`eas build --profile production --platform all`, puis `eas submit`. Le profil Android dépose en
+piste interne, en brouillon : rien ne part en production sans action explicite.
+
+### 5. Essais sur appareil : 2 j
+
+Ce qui ne se vérifie pas depuis une machine de développement : la lecture du profil au démarrage à
+froid, le sélecteur de date natif sur les deux plateformes, l'écran maintenu allumé pendant une
+recette, le rendu des polices sur Android, le comportement des marges de sécurité sur un iPhone à
+encoche et sur un Android à barre gestuelle.
 
 ## v1.1 : Finitions avant de montrer l'app (≈ 3 j)
 
@@ -21,63 +55,69 @@ Réglé lors de la refonte visuelle : le `faint` de la maquette (`#9e9e9e`, 2,7:
 remplacé par `#6f7d75` (4,6:1), et la palette sombre a été reconstruite sur la même exigence.
 Mesuré dans le navigateur : les petits textes tournent autour de 7:1 en mode sombre.
 
-### 2. ARIA des groupes d'options : 0,5 j (élargi)
+### 2. Groupes d'options : fait pour les rôles, reste le clavier (0,25 j)
 
-`ProfilForm` déclare `role="radiogroup"` mais les enfants sont des `<button aria-pressed>` : les
-lecteurs d'écran n'annoncent pas « 2 sur 5 » et les flèches directionnelles ne naviguent pas entre
-les options.
+**Livré** : `OptionButton` annonce `radio` et son état de sélection, et chaque groupe est déclaré
+`radiogroup`. Les lecteurs d'écran annoncent désormais correctement « sélectionné ». Concerne le
+sexe, le niveau d'activité, l'objectif et le poids cible.
 
-- `role="radio"` + `aria-checked`, navigation clavier (flèches, Home/End), un seul point d'entrée
-  dans l'ordre de tabulation par groupe.
-- Concerne : sexe, niveau d'activité, objectif (formulaire et page « Ce que je mange »), poids
-  cible sur la page « Mon poids ».
+**Reste à faire**, et uniquement sur le web, où il y a un clavier : navigation par flèches et
+Home/End à l'intérieur d'un groupe, avec un seul point d'entrée dans l'ordre de tabulation.
+React Native n'a pas d'équivalent de `roving tabindex` ; il faudra le poser à la main sur la
+plateforme web.
 
-### 3. Persistance `localStorage` : fait pour le profil, reste le thème (0,25 j)
+### 3. Persistance : fait
 
 **Livré** : profil complet enregistré sous `vitae.v1.profile` (clé versionnée, lecture tolérante
 dans `parseProfile`), date de naissance à la place de l'âge pour que l'âge se recalcule seul,
 horodatage des modifications, poids redemandé au-delà de 7 jours, date de naissance figée une fois
-enregistrée. Couvert par `src/lib/profile.test.ts`.
+enregistrée. Couvert par `packages/core/src/profile.test.ts`.
 
-**Reste à faire** : le thème, toujours réinitialisé à chaque rechargement.
+**Livré aussi** : le thème est retenu d'un lancement à l'autre, sous une clé distincte du profil —
+c'est une préférence d'affichage, pas une donnée de santé, et « Tout effacer » ne doit pas la
+remettre en clair.
 
-Sans base de données, `src/lib/storage.ts` est la **fondation de tout le v2** : la qualité de cette
-couche conditionne le suivi de poids et les profils multiples.
+Sans base de données, `packages/core/src/storage.ts` est la **fondation de tout le v2** : la
+qualité de cette couche conditionne le suivi de poids et les profils multiples. Le module ne
+connaît aucun support et le reçoit par injection ; toute nouvelle donnée persistée doit passer par
+lui, jamais par MMKV ou `localStorage` depuis un écran.
 
-- Persister le thème choisi, avec `InitColorSchemeScript` pour éviter le flash clair → sombre.
-- Respecter `prefers-color-scheme` tant que l'utilisateur n'a pas choisi explicitement.
-- Contrainte déjà respectée pour le profil, à conserver : la lecture se fait au montage et non
-  pendant le rendu serveur, pour que l'état initial reste déterministe.
+**Reste à faire** : respecter `prefers-color-scheme` tant que l'utilisateur n'a pas choisi
+explicitement. La préférence est aujourd'hui retenue dès la première bascule, mais un thème jamais
+choisi suit déjà le système (`colorScheme` à `system`).
 
-### 4. Intégration continue : 0,5 j
+### 4. Intégration continue : fait
 
-Rien ne garde le vert entre deux commits aujourd'hui.
+`.github/workflows/ci.yml` sur chaque PR : fichiers engendrés, Biome, types, 93 tests, export du
+site. Une étape vérifie le HTML produit — titre, canonique, JSON-LD — parce qu'une page vide
+passait toutes les autres, ce qui est précisément arrivé au premier export.
 
-- GitHub Actions sur chaque PR : `bun install --frozen-lockfile`, `bun run check`, `bun test`,
-  `bun run typecheck`, `bun run build`.
+### 5. SEO et partage : fait, sauf l'image de partage (0,5 j)
 
-### 5. SEO et partage : 0,5 j
+**Livré** : `robots.txt` et `sitemap.xml` engendrés, balises de titre, description et canonique par
+route, JSON-LD `Recipe` sur chaque recette, pré-rendu statique de toutes les routes.
 
-C'est une app grand public dont l'acquisition passera par la recherche, et le levier est à zéro.
-
-- `robots.txt`, `sitemap.ts`, image Open Graph générée par `next/og`.
-- Données structurées, titre et description travaillés sur la requête cible.
+**Reste à faire** : l'image Open Graph. `next/og` n'existe plus ; il faut soit une image fixe par
+type de page, soit une génération à la compilation avec `sharp`, déjà présent pour les icônes.
 
 ## v1.2 : Ce qui fait revenir l'utilisateur (≈ 5 j)
 
 - **État dans l'URL** (`?s=h&n=1992-03-15&t=178&p=86&act=1&g=seche`) : 1 j
-  Aujourd'hui les pages ont chacune leur URL, mais elles lisent le profil local : un lien envoyé à
-  quelqu'un d'autre le renvoie vers `/profil`. Porter le profil dans la requête rendrait les
-  résultats vraiment partageables, et permettrait un rendu serveur.
+  Aujourd'hui les écrans ont chacun leur adresse, mais ils lisent le profil local : un lien envoyé
+  à quelqu'un d'autre le renvoie vers la saisie. Porter le profil dans la requête rendrait les
+  résultats vraiment partageables, et donnerait au passage des liens profonds utiles depuis
+  l'application native.
 - **Export du plan** : 1 j
   Feuille d'impression (`@media print`) et bouton « Copier mon résumé ». Le cas d'usage réel est
   d'emmener ces chiffres chez un professionnel ou de les recopier dans une app de suivi.
 - **Unités impériales** (lb, ft/in) avec détection par la locale : 1 j
-  Ouvre le marché anglophone sans toucher au métier : `src/lib/format.ts` isole déjà les formats.
+  Ouvre le marché anglophone sans toucher au métier : `packages/core/src/format.ts` isole déjà les formats.
 - **Formule Katch-McArdle en option** (si le taux de masse grasse est connu) : 1 j
   Nettement plus juste pour les personnes musclées, exactement la population que l'IMC pénalise :
   l'app le dit elle-même dans son avertissement.
-- **Tests E2E Playwright** sur les trois parcours (guidé, formulaire, erreurs de validation) : 1 j
+- **Tests de bout en bout** sur les trois parcours (guidé, formulaire, erreurs de validation) :
+  1,5 j. Maestro plutôt que Playwright : il couvre iOS et Android, et le web reste vérifiable par
+  l'export statique déjà contrôlé en CI.
 - **Suivi des séances** : 1 j
   Cocher une séance faite dans la semaine, et voir la régularité sur le mois. Local, comme le
   reste.
@@ -100,9 +140,12 @@ Tout ce qui suit tient dans le navigateur et s'appuie sur le module de stockage 
   ayant son historique. Sans comptes, la limite à assumer et à afficher : les profils sont liés au
   navigateur, pas à une identité.
 - **Choix du menu** : 1 j
-  La journée type est faite (`src/lib/nutrition.ts`). Reste à proposer des variantes : version
+  La journée type est faite (`packages/core/src/nutrition.ts`). Reste à proposer des variantes : version
   végétarienne, sans lactose, et un bouton « une autre journée » qui change les sources.
-- **Internationalisation** (`next-intl`) : 1 j, à faire après les unités impériales.
+- **Internationalisation** : 1 j, à faire après les unités impériales. `expo-localization` pour la
+  détection, `i18n-js` ou équivalent pour les catalogues. Les textes sont déjà rassemblés dans
+  `packages/core` (`constants.ts`, `explainers.ts`, `nutrition.ts`, `training.ts`), ce qui est le
+  gros du travail d'extraction.
 
 ### Limites à afficher clairement dans l'interface
 
@@ -131,11 +174,22 @@ JSON du v2 doit donc être pensé comme un futur format d'import serveur.
 - Sans backend, le schéma des données locales est un contrat public : une clé versionnée et une
   fonction de migration dès la première écriture évitent de casser les historiques au premier
   changement de format.
-- Biome ne couvre pas les règles `next/core-web-vitals` : si `next/image` ou `next/link` entrent
-  dans le code, seul `bun run build` les vérifiera.
+- Le pré-rendu du site est fragile par nature : tout composant qui refuse de rendre hors navigateur
+  produit une page vide sans faire échouer le build. La CI garde une vérification sur le HTML
+  produit ; l'étendre à chaque nouvelle route indexable.
+- `react-native-web` rend des `<div>`, pas un balisage sémantique. Les rôles d'accessibilité
+  (`accessibilityRole="header"`, `"link"`, `"radio"`) sont ce qui tient lieu de structure : les
+  omettre dégrade le référencement autant que les lecteurs d'écran.
 - Contenu santé : ajouter une exclusion explicite pour la grossesse et les moins de 15 ans. La
   validation bloque déjà l'âge, mais rien ne l'explique à l'utilisateur.
-- Vercel Analytics et Speed Insights : deux lignes de code, et cela évite de prioriser à l'aveugle.
-- La maquette (`maquette/`) reste la source de vérité des valeurs et des copies. Toute évolution
-  qui s'en écarte doit être notée dans `README.md`, comme les deux écarts responsive déjà
-  documentés.
+- Mesure d'audience : **aucune, et c'est un choix qui a un prix**. L'ajouter rendrait fausses la
+  déclaration « aucune donnée collectée » chez Apple, le formulaire Data Safety chez Google et
+  `packages/core/src/legal.ts`. Si le besoin devient réel, les trois se corrigent dans le même
+  commit, et une mesure sans identifiant persistant reste préférable.
+- Contenu santé : ajouter une exclusion explicite pour la grossesse. La validation bloque déjà
+  l'âge, mais rien ne l'explique à l'utilisateur.
+- Les jetons de couleur et les textes d'explication sont engendrés depuis `packages/core` : les
+  modifier dans les fichiers `*.generated.*` est sans effet, ils sont réécrits au prochain
+  `bun run generate`.
+- Les écarts avec la maquette sont listés en fin de `README.md`. Toute nouvelle divergence doit y
+  être notée.

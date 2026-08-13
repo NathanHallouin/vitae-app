@@ -13,6 +13,7 @@ export * from './date';
 export * from './explainers';
 export * from './format';
 export * from './icons';
+export * from './legal';
 export * from './nav';
 export * from './neat';
 export * from './nutrition';

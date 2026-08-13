@@ -32,7 +32,7 @@ export default function AppHeader() {
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Accueil"
-          onPress={() => router.navigate('/accueil')}
+          onPress={() => router.navigate('/')}
           className="min-w-0 flex-1 flex-row items-center gap-3"
         >
           <LinearGradient

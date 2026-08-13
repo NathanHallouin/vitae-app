@@ -1,6 +1,6 @@
 import { formFromProfile } from '@vitae/core/state';
-import { useRouter } from 'expo-router';
-import { ScrollView } from 'react-native';
+import { Link, useRouter } from 'expo-router';
+import { ScrollView, View } from 'react-native';
 import { useProfile } from '@/components/ProfileProvider';
 import ProfilForm from '@/components/screens/ProfilForm';
 
@@ -35,12 +35,21 @@ export default function ProfilTab() {
           save(input);
           router.navigate('/metabolisme');
         }}
-        onCancel={() => router.navigate(profile ? '/metabolisme' : '/accueil')}
+        onCancel={() => router.navigate(profile ? '/metabolisme' : '/')}
         onReset={() => {
           reset();
-          router.navigate('/accueil');
+          router.navigate('/');
         }}
       />
+
+      {/* Les deux magasins exigent que la politique soit atteignable depuis l'application, pas
+          seulement depuis leur fiche. Sa place est ici : c'est l'écran où l'on confie ses
+          informations, et celui où l'on peut tout effacer. */}
+      <View className="mt-8 items-center">
+        <Link href="/confidentialite" className="text-caption text-faint underline">
+          Ce que deviennent vos informations
+        </Link>
+      </View>
     </ScrollView>
   );
 }

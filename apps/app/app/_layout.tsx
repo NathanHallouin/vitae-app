@@ -71,9 +71,10 @@ function Navigation() {
         }}
       >
         <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="accueil" options={{ animation: 'fade' }} />
+        <Stack.Screen name="index" options={{ animation: 'fade' }} />
         <Stack.Screen name="recettes/index" />
         <Stack.Screen name="recettes/[slug]" />
+        <Stack.Screen name="confidentialite" />
       </Stack>
     </>
   );
