@@ -3,7 +3,6 @@
  * projection et répartition de l'écart. Fonctions pures, sans dépendance à React.
  */
 
-import type { IconName } from './icons';
 import {
   activityFactor,
   activityLabel,
@@ -18,6 +17,7 @@ import {
   type Sexe,
 } from './constants';
 import { dec, kcal } from './format';
+import type { IconName } from './icons';
 
 export interface Metrics {
   /** métabolisme de base, arrondi */

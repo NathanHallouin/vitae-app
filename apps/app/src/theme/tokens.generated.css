@@ -1,0 +1,64 @@
+/* Fichier généré par `bun run tokens`. Ne pas modifier à la main :
+   la source est `packages/core/src/tokens.ts`. */
+
+:root {
+  --t-bg: #fbf7f2;
+  --t-surface: #ffffff;
+  --t-surface2: #f6efe6;
+  --t-text: #241a12;
+  --t-muted: #5a4c40;
+  --t-muted2: #6a5b4d;
+  --t-faint: #78685a;
+  --t-divider: #efe6da;
+  --t-border: #e3d7c8;
+  --t-border-strong: #bfae9b;
+  --t-primary: #084684;
+  --t-primary-dark: #063461;
+  --t-primary-ink: #084684;
+  --t-primary-tint: rgba(8, 70, 132, 0.1);
+  --t-hero-from: #084684;
+  --t-hero-to: #0a5da9;
+  --t-hero-text: #f2f7fc;
+  --t-accent: #3f7d6e;
+  --t-error-bg: #fbeceb;
+  --t-error-ink: #a02017;
+  --t-warn-bg: #fdf1de;
+  --t-warn-ink: #7a5410;
+  --t-macro-prot: #a85b12;
+  --t-macro-fat: #4e7ca1;
+  --t-macro-carb: #3f7d53;
+  --t-marker: #8a7a6b;
+  --t-doodle-ink: #084684;
+  --t-doodle-accent: #f0dcc4;
+}
+
+.dark:root {
+  --t-bg: #16120e;
+  --t-surface: #1e1913;
+  --t-surface2: #28211a;
+  --t-text: #f1e7dc;
+  --t-muted: #bcaf9f;
+  --t-muted2: #ab9e8e;
+  --t-faint: #9a8b7c;
+  --t-divider: #2e271f;
+  --t-border: #392f26;
+  --t-border-strong: #52463a;
+  --t-primary: #f7b97b;
+  --t-primary-dark: #e9a25e;
+  --t-primary-ink: #f7b97b;
+  --t-primary-tint: rgba(247, 185, 123, 0.16);
+  --t-hero-from: #f0ac68;
+  --t-hero-to: #d98c3f;
+  --t-hero-text: #231609;
+  --t-accent: #6fb3a1;
+  --t-error-bg: #3a1e1c;
+  --t-error-ink: #ffb4ab;
+  --t-warn-bg: #33291a;
+  --t-warn-ink: #f2c98a;
+  --t-macro-prot: #f0a461;
+  --t-macro-fat: #84b0d4;
+  --t-macro-carb: #7fc08f;
+  --t-marker: #9a8b7c;
+  --t-doodle-ink: #f0ac68;
+  --t-doodle-accent: #3d3225;
+}

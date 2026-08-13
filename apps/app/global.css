@@ -1,0 +1,24 @@
+/*
+ * Les jetons viennent de `@vitae/core/tokens` : voir `tools/build-tokens.ts`, qui écrit le fichier
+ * importé ci-dessous. NativeWind sait lire des variables CSS et les redéfinir sous `.dark`, si
+ * bien que la bascule de thème ne re-rend rien : on change la classe racine, les variables
+ * changent, et tout l'arbre se repeint.
+ *
+ * L'import précède les directives : la spécification CSS exige que `@import` vienne en tête, et
+ * un import placé après serait ignoré par un navigateur strict.
+ */
+@import "./src/theme/tokens.generated.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  /* Carte : bordure fine et fond plein, jamais d'ombre portée. */
+  .card {
+    background-color: var(--t-surface);
+    border-width: 1px;
+    border-color: var(--t-divider);
+    border-radius: 16px;
+  }
+}

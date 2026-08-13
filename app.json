@@ -1,5 +1,3 @@
 {
-  "plugins": [
-    "@react-native-community/datetimepicker"
-  ]
+  "plugins": ["@react-native-community/datetimepicker"]
 }

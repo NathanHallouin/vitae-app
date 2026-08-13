@@ -179,7 +179,9 @@ async function main(): Promise<void> {
   ].join('\n');
 
   await writeFile(SORTIE, `${entete}${JSON.stringify(recettes, null, 2)};\n`, 'utf8');
-  console.log(`${recettes.length} recette(s) compilée(s) → ${path.relative(process.cwd(), SORTIE)}`);
+  console.log(
+    `${recettes.length} recette(s) compilée(s) → ${path.relative(process.cwd(), SORTIE)}`,
+  );
 }
 
 await main();
