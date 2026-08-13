@@ -3,7 +3,6 @@ import { CONFIDENTIALITE, CONFIDENTIALITE_MAJ, CONFIDENTIALITE_RESUME } from '@v
 import { SITE_URL } from '@vitae/core/site';
 
 import { ScrollView, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Seo from '@/components/Seo';
 
 /**
@@ -15,8 +14,6 @@ import Seo from '@/components/Seo';
  * vérité, quelle que soit la porte d'entrée.
  */
 export default function ConfidentialitePage() {
-  const insets = useSafeAreaInsets();
-
   return (
     <>
       <Seo
@@ -25,11 +22,7 @@ export default function ConfidentialitePage() {
         canonical={`${SITE_URL}/confidentialite`}
       />
 
-      <ScrollView
-        className="flex-1 bg-bg"
-        contentContainerStyle={{ paddingTop: insets.top + 24, paddingBottom: 64 }}
-        contentContainerClassName="px-4"
-      >
+      <ScrollView className="flex-1 bg-bg" contentContainerClassName="px-4 pt-6 pb-16">
         <Text
           accessibilityRole="header"
           className="mb-3 font-display text-h1 leading-[44px] text-ink"

@@ -2,7 +2,6 @@ import { type Block, dureeISO, dureeTotale, getRecipe, getRecipeSlugs } from '@v
 import { SITE_NAME, SITE_URL } from '@vitae/core/site';
 import { Link, useLocalSearchParams } from 'expo-router';
 import { ScrollView, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import RecetteAtelier, { GarderEcranAllume } from '@/components/recette/RecetteAtelier';
 import Seo from '@/components/Seo';
 
@@ -17,7 +16,6 @@ export function generateStaticParams(): Array<{ slug: string }> {
 export default function RecettePage() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
   const recette = getRecipe(slug ?? '');
-  const insets = useSafeAreaInsets();
 
   if (!recette) {
     return (
@@ -84,11 +82,7 @@ export default function RecettePage() {
       />
       <GarderEcranAllume />
 
-      <ScrollView
-        className="flex-1 bg-bg"
-        contentContainerStyle={{ paddingTop: insets.top + 24, paddingBottom: 64 }}
-        contentContainerClassName="px-4"
-      >
+      <ScrollView className="flex-1 bg-bg" contentContainerClassName="px-4 pt-6 pb-16">
         <View className="mb-6 flex-row">
           <Link href="/recettes" className="text-small text-primary-ink">
             Recettes

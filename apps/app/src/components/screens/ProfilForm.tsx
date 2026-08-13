@@ -1,6 +1,5 @@
-import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { activityFactor, DAILY, GOALS, SESSIONS, STEP_TITLES } from '@vitae/core/constants';
-import { ageFrom, formatBirthDate, formatLongDate } from '@vitae/core/date';
+import { ageFrom, formatLongDate } from '@vitae/core/date';
 import { fmtFactor } from '@vitae/core/format';
 import {
   type FormState,
@@ -11,10 +10,11 @@ import {
   validate,
 } from '@vitae/core/state';
 import type { ProfileInput } from '@vitae/core/storage';
-import { useReducer, useState } from 'react';
-import { Platform, Pressable, Text, View } from 'react-native';
+import { useReducer } from 'react';
+import { Text, View } from 'react-native';
 import { usePalette } from '@/theme/palette';
 import LivePreview from '../LivePreview';
+import DateField from '../ui/DateField';
 import Icon, { type IconName } from '../ui/Icon';
 import OptionButton from '../ui/OptionButton';
 import Overline from '../ui/Overline';
@@ -39,7 +39,6 @@ export default function ProfilForm({
   hasProfile: boolean;
 }) {
   const [form, dispatch] = useReducer(reducer, initial);
-  const [pickerOuvert, setPickerOuvert] = useState(false);
   const palette = usePalette();
 
   const fields = stepFields(form);
@@ -61,24 +60,6 @@ export default function ProfilForm({
     if (!isLastStep(form)) return dispatch({ type: 'next' });
     const profile = profileFromForm(form);
     if (profile) onSubmit(profile);
-  };
-
-  /**
-   * Le sélecteur natif rend une `Date` ; le métier attend `yyyy-mm-dd`.
-   *
-   * La conversion passe par les composantes locales et non par `toISOString`, qui repasse en UTC :
-   * pour une naissance saisie à Paris en été, un jour entier se perdrait au passage.
-   */
-  const choisirDate = (event: DateTimePickerEvent, date?: Date) => {
-    // Android referme le sélecteur lui-même ; iOS le laisse ouvert, en molette.
-    if (Platform.OS === 'android') setPickerOuvert(false);
-    if (event.type === 'dismissed' || !date) return;
-    const iso = [
-      date.getFullYear(),
-      String(date.getMonth() + 1).padStart(2, '0'),
-      String(date.getDate()).padStart(2, '0'),
-    ].join('-');
-    dispatch({ type: 'setField', field: 'naissance', value: iso });
   };
 
   return (
@@ -149,30 +130,12 @@ export default function ProfilForm({
           <View className="mb-6 gap-5">
             <View>
               <FieldLabel compact>Date de naissance</FieldLabel>
-              {form.naissanceLocked ? (
-                // Date issue du profil enregistré : affichée en clair et non dans un contrôle,
-                // pour qu'aucune apparence de champ ne laisse croire qu'elle est modifiable.
-                <View className="rounded-control border border-line bg-surface2 px-[14px] py-[14px]">
-                  <Text
-                    accessibilityLabel={`Date de naissance enregistrée : ${formatBirthDate(form.naissance)}`}
-                    className="text-input text-muted"
-                  >
-                    {formatBirthDate(form.naissance)}
-                  </Text>
-                </View>
-              ) : (
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel="Date de naissance"
-                  accessibilityHint="Ouvre le sélecteur de date"
-                  onPress={() => setPickerOuvert(true)}
-                  className="rounded-control border border-line bg-surface2 px-[14px] py-[14px] active:border-line-strong"
-                >
-                  <Text className={cx('text-input', form.naissance ? 'text-ink' : 'text-faint')}>
-                    {form.naissance ? formatBirthDate(form.naissance) : 'Choisir une date'}
-                  </Text>
-                </Pressable>
-              )}
+              <DateField
+                value={form.naissance}
+                locked={form.naissanceLocked}
+                label="Date de naissance"
+                onChange={(value) => dispatch({ type: 'setField', field: 'naissance', value })}
+              />
               <Text className="mt-[6px] text-caption text-muted2">
                 {age === null
                   ? 'Votre âge est calculé tout seul.'
@@ -311,19 +274,6 @@ export default function ProfilForm({
             Tout effacer
           </Button>
         </View>
-      ) : null}
-
-      {pickerOuvert && !form.naissanceLocked ? (
-        <DateTimePicker
-          mode="date"
-          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-          // Une naissance est forcément passée, et la validation borne déjà l'âge à 15–100 ans :
-          // autant que le sélecteur refuse d'emblée ce que le formulaire rejetterait ensuite.
-          value={form.naissance ? new Date(`${form.naissance}T12:00:00`) : new Date(1990, 0, 1)}
-          maximumDate={new Date()}
-          onChange={choisirDate}
-          locale="fr-FR"
-        />
       ) : null}
     </View>
   );

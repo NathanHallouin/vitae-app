@@ -59,11 +59,7 @@ export default function MetabolismeScreen() {
           {kcal(energie.bmr)} kcal par jour.
         </Text>
 
-        <View
-          accessibilityElementsHidden
-          importantForAccessibility="no-hide-descendants"
-          className="mb-[14px] h-3 flex-row overflow-hidden rounded-[6px]"
-        >
+        <View aria-hidden className="mb-[14px] h-3 flex-row overflow-hidden rounded-[6px]">
           <View className="h-full bg-primary-ink" style={{ width: `${energie.bmrPct}%` }} />
           <View
             className="h-full bg-primary opacity-55"

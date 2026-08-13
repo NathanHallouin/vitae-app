@@ -2,7 +2,6 @@ import { dureeTotale, getAllRecipes } from '@vitae/content';
 import { SITE_URL } from '@vitae/core/site';
 import { Link } from 'expo-router';
 import { Pressable, ScrollView, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Seo from '@/components/Seo';
 import { Card } from '@/components/ui/primitives';
 
@@ -14,7 +13,6 @@ import { Card } from '@/components/ui/primitives';
  */
 export default function RecettesIndex() {
   const recettes = getAllRecipes();
-  const insets = useSafeAreaInsets();
 
   return (
     <>
@@ -24,11 +22,7 @@ export default function RecettesIndex() {
         canonical={`${SITE_URL}/recettes`}
       />
 
-      <ScrollView
-        className="flex-1 bg-bg"
-        contentContainerStyle={{ paddingTop: insets.top + 24, paddingBottom: 64 }}
-        contentContainerClassName="px-4"
-      >
+      <ScrollView className="flex-1 bg-bg" contentContainerClassName="px-4 pt-6 pb-16">
         <Text
           accessibilityRole="header"
           className="mb-[6px] font-display text-h1 leading-[44px] text-ink"

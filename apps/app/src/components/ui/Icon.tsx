@@ -192,11 +192,13 @@ export default function Icon({
       strokeWidth={1.6}
       strokeLinecap="round"
       strokeLinejoin="round"
-      accessible={Boolean(title)}
+      // `aria-hidden` plutôt que le couple `accessibilityElementsHidden` /
+      // `importantForAccessibility` : React Native comprend les deux formes depuis la 0.71, mais
+      // seule celle-ci a un équivalent sur le web — les autres finissaient telles quelles dans le
+      // DOM, avec un avertissement de React à chaque rendu.
       accessibilityRole={title ? 'image' : undefined}
       accessibilityLabel={title}
-      accessibilityElementsHidden={!title}
-      importantForAccessibility={title ? 'yes' : 'no-hide-descendants'}
+      aria-hidden={!title}
     >
       {PATHS[name]}
     </Svg>

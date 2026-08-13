@@ -29,6 +29,7 @@ import { Platform } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { enableFreeze } from 'react-native-screens';
+import AppHeader from '@/components/AppHeader';
 import ProfileProvider from '@/components/ProfileProvider';
 import ColorModeProvider, { useColorMode } from '@/theme/ColorMode';
 import { usePalette } from '@/theme/palette';
@@ -62,7 +63,10 @@ function Navigation() {
       <StatusBar style={mode === 'dark' ? 'light' : 'dark'} />
       <Stack
         screenOptions={{
-          headerShown: false,
+          // L'en-tête est porté par la pile, pas par les onglets : les recettes, l'accueil et la
+          // confidentialité vivent hors des onglets, et se retrouvaient sans aucune navigation —
+          // sur le site, une recette ouverte depuis un moteur de recherche était un cul-de-sac.
+          header: () => <AppHeader />,
           contentStyle: { backgroundColor: palette.bg },
           // La pile native rend les transitions au niveau du système : elles ne passent pas par
           // le fil JavaScript, et restent donc fluides même pendant un recalcul.

@@ -4,7 +4,6 @@ import { SITE_URL } from '@vitae/core/site';
 import { useRouter } from 'expo-router';
 import { useEffect } from 'react';
 import { Platform, ScrollView, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useProfile } from '@/components/ProfileProvider';
 import Seo from '@/components/Seo';
 import HomeIllustration from '@/components/ui/HomeIllustration';
@@ -36,7 +35,6 @@ export default function AccueilScreen() {
   const { status, metrics } = useProfile();
   const router = useRouter();
   const palette = usePalette();
-  const insets = useSafeAreaInsets();
   const known = status === 'ready' && metrics !== null;
 
   useEffect(() => {
@@ -53,11 +51,7 @@ export default function AccueilScreen() {
         description="Calculez ce que votre corps dépense au repos et dans la journée, votre IMC, et combien manger selon votre objectif. Expliqué simplement, sans compte à créer."
         canonical={SITE_URL}
       />
-      <ScrollView
-        className="flex-1 bg-bg"
-        contentContainerStyle={{ paddingTop: insets.top + 24, paddingBottom: 64 }}
-        contentContainerClassName="px-4"
-      >
+      <ScrollView className="flex-1 bg-bg" contentContainerClassName="px-4 pt-6 pb-16">
         <Text className="mb-4 font-display text-h1 leading-[44px] text-ink">
           Combien votre corps brûle-t-il de calories ?
         </Text>

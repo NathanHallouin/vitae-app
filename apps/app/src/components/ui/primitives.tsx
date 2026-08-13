@@ -12,7 +12,7 @@
  *   est de toute façon plus étroite que la mesure qu'elles cherchaient à borner.
  */
 
-import type { ReactNode } from 'react';
+import { type ReactNode, useState } from 'react';
 import { ActivityIndicator, Pressable, Text, TextInput, View, type ViewProps } from 'react-native';
 import { usePalette } from '@/theme/palette';
 
@@ -130,10 +130,16 @@ export function NumberField({
   className?: string;
 }) {
   const palette = usePalette();
+  const [focalise, setFocalise] = useState(false);
+
   return (
     <View
       className={cx(
-        'flex-row items-center rounded-control border border-line bg-surface2',
+        'flex-row items-center rounded-control bg-surface2',
+        // La bordure passe à la couleur d'action et s'épaissit à la saisie, comme sur la maquette.
+        // Elle remplace le contour que le navigateur dessinerait de lui-même — supprimé juste en
+        // dessous, mais pas sans le remplacer : un champ focalisé doit rester repérable à l'œil.
+        focalise ? 'border-2 border-primary m-[-1px]' : 'border border-line',
         !editable && 'opacity-60',
         className,
       )}
@@ -142,17 +148,21 @@ export function NumberField({
         accessibilityLabel={label}
         value={value}
         onChangeText={onChangeText}
+        onFocus={() => setFocalise(true)}
+        onBlur={() => setFocalise(false)}
         editable={editable}
         placeholder={placeholder}
         placeholderTextColor={palette.faint}
         keyboardType="decimal-pad"
         inputMode="decimal"
         className="flex-1 px-[14px] py-[14px] text-input text-ink"
+        // Sans effet en natif ; sur le web, retire le contour par défaut du navigateur, dont la
+        // bordure ci-dessus prend le relais.
+        style={{ outline: 'none' }}
       />
       <Text
         // Décoratif : le libellé du champ porte déjà l'unité.
-        accessibilityElementsHidden
-        importantForAccessibility="no"
+        aria-hidden
         className="pr-[14px] text-small text-muted2"
       >
         {unit}
@@ -183,11 +193,7 @@ export function ProgressBar({ value, label }: { value: number; label: string }) 
  */
 export function SplitBar({ pct }: { pct: number }) {
   return (
-    <View
-      accessibilityElementsHidden
-      importantForAccessibility="no-hide-descendants"
-      className="mb-3 h-[10px] flex-row overflow-hidden rounded-[5px]"
-    >
+    <View aria-hidden className="mb-3 h-[10px] flex-row overflow-hidden rounded-[5px]">
       <View className="h-full bg-primary-ink" style={{ width: `${pct}%` }} />
       <View className="h-full bg-divider" style={{ width: `${100 - pct}%` }} />
     </View>

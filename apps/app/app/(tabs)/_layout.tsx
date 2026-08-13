@@ -16,7 +16,6 @@
 
 import { MOBILE_PAGES } from '@vitae/core/nav';
 import { Tabs } from 'expo-router';
-import AppHeader from '@/components/AppHeader';
 import Icon from '@/components/ui/Icon';
 import { usePalette } from '@/theme/palette';
 
@@ -26,7 +25,9 @@ export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{
-        header: () => <AppHeader />,
+        // L'en-tête vient de la pile qui contient ces onglets : en poser un second ici l'afficherait
+        // deux fois.
+        headerShown: false,
         tabBarActiveTintColor: palette.primaryInk,
         tabBarInactiveTintColor: palette.muted2,
         tabBarStyle: {
