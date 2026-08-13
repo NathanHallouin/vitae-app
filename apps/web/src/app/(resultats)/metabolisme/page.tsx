@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
-import MetabolismeExplainer from '@/components/explainers/MetabolismeExplainer';
+import { METABOLISME_EXPLAINER } from '@vitae/core/explainers';
+import Explainer from '@/components/explainers/Explainer';
 import MetabolismeScreen from '@/components/screens/MetabolismeScreen';
 import MeditatingDoodle from '@/components/ui/doodles/MeditatingDoodle';
 import PageIntro from '@/components/ui/PageIntro';
@@ -25,7 +26,7 @@ export default function Page() {
         illustration={<MeditatingDoodle />}
       />
       <MetabolismeScreen />
-      <MetabolismeExplainer />
+      <Explainer data={METABOLISME_EXPLAINER} />
     </>
   );
 }

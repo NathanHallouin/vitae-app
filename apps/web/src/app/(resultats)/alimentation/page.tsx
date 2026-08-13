@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
-import AlimentationExplainer from '@/components/explainers/AlimentationExplainer';
+import { ALIMENTATION_EXPLAINER } from '@vitae/core/explainers';
+import Explainer from '@/components/explainers/Explainer';
 import AlimentationScreen from '@/components/screens/AlimentationScreen';
 import PlantDoodle from '@/components/ui/doodles/PlantDoodle';
 import PageIntro from '@/components/ui/PageIntro';
@@ -25,7 +26,7 @@ export default function Page() {
         illustration={<PlantDoodle />}
       />
       <AlimentationScreen />
-      <AlimentationExplainer />
+      <Explainer data={ALIMENTATION_EXPLAINER} />
     </>
   );
 }

@@ -1,0 +1,8 @@
+# Disposition classique des dépendances, à plat dans `node_modules/`.
+#
+# Bun installe par défaut en mode isolé, chaque paquet dans son propre dossier relié par un lien.
+# La chaîne React Native ne s'en accommode pas : Metro, l'autolinking des modules natifs, Gradle et
+# CocoaPods résolvent tous les chemins à leur façon, et un seul module natif introuvable fait
+# échouer le build sur l'appareil, pas au moment de l'installation.
+[install]
+linker = "hoisted"

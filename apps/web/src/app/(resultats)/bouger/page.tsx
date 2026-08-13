@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
-import BougerExplainer from '@/components/explainers/BougerExplainer';
+import { BOUGER_EXPLAINER } from '@vitae/core/explainers';
+import Explainer from '@/components/explainers/Explainer';
 import BougerScreen from '@/components/screens/BougerScreen';
 import RunningDoodle from '@/components/ui/doodles/RunningDoodle';
 import PageIntro from '@/components/ui/PageIntro';
@@ -25,7 +26,7 @@ export default function Page() {
         illustration={<RunningDoodle />}
       />
       <BougerScreen />
-      <BougerExplainer />
+      <Explainer data={BOUGER_EXPLAINER} />
     </>
   );
 }

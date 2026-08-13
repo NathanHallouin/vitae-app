@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./tokens.generated.css";
 @plugin "@tailwindcss/typography";
 
 /*
@@ -13,66 +14,11 @@
  * Deux niveaux : `--t-*` porte les valeurs et change avec le thème, `@theme inline` les expose en
  * utilitaires Tailwind (`bg-surface`, `text-muted`…). Sans le passage par `--t-*`, Tailwind fige
  * les couleurs à la compilation et la bascule de thème ne ferait plus rien.
+ *
+ * Les valeurs elles-mêmes vivent dans `tokens.generated.css`, écrit depuis `@vitae/core/tokens` :
+ * l'application native lit la même source, et une couleur ne peut plus diverger d'une interface
+ * à l'autre.
  */
-:root {
-  --t-bg: #fbf7f2;
-  --t-surface: #ffffff;
-  --t-surface2: #f6efe6;
-  --t-text: #241a12;
-  --t-muted: #5a4c40;
-  --t-muted2: #6a5b4d;
-  --t-faint: #78685a;
-  --t-divider: #efe6da;
-  --t-border: #e3d7c8;
-  --t-border-strong: #bfae9b;
-  --t-primary: #084684;
-  --t-primary-dark: #063461;
-  --t-primary-ink: #084684;
-  --t-primary-tint: rgb(8 70 132 / 0.1);
-  --t-hero-gradient: linear-gradient(135deg, #084684 0%, #0a5da9 100%);
-  --t-hero-text: #f2f7fc;
-  --t-accent: #3f7d6e;
-  --t-error-bg: #fbeceb;
-  --t-error-ink: #a02017;
-  --t-warn-bg: #fdf1de;
-  --t-warn-ink: #7a5410;
-  --t-macro-prot: #a85b12;
-  --t-macro-fat: #4e7ca1;
-  --t-macro-carb: #3f7d53;
-  --t-marker: #8a7a6b;
-  --t-doodle-ink: #084684;
-  --t-doodle-accent: #f0dcc4;
-}
-
-.dark {
-  --t-bg: #16120e;
-  --t-surface: #1e1913;
-  --t-surface2: #28211a;
-  --t-text: #f1e7dc;
-  --t-muted: #bcaf9f;
-  --t-muted2: #ab9e8e;
-  --t-faint: #9a8b7c;
-  --t-divider: #2e271f;
-  --t-border: #392f26;
-  --t-border-strong: #52463a;
-  --t-primary: #f7b97b;
-  --t-primary-dark: #e9a25e;
-  --t-primary-ink: #f7b97b;
-  --t-primary-tint: rgb(247 185 123 / 0.16);
-  --t-hero-gradient: linear-gradient(135deg, #f0ac68 0%, #d98c3f 100%);
-  --t-hero-text: #231609;
-  --t-accent: #6fb3a1;
-  --t-error-bg: #3a1e1c;
-  --t-error-ink: #ffb4ab;
-  --t-warn-bg: #33291a;
-  --t-warn-ink: #f2c98a;
-  --t-macro-prot: #f0a461;
-  --t-macro-fat: #84b0d4;
-  --t-macro-carb: #7fc08f;
-  --t-marker: #9a8b7c;
-  --t-doodle-ink: #f0ac68;
-  --t-doodle-accent: #3d3225;
-}
 
 @theme inline {
   --color-bg: var(--t-bg);
@@ -168,8 +114,10 @@
     border-radius: var(--radius-card);
   }
 
+  /* Le dégradé est composé ici : les jetons ne portent que ses deux arrêts, parce que React Native
+     n'a pas de valeur `linear-gradient` à recevoir. */
   .hero-gradient {
-    background: var(--t-hero-gradient);
+    background: linear-gradient(135deg, var(--t-hero-from) 0%, var(--t-hero-to) 100%);
     color: var(--t-hero-text);
   }
 }

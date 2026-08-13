@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
-import PoidsExplainer from '@/components/explainers/PoidsExplainer';
+import { POIDS_EXPLAINER } from '@vitae/core/explainers';
+import Explainer from '@/components/explainers/Explainer';
 import PoidsScreen from '@/components/screens/PoidsScreen';
 import LevitateDoodle from '@/components/ui/doodles/LevitateDoodle';
 import PageIntro from '@/components/ui/PageIntro';
@@ -25,7 +26,7 @@ export default function Page() {
         illustration={<LevitateDoodle />}
       />
       <PoidsScreen />
-      <PoidsExplainer />
+      <Explainer data={POIDS_EXPLAINER} />
     </>
   );
 }
