@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import ProfileBar from './ProfileBar';
+import Page from './ui/Page';
 
 /**
  * Le cadre commun des écrans de résultats : rappel du profil, contenu, avertissement.
@@ -15,9 +16,7 @@ import ProfileBar from './ProfileBar';
  */
 export default function ResultScreen({ children }: { children: ReactNode }) {
   return (
-    <ScrollView
-      className="flex-1 bg-bg"
-      contentContainerClassName="px-4 pt-6 pb-16"
+    <Page
       // Le clavier se referme dès qu'on touche ailleurs : sans cela, il masque la moitié des
       // chiffres sur l'écran du poids cible.
       keyboardShouldPersistTaps="handled"
@@ -31,6 +30,6 @@ export default function ResultScreen({ children }: { children: ReactNode }) {
           diététicien.
         </Text>
       </View>
-    </ScrollView>
+    </Page>
   );
 }

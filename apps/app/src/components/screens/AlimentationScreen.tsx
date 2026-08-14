@@ -15,6 +15,7 @@ import CalculPrompt from '../ui/CalculPrompt';
 import Icon from '../ui/Icon';
 import OptionButton from '../ui/OptionButton';
 import Overline from '../ui/Overline';
+import { TileRow } from '../ui/Page';
 import { Card } from '../ui/primitives';
 import StatTile from '../ui/StatTile';
 import RecipesCard from './RecipesCard';
@@ -113,7 +114,7 @@ export default function AlimentationScreen() {
             <Text className="text-micro text-muted2">Ce que vous brûlez en tout</Text>
           </View>
 
-          <View className="gap-3">
+          <TileRow>
             <StatTile
               label="Au minimum"
               value={`${kcal(metrics.min)} kcal`}
@@ -124,7 +125,7 @@ export default function AlimentationScreen() {
               value={`${kcal(metrics.max)} kcal`}
               note={`${fmtGap(gapAtMax)} par rapport à votre dépense · ${fmtWeekly(gapAtMax)}`}
             />
-          </View>
+          </TileRow>
 
           {warning ? (
             <View className="mt-3 rounded-xl bg-warn-bg px-[14px] py-3">

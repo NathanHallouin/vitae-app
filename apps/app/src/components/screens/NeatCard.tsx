@@ -2,6 +2,7 @@ import { kcal } from '@vitae/core/format';
 import type { NeatPlan } from '@vitae/core/neat';
 import { Text, View } from 'react-native';
 import Overline from '../ui/Overline';
+import { TileRow } from '../ui/Page';
 import { Bullet, Card } from '../ui/primitives';
 import StatTile from '../ui/StatTile';
 
@@ -17,7 +18,7 @@ export default function NeatCard({ neat }: { neat: NeatPlan }) {
         <Overline className="mb-[10px]">Ce que votre quotidien dépense déjà</Overline>
         <Text className="mb-5 text-base leading-[22px] text-muted">{neat.lead}</Text>
 
-        <View className="gap-3">
+        <TileRow>
           <StatTile
             label="Mouvement du quotidien"
             value={`${kcal(neat.currentKcal)} kcal`}
@@ -31,7 +32,7 @@ export default function NeatCard({ neat }: { neat: NeatPlan }) {
               note="en passant au cran de mouvement au-dessus"
             />
           ) : null}
-        </View>
+        </TileRow>
 
         <Text className="mt-[14px] text-small leading-[22px] text-muted">{neat.note}</Text>
       </Card>
@@ -74,11 +75,11 @@ export default function NeatCard({ neat }: { neat: NeatPlan }) {
         <Text className="mb-[14px] text-small text-muted">
           Adaptés à votre façon de passer vos journées.
         </Text>
-        <View className="gap-3">
+        <TileRow>
           {[neat.steps, ...neat.tips].map((tip) => (
             <Bullet key={tip}>{tip}</Bullet>
           ))}
-        </View>
+        </TileRow>
       </Card>
     </View>
   );

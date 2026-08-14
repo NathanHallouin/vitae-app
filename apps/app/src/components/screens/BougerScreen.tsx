@@ -6,6 +6,7 @@ import { Text, View } from 'react-native';
 import { useProfile } from '../ProfileProvider';
 import CalculPrompt from '../ui/CalculPrompt';
 import Overline from '../ui/Overline';
+import { TileRow } from '../ui/Page';
 import { Card, SplitBar } from '../ui/primitives';
 import SectionHeading from '../ui/SectionHeading';
 import StatTile from '../ui/StatTile';
@@ -42,7 +43,7 @@ export default function BougerScreen() {
           <>
             <Overline className="mb-3">{plan.splitLabel}</Overline>
             <SplitBar pct={plan.movePct} />
-            <View className="gap-3">
+            <TileRow>
               <StatTile
                 label={`${plan.moveLabel} · ${plan.movePct} %`}
                 value={`${kcal(plan.moveKcal)} kcal`}
@@ -52,7 +53,7 @@ export default function BougerScreen() {
                 label={`${plan.foodLabel} · ${plan.foodPct} %`}
                 value={`${kcal(plan.foodKcal)} kcal`}
               />
-            </View>
+            </TileRow>
           </>
         ) : null}
       </Card>
@@ -67,7 +68,7 @@ export default function BougerScreen() {
 
         <SplitBar pct={split.neatPct} />
 
-        <View className="gap-3">
+        <TileRow>
           <StatTile
             label={`Le quotidien · ${split.neatPct} %`}
             value={`${kcal(split.neat)} kcal`}
@@ -79,7 +80,7 @@ export default function BougerScreen() {
             value={`${kcal(split.sessions)} kcal`}
             note="lissées sur les sept jours"
           />
-        </View>
+        </TileRow>
       </Card>
 
       <SectionHeading

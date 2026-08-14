@@ -7,6 +7,7 @@ import { usePalette } from '@/theme/palette';
 import { useProfile } from '../ProfileProvider';
 import CalculPrompt from '../ui/CalculPrompt';
 import Overline from '../ui/Overline';
+import { TileRow } from '../ui/Page';
 import { Card } from '../ui/primitives';
 import StatTile from '../ui/StatTile';
 
@@ -67,7 +68,7 @@ export default function MetabolismeScreen() {
           />
         </View>
 
-        <View className="gap-3">
+        <TileRow>
           <StatTile
             label={`Fonctionnement du corps · ${energie.bmrPct} %`}
             value={`${kcal(energie.bmr)} kcal`}
@@ -84,7 +85,7 @@ export default function MetabolismeScreen() {
             value={`≈ ${kcal(energie.digestion)} kcal`}
             note="Environ 10 % de ce que vous mangez, déjà compté dans le total ci-dessus."
           />
-        </View>
+        </TileRow>
       </Card>
 
       <Card className="p-6">

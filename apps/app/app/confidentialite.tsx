@@ -2,8 +2,9 @@ import { formatLongDate } from '@vitae/core/date';
 import { CONFIDENTIALITE, CONFIDENTIALITE_MAJ, CONFIDENTIALITE_RESUME } from '@vitae/core/legal';
 import { SITE_URL } from '@vitae/core/site';
 
-import { ScrollView, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import Seo from '@/components/Seo';
+import Page from '@/components/ui/Page';
 
 /**
  * La politique de confidentialité.
@@ -22,7 +23,7 @@ export default function ConfidentialitePage() {
         canonical={`${SITE_URL}/confidentialite`}
       />
 
-      <ScrollView className="flex-1 bg-bg" contentContainerClassName="px-4 pt-6 pb-16">
+      <Page>
         <Text
           accessibilityRole="header"
           className="mb-3 font-display text-h1 leading-[44px] text-ink"
@@ -54,7 +55,7 @@ export default function ConfidentialitePage() {
         <Text className="mt-8 text-caption text-faint">
           Dernière révision : {formatLongDate(CONFIDENTIALITE_MAJ)}
         </Text>
-      </ScrollView>
+      </Page>
     </>
   );
 }

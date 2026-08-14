@@ -1,8 +1,9 @@
 import { formFromProfile } from '@vitae/core/state';
 import { Link, useRouter } from 'expo-router';
-import { ScrollView, View } from 'react-native';
+import { View } from 'react-native';
 import { useProfile } from '@/components/ProfileProvider';
 import ProfilForm from '@/components/screens/ProfilForm';
+import Page from '@/components/ui/Page';
 
 /**
  * La saisie du profil.
@@ -21,11 +22,7 @@ export default function ProfilTab() {
   const initial = formFromProfile(profile, staleWeight, mode);
 
   return (
-    <ScrollView
-      className="flex-1 bg-bg"
-      contentContainerClassName="px-4 pt-8 pb-16"
-      keyboardShouldPersistTaps="handled"
-    >
+    <Page contentClassName="pt-8" keyboardShouldPersistTaps="handled">
       <ProfilForm
         // Réinitialise le formulaire si le profil enregistré change sous ses pieds.
         key={profile?.updatedAt ?? 'nouveau'}
@@ -50,6 +47,6 @@ export default function ProfilTab() {
           Ce que deviennent vos informations
         </Link>
       </View>
-    </ScrollView>
+    </Page>
   );
 }

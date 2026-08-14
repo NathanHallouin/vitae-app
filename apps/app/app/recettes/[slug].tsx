@@ -1,9 +1,10 @@
 import { type Block, dureeISO, dureeTotale, getRecipe, getRecipeSlugs } from '@vitae/content';
 import { SITE_NAME, SITE_URL } from '@vitae/core/site';
 import { Link, useLocalSearchParams } from 'expo-router';
-import { ScrollView, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import RecetteAtelier, { GarderEcranAllume } from '@/components/recette/RecetteAtelier';
 import Seo from '@/components/Seo';
+import Page from '@/components/ui/Page';
 
 /**
  * Toutes les recettes sont connues à la compilation : l'export web produit un fichier HTML par
@@ -82,7 +83,7 @@ export default function RecettePage() {
       />
       <GarderEcranAllume />
 
-      <ScrollView className="flex-1 bg-bg" contentContainerClassName="px-4 pt-6 pb-16">
+      <Page>
         <View className="mb-6 flex-row">
           <Link href="/recettes" className="text-small text-primary-ink">
             Recettes
@@ -117,7 +118,7 @@ export default function RecettePage() {
         <RecetteAtelier recette={recette} />
 
         <Prose blocks={recette.suiteBlocks} />
-      </ScrollView>
+      </Page>
     </>
   );
 }

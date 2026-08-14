@@ -13,6 +13,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColorMode } from '@/theme/ColorMode';
 import { usePalette } from '@/theme/palette';
 import Icon from './ui/Icon';
+import { MAX_CONTENT } from './ui/Page';
 
 export default function AppHeader() {
   const router = useRouter();
@@ -28,7 +29,13 @@ export default function AppHeader() {
       // fond plein jusqu'au bord haut de l'écran, pas commencer sous la barre d'état.
       style={{ paddingTop: insets.top }}
     >
-      <View className="h-14 flex-row items-center gap-3 px-4">
+      {/* Le fond court jusqu'aux bords, la barre s'aligne sur la colonne de contenu : sur un
+          écran large, une marque collée à l'angle et une bascule de thème à 1 400 px de là ne
+          formaient plus un en-tête, mais deux éléments sans rapport. */}
+      <View
+        className="h-14 w-full flex-row items-center gap-3 self-center px-4"
+        style={{ maxWidth: MAX_CONTENT }}
+      >
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Accueil"
