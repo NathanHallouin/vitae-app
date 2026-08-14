@@ -468,6 +468,50 @@ Ce n'est pas un réglage mais une conséquence, et chaque point compte :
    l'écran pendant ce temps : pas d'écran blanc, et pas de saut de police — un défaut que l'œil lit
    comme de la lenteur alors que tout est déjà là.
 
+### Le système visuel
+
+Ce qui rend un écran de cette application reconnaissable tient en quatre éléments, et ce sont des
+composants plutôt que des conventions — une convention se perd au troisième écran.
+
+| | Rôle |
+|---|---|
+| `Hero` | la réponse de l'écran : dégradé plein, surtitre, grand chiffre. **Une par écran, jamais deux** — c'est elle qui dit ce qui est la réponse et ce qui est le détail |
+| `Chiffre` | le grand nombre. Fraunces, chasse fixe, unité en Inter plus petite. Quatre tailles, de la réponse principale à la tuile |
+| `Card` | bordure fine, fond plein, **jamais d'ombre**. C'est ce qui donne l'air de papier plutôt que d'interface |
+| `Overline` | le surtitre 11 px en majuscules espacées, en tête de chaque carte |
+
+Le grand chiffre est l'élément signature, et ce n'est pas arbitraire : c'est une application de
+chiffres. Le traitement était réécrit dans huit fichiers avec des tailles et des interlignes qui
+divergeaient ; `Chiffre` les remet d'aplomb et impose la chasse fixe, sans laquelle un nombre qui se
+met à jour fait sautiller toute la ligne.
+
+### Le mouvement
+
+Les durées vivent dans `@vitae/core/tokens` (`MOTION`), avec les couleurs. Une échelle plutôt que
+des valeurs au cas par cas : c'est ce qui fait qu'une application paraît réglée plutôt qu'animée.
+
+Quatre mouvements, et un seul porte du sens :
+
+- **Le compteur.** Quand un chiffre change parce que le profil a changé, il monte jusqu'à sa
+  nouvelle valeur. C'est la seule animation qui dit quelque chose : que le calcul vient d'être
+  refait pour vous. Affiché sec, le même nombre passe inaperçu.
+- **La cascade d'arrivée** (`Apparition`) : les cartes se posent de haut en bas, décalées de 60 ms.
+  Sur un écran qui en empile huit, cela donne un ordre de lecture qu'une arrivée simultanée ne
+  donne pas. Le décalage est plafonné, sinon le rythme devient de l'attente.
+- **Le repli** : la carte anime sa hauteur, le chevron pivote d'un demi-tour.
+- **Les transitions d'écran**, rendues par le système et non par le fil JavaScript.
+
+Trois pièges rencontrés, et qui se reproduiront :
+
+- **`entering` de Reanimated sort l'élément du flux sur le web** : les blocs suivants remontent et
+  se superposent au titre. Les arrivées n'animent donc que l'opacité et une translation, deux
+  propriétés qui ne touchent jamais à la mise en page.
+- **NativeWind ignore `className` sur un `Animated.View`** non enregistré — une carte animée perd
+  sa bordure et son fond, sans la moindre erreur. D'où `VueAnimee`, enregistrée une fois.
+- **`useMotionReduite` n'est pas une préférence esthétique.** Les animations d'entrée déclenchent
+  des vertiges chez les personnes sensibles, et les trois systèmes exposent un réglage. Quand il est
+  actif, on **supprime** le mouvement, on ne le ralentit pas : un fondu lent reste un mouvement.
+
 ### Deux façons de replier, et quand employer laquelle
 
 Les écrans portent beaucoup de matière — c'est voulu, on y apprend des choses — mais tout déplier

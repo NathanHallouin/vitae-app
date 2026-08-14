@@ -35,7 +35,6 @@ import { Card, cx } from './ui/primitives';
 export default function Explainer({ data }: { data: ExplainerData }) {
   const [ouvert, setOuvert] = useState(0);
   const palette = usePalette();
-  const reduite = useMotionReduite();
 
   return (
     <Card taille className="mt-6 p-6">
