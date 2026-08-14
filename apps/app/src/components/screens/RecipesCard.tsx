@@ -7,7 +7,6 @@ import {
   buildRecipeSuggestions,
   EXCLUSIONS,
   type Exclusion,
-  RECIPES,
   type Suggestion,
   snackKcal,
 } from '@vitae/core/recipes';
@@ -63,11 +62,10 @@ export default function RecipesCard({ metrics, goal }: { metrics: Metrics; goal:
     <Card className="p-6">
       <Overline className="mb-1">Des recettes pour ces repères</Overline>
       <Text className="mb-5 text-base leading-[22px] text-muted">
-        Des plats choisis pour tomber près de vos {kcal(metrics.target)} kcal et de vos besoins en
-        protéines. Nos recettes passent en premier ; le reste renvoie vers une recherche sur un site
-        de cuisine, parmi {RECIPES.length} plats dont les valeurs sont des ordres de grandeur pour
-        une portion courante. Touchez-en un pour l’ouvrir, ou « changer » pour une autre
-        proposition.
+        Nos recettes, choisies pour tomber près de vos {kcal(metrics.target)} kcal et de vos besoins
+        en protéines, sans jamais servir deux fois le même ingrédient dans la journée. Touchez-en
+        une pour l’ouvrir, ou « changer » pour une autre proposition. Si vos filtres réduisent trop
+        le choix, une recherche sur un site de cuisine vient compléter.
       </Text>
 
       <View accessibilityLabel="Filtrer les ingrédients" className="mb-5 flex-row flex-wrap gap-2">

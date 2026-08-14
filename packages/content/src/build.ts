@@ -155,7 +155,27 @@ function enBlocs(markdown: string): Block[] {
 
 async function lireRecette(slug: string): Promise<Recipe> {
   const brut = await readFile(path.join(RACINE, `${slug}.md`), 'utf8');
-  const { data, content } = matter(brut);
+
+  /**
+   * Le frontmatter est du YAML, avec ses pièges.
+   *
+   * Un deux-points suivi d'une espace dans une valeur non quotée y ouvre une nouvelle clé : la
+   * description « lié au fromage blanc plutôt qu'à la crème : 33 g » fait échouer l'analyse. Le
+   * message brut de la bibliothèque ne dit pas quel fichier est en cause — sur neuf recettes, on
+   * les ouvre une par une. Autant le dire.
+   */
+  let data: Record<string, unknown>;
+  let content: string;
+  try {
+    const lu = matter(brut);
+    data = lu.data as Record<string, unknown>;
+    content = lu.content;
+  } catch (cause) {
+    throw new Error(
+      `Recette « ${slug} » : frontmatter illisible. Une valeur contenant « : » doit être entre guillemets.`,
+      { cause },
+    );
+  }
   const { intro, etapes, suite } = decouper(content);
 
   if (etapes.length === 0) {
@@ -163,7 +183,7 @@ async function lireRecette(slug: string): Promise<Recipe> {
   }
 
   return {
-    ...lireMeta(slug, data as Record<string, unknown>),
+    ...lireMeta(slug, data),
     etapes,
     introHtml: await marked.parse(intro),
     suiteHtml: await marked.parse(suite),

@@ -47,7 +47,7 @@ jobs:
         run: bun run typecheck
 
       - name: Tests
-        run: bun test packages/core
+        run: bun test packages
 
       - name: Export du site
         run: bun run --cwd apps/app export:web

@@ -33,6 +33,10 @@ export const BASES = [
   'boeuf',
   'porc',
   'legumineuse',
+  // Le soja est tenu à part des autres légumineuses : c'est la seule base végétale qui atteigne la
+  // densité protéique d'une viande, et la règle de variété doit pouvoir le distinguer d'un plat de
+  // lentilles. Sans cela, un menu végétarien n'a que deux bases pour quatre plats de la journée.
+  'soja',
   'cereale',
 ] as const;
 
@@ -821,6 +825,9 @@ export const RECIPES: Recipe[] = CATALOGUE.map(complet);
  * Répartition de la journée. Le compte s'arrête volontairement à 90 % : les 10 % restants sont la
  * collation, un fruit ou un yaourt, qu'il serait absurde de faire passer par une recette.
  */
+/** Propositions par repas. Deux : de quoi choisir sans transformer l'écran en catalogue. */
+const PAR_REPAS = 2;
+
 const MEALS: { name: string; share: number; slot: Slot }[] = [
   { name: 'Petit-déjeuner', share: 0.25, slot: 'matin' },
   { name: 'Déjeuner', share: 0.35, slot: 'plat' },
@@ -953,20 +960,23 @@ function maisonDAbord(list: Recipe[]): Recipe[] {
 }
 
 /**
- * Seconde proposition d'un repas : ce qui ne prend la place de personne d'abord.
+ * Seconde proposition d'un repas, quand les recettes de l'application sont comptées.
  *
- * Deux choses sont repoussées en queue. Les recettes de l'application, réservées pour la tête du
- * repas suivant — sans quoi les deux recettes maison de plat se retrouvaient toutes deux au
- * déjeuner et le dîner n'en avait aucune. Et les plats dont l'ingrédient dominant est celui d'une
- * recette maison pas encore servie : la règle de variété interdisant deux fois le même ingrédient
- * dans la journée, un plat de lentilles pris ici condamnait le dahl du dîner.
+ * En tête, ce qui ne prend la place de personne : un plat extérieur dont l'ingrédient dominant
+ * n'est réclamé par aucune recette maison encore à servir. La règle de variété interdisant deux
+ * fois le même ingrédient dans la journée, un plat de lentilles pris ici condamnerait le dahl du
+ * dîner.
  *
- * C'est un ordre de préférence, pas un filtre : si rien d'autre ne convient, ces plats reviennent.
+ * Viennent ensuite les recettes de l'application elles-mêmes, et en dernier seulement les plats
+ * extérieurs qui bloqueraient l'une d'elles. L'ordre compte : à défaut de choix neutre, mieux vaut
+ * servir une recette maison maintenant que la sacrifier pour un lien de recherche.
+ *
+ * C'est un ordre de préférence, pas un filtre : si rien d'autre ne convient, tout revient.
  */
 function maisonEnDernier(list: Recipe[], reservees: Set<Base>): Recipe[] {
   const libres = list.filter((r) => !r.slug && !reservees.has(r.base));
-  const reste = list.filter((r) => !r.slug && reservees.has(r.base));
-  return [...libres, ...reste, ...list.filter((r) => r.slug)];
+  const bloquants = list.filter((r) => !r.slug && reservees.has(r.base));
+  return [...libres, ...list.filter((r) => r.slug), ...bloquants];
 }
 
 /** Une recette passe si aucun filtre coché ne touche l'un de ses ingrédients. */
@@ -1043,9 +1053,12 @@ export function buildRecipeSuggestions(
   const usedBases: Record<Slot, Set<Base>> = { matin: new Set(), plat: new Set() };
   const usedTitles = new Set<string>();
 
-  return MEALS.map((meal) => {
+  return MEALS.map((meal, rang) => {
     const budget = Math.round(m.target * meal.share);
     const seen = usedBases[meal.slot];
+    // Combien de places restent-elles, plus tard dans la journée, pour une recette de ce moment ?
+    const placesRestantes =
+      MEALS.slice(rang + 1).filter((autre) => autre.slot === meal.slot).length * PAR_REPAS;
 
     const candidats = [...maison, ...RECIPES]
       .filter((r) => r.slot === meal.slot && autorisee(r, excluded))
@@ -1053,25 +1066,31 @@ export function buildRecipeSuggestions(
     const pool = tirage(candidats, goal);
 
     const picked: Recipe[] = [];
-    for (let i = 0; i < 2; i++) {
+    for (let i = 0; i < PAR_REPAS; i++) {
       const slotKey = `${meal.name}-${i}`;
       // Le tirage reste aléatoire, mais les recettes de l'application passent devant : à qualité
       // nutritionnelle égale, une recette rédigée, aux valeurs contrôlées et qui s'ouvre dans
       // l'application vaut mieux qu'une recherche sur un site tiers. Les propositions extérieures
       // comblent ce que le catalogue maison ne couvre pas encore.
       const melangee = melange(pool.length > 0 ? pool : candidats, base ^ hash(slotKey));
+      const enAttente = maison.filter((r) => r.slot === meal.slot && !usedTitles.has(r.title));
+
+      /**
+       * Réserver une recette maison pour plus tard, ou la servir tout de suite.
+       *
+       * On ne met de côté que ce qui est compté. Tant qu'il reste plus de recettes de
+       * l'application que de places pour les accueillir, en servir une maintenant n'en prive
+       * personne — et la réserver reviendrait à laisser un lien de recherche prendre sa place.
+       *
+       * La règle inverse a son utilité quand le catalogue maison est mince : avec deux recettes de
+       * plat pour quatre places, les deux se retrouvaient au déjeuner et le dîner n'en avait
+       * aucune.
+       */
+      const compte = enAttente.length > 0 && enAttente.length <= placesRestantes;
       const ordre =
-        i === 0
+        i === 0 || !compte
           ? maisonDAbord(melangee)
-          : maisonEnDernier(
-              melangee,
-              // Les ingrédients dont une recette maison de ce moment de la journée a encore besoin.
-              new Set(
-                maison
-                  .filter((r) => r.slot === meal.slot && !usedTitles.has(r.title))
-                  .map((r) => r.base),
-              ),
-            );
+          : maisonEnDernier(melangee, new Set(enAttente.map((r) => r.base)));
       let saut = offsets[slotKey] ?? 0;
 
       // Deux passes : d'abord en respectant les ingrédients déjà servis, puis sans, pour ne
