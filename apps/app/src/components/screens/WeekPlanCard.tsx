@@ -2,11 +2,22 @@ import type { WeekPlan } from '@vitae/core/training';
 import { Text, View } from 'react-native';
 import Overline from '../ui/Overline';
 import { Bullet, Card } from '../ui/primitives';
+import Repliable from '../ui/Repliable';
 
-/** Programme hebdomadaire : quoi faire, dans quel ordre, et comment progresser. */
+/**
+ * Programme hebdomadaire : quoi faire, dans quel ordre, et comment progresser.
+ *
+ * Une seule carte reste ouverte, la semaine type — combien de séances, réparties comment. Tout le
+ * reste se replie derrière un résumé qui suffit à décider : « Haut du corps · 40 min · 5 exercices »
+ * n'a besoin d'être ouvert que par quelqu'un qui s'entraîne à l'instant même.
+ *
+ * Rien n'est retiré. Le programme complet est là, exercice par exercice, avec les variantes plus
+ * faciles et plus difficiles ; il ne se déverse simplement plus d'un bloc sur quelqu'un qui voulait
+ * juste savoir combien de fois par semaine s'entraîner.
+ */
 export default function WeekPlanCard({ week }: { week: WeekPlan }) {
   return (
-    <View className="gap-6">
+    <View className="gap-4">
       <Card className="p-6">
         <Overline className="mb-1">Votre semaine type</Overline>
         <View className="my-2 flex-row items-baseline gap-2">
@@ -25,10 +36,12 @@ export default function WeekPlanCard({ week }: { week: WeekPlan }) {
         <Text className="mt-[6px] text-small text-muted2">Échauffement : {week.warmup}</Text>
       </Card>
 
-      <Card className="p-6">
-        <Overline className="mb-1">Pourquoi ce programme-là</Overline>
-        <Text className="mb-[14px] text-small text-muted">
-          Ce que votre profil a changé par rapport au programme de base, et pour quelle raison.
+      <Repliable
+        titre="Pourquoi ce programme-là"
+        resume={`${week.adaptations.length} ajustements, et la raison de chacun`}
+      >
+        <Text className="mb-1 text-small text-muted">
+          Ce que votre profil a changé par rapport au programme de base.
         </Text>
         <View>
           {week.adaptations.map((a) => (
@@ -40,19 +53,19 @@ export default function WeekPlanCard({ week }: { week: WeekPlan }) {
             </View>
           ))}
         </View>
-      </Card>
+      </Repliable>
 
       {week.sessions.map((session) => (
-        <Card key={session.title} className="p-6">
-          <View className="mb-1">
-            <Text className="font-display text-stat3 leading-[24px] text-ink">{session.title}</Text>
-            <Text className="mt-[2px] text-small text-muted2">
-              {session.focus} · {session.duration} · ≈ {session.kcal} kcal
-            </Text>
-          </View>
-
-          {session.exercises.map((ex) => (
-            <View key={ex.name} className="border-t border-divider py-[14px]">
+        <Repliable
+          key={session.title}
+          titre={session.title}
+          resume={`${session.focus} · ${session.duration} · ${session.exercises.length} exercices · ≈ ${session.kcal} kcal`}
+        >
+          {session.exercises.map((ex, i) => (
+            <View
+              key={ex.name}
+              className={i === 0 ? 'pb-[14px]' : 'border-t border-divider py-[14px]'}
+            >
               <View className="flex-row flex-wrap items-baseline justify-between gap-2">
                 <Text className="text-option font-sans-medium text-ink">{ex.name}</Text>
                 <Text
@@ -73,11 +86,13 @@ export default function WeekPlanCard({ week }: { week: WeekPlan }) {
               </View>
             </View>
           ))}
-        </Card>
+        </Repliable>
       ))}
 
-      <Card className="p-6">
-        <Overline className="mb-3">Progresser sans matériel</Overline>
+      <Repliable
+        titre="Progresser sans matériel"
+        resume={`${week.progression.length} étapes, dans l’ordre où les franchir`}
+      >
         <View className="gap-[10px]">
           {week.progression.map((step, i) => (
             <View key={step} className="flex-row items-start gap-3">
@@ -88,16 +103,18 @@ export default function WeekPlanCard({ week }: { week: WeekPlan }) {
             </View>
           ))}
         </View>
-      </Card>
+      </Repliable>
 
-      <Card className="p-6">
-        <Overline className="mb-3">Le cardio, en complément</Overline>
+      <Repliable
+        titre="Le cardio, en complément"
+        resume={`${week.cardio.length} repères, si vous voulez en ajouter`}
+      >
         <View className="gap-3">
           {week.cardio.map((line) => (
             <Bullet key={line}>{line}</Bullet>
           ))}
         </View>
-      </Card>
+      </Repliable>
     </View>
   );
 }

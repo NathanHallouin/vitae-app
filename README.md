@@ -468,6 +468,23 @@ Ce n'est pas un réglage mais une conséquence, et chaque point compte :
    l'écran pendant ce temps : pas d'écran blanc, et pas de saut de police — un défaut que l'œil lit
    comme de la lenteur alors que tout est déjà là.
 
+### Deux façons de replier, et quand employer laquelle
+
+Les écrans portent beaucoup de matière — c'est voulu, on y apprend des choses — mais tout déplier
+d'un bloc revient à ne rien donner à lire. Deux composants s'en chargent, et ils ne sont pas
+interchangeables :
+
+- `Explainer` déplie **une** question à la fois, numérotée, sous un fil qui annonce l'ordre. C'est
+  une lecture suivie : on va de la première à la dernière.
+- `Repliable` est une carte qui se plie, plusieurs pouvant être ouvertes ensemble. C'est de la
+  consultation : on compare deux séances, on ouvre celle du jour. Son résumé — « Haut du corps ·
+  40 min · 5 exercices » — doit suffire à décider sans ouvrir ; une carte dont le résumé n'apprend
+  rien n'a pas à être repliée.
+
+Dans les deux cas le contenu fermé reste dans le document (`display: 'none'`, jamais un rendu
+conditionnel) : c'est lui qui donne à lire quelque chose à un moteur de recherche sur des pages dont
+les chiffres dépendent de l'appareil.
+
 ### La seule concession de plateforme
 
 Le moment de la lecture du stockage, et rien d'autre. En natif, MMKV lit tout de suite. Sur le web,

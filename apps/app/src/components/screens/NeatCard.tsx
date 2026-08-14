@@ -4,16 +4,24 @@ import { Text, View } from 'react-native';
 import Overline from '../ui/Overline';
 import { TileRow } from '../ui/Page';
 import { Bullet, Card } from '../ui/primitives';
+import Repliable from '../ui/Repliable';
 import StatTile from '../ui/StatTile';
 
 /**
  * Le mouvement du quotidien, présenté séparément des séances.
- * Volontairement sans séries ni répétitions : ce qui compte ici est la répétition quotidienne,
- * pas la performance. Les kcal affichées sont calculées pour le poids de la personne.
+ *
+ * Volontairement sans séries ni répétitions : ce qui compte ici est la répétition quotidienne, pas
+ * la performance. Les kcal affichées sont calculées pour le poids de la personne.
+ *
+ * Une seule carte reste ouverte, celle qui porte les chiffres — c'est la réponse à la question de
+ * l'écran. Les gestes et les repères se replient : ils se lisent quand on a décidé d'agir, pas
+ * pendant qu'on cherche à comprendre.
  */
 export default function NeatCard({ neat }: { neat: NeatPlan }) {
+  const reperes = [neat.steps, ...neat.tips];
+
   return (
-    <View className="gap-6">
+    <View className="gap-4">
       <Card className="p-6">
         <Overline className="mb-[10px]">Ce que votre quotidien dépense déjà</Overline>
         <Text className="mb-5 text-base leading-[22px] text-muted">{neat.lead}</Text>
@@ -37,11 +45,12 @@ export default function NeatCard({ neat }: { neat: NeatPlan }) {
         <Text className="mt-[14px] text-small leading-[22px] text-muted">{neat.note}</Text>
       </Card>
 
-      <Card className="p-6">
-        <Overline className="mb-1">Où aller la chercher</Overline>
-        <Text className="mb-[6px] text-small text-muted">
-          Des gestes à répéter tous les jours, y compris les jours de séance. Les calories sont
-          estimées pour votre poids actuel.
+      <Repliable
+        titre="Où aller la chercher"
+        resume={`${neat.actions.length} gestes à répéter tous les jours, chiffrés pour votre poids`}
+      >
+        <Text className="mb-1 text-small text-muted">
+          À répéter tous les jours, y compris les jours de séance.
         </Text>
         <View>
           {neat.actions.map((action) => (
@@ -68,19 +77,18 @@ export default function NeatCard({ neat }: { neat: NeatPlan }) {
           Ces gestes ne demandent aucune récupération : contrairement à une séance, vous pouvez les
           cumuler tous les jours sans jamais avoir à lever le pied.
         </Text>
-      </Card>
+      </Repliable>
 
-      <Card className="p-6">
-        <Overline className="mb-1">Vos repères</Overline>
-        <Text className="mb-[14px] text-small text-muted">
-          Adaptés à votre façon de passer vos journées.
-        </Text>
+      <Repliable
+        titre="Vos repères"
+        resume={`${reperes.length} repères, adaptés à votre façon de passer vos journées`}
+      >
         <TileRow>
-          {[neat.steps, ...neat.tips].map((tip) => (
+          {reperes.map((tip) => (
             <Bullet key={tip}>{tip}</Bullet>
           ))}
         </TileRow>
-      </Card>
+      </Repliable>
     </View>
   );
 }
