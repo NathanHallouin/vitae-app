@@ -14,7 +14,10 @@
 
 import { type ReactNode, useState } from 'react';
 import { ActivityIndicator, Pressable, Text, TextInput, View, type ViewProps } from 'react-native';
+import { LinearTransition } from 'react-native-reanimated';
+import { MOTION, useMotionReduite } from '@/theme/motion';
 import { usePalette } from '@/theme/palette';
+import { VueAnimee } from './VueAnimee';
 
 /** Concatène des classes en ignorant les valeurs vides, pour composer sans `clsx`. */
 export function cx(...parts: (string | false | null | undefined)[]): string {
@@ -91,16 +94,43 @@ export function Button({
   );
 }
 
-/** Carte : bordure fine et fond plein, jamais d'ombre portée. */
+/**
+ * Carte : bordure fine et fond plein, jamais d'ombre portée.
+ *
+ * L'absence d'ombre est un choix, pas un oubli : sur le fond crème, une carte bordée se lit comme
+ * une feuille posée, une carte ombrée comme un composant flottant. C'est ce qui donne à
+ * l'application son air de papier plutôt que d'interface.
+ *
+ * `taille` fait animer la carte quand sa hauteur change — le cas des cartes qui se replient. Une
+ * propriété plutôt qu'un composant à substituer : le style de la carte reste écrit une seule fois,
+ * et l'appelant n'a pas à connaître Reanimated.
+ */
 export function Card({
+  taille = false,
   className,
   children,
   ...rest
-}: { className?: string; children?: ReactNode } & ViewProps) {
+}: {
+  /** anime le changement de hauteur ; sans effet si le système demande moins de mouvement */
+  taille?: boolean;
+  className?: string;
+  children?: ReactNode;
+} & ViewProps) {
+  const reduite = useMotionReduite();
+  const style = cx('rounded-card border border-divider bg-surface', className);
+
+  if (!taille || reduite) {
+    return (
+      <View className={style} {...rest}>
+        {children}
+      </View>
+    );
+  }
+
   return (
-    <View className={cx('rounded-card border border-divider bg-surface', className)} {...rest}>
+    <VueAnimee className={style} layout={LinearTransition.duration(MOTION.normal)} {...rest}>
       {children}
-    </View>
+    </VueAnimee>
   );
 }
 

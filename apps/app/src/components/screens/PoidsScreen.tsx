@@ -3,6 +3,7 @@ import { dec, fmtKg, fmtWeekly, kcal, monthIn } from '@vitae/core/format';
 import { Text, View } from 'react-native';
 import { useProfile } from '../ProfileProvider';
 import ProjectionChart from '../result/ProjectionChart';
+import Apparition from '../ui/Apparition';
 import CalculPrompt from '../ui/CalculPrompt';
 import OptionButton from '../ui/OptionButton';
 import Overline from '../ui/Overline';
@@ -19,99 +20,103 @@ export default function PoidsScreen() {
 
   return (
     <View className="gap-6">
-      <Card className="p-6">
-        <Overline className="mb-1">Quel poids viser ?</Overline>
-        <Text className="mb-[14px] text-small text-muted">
-          Trois repères calculés pour votre taille. Choisissez celui qui vous parle, rien n’est
-          définitif.
-        </Text>
-        <View accessibilityRole="radiogroup" className="gap-[10px]">
-          {projection.options.map((o) => {
-            const choisi = o.key === projection.key;
-            return (
-              <OptionButton
-                key={o.key}
-                selected={choisi}
-                onPress={() => setTargetKey(o.key)}
-                className="px-4 py-[14px]"
-              >
-                <Text
-                  style={{ fontVariant: ['tabular-nums'] }}
-                  className={cx(
-                    'text-stat3 font-sans-medium',
-                    choisi ? 'text-primary-ink' : 'text-ink',
-                  )}
+      <Apparition depuis={1}>
+        <Card className="p-6">
+          <Overline className="mb-1">Quel poids viser ?</Overline>
+          <Text className="mb-[14px] text-small text-muted">
+            Trois repères calculés pour votre taille. Choisissez celui qui vous parle, rien n’est
+            définitif.
+          </Text>
+          <View accessibilityRole="radiogroup" className="gap-[10px]">
+            {projection.options.map((o) => {
+              const choisi = o.key === projection.key;
+              return (
+                <OptionButton
+                  key={o.key}
+                  selected={choisi}
+                  onPress={() => setTargetKey(o.key)}
+                  className="px-4 py-[14px]"
                 >
-                  {dec(o.w)} kg
+                  <Text
+                    style={{ fontVariant: ['tabular-nums'] }}
+                    className={cx(
+                      'text-stat3 font-sans-medium',
+                      choisi ? 'text-primary-ink' : 'text-ink',
+                    )}
+                  >
+                    {dec(o.w)} kg
+                  </Text>
+                  <Text className="mt-[2px] text-small text-muted">{o.label}</Text>
+                  <Text className="text-caption text-muted">{o.sub}</Text>
+                </OptionButton>
+              );
+            })}
+          </View>
+        </Card>
+
+        <Card className="p-6">
+          <Overline className="mb-[14px]">Combien de temps ?</Overline>
+
+          {projection.coherent ? (
+            <>
+              <Text className="mb-[18px] text-body leading-[26px] text-ink">
+                En mangeant {kcal(metrics.target)} kcal par jour, vous atteindriez{' '}
+                <Text className="font-sans-semibold">{cible}</Text> en environ{' '}
+                <Text className="font-sans-semibold">
+                  {projection.weeks} {projection.weeks > 1 ? 'semaines' : 'semaine'}
                 </Text>
-                <Text className="mt-[2px] text-small text-muted">{o.label}</Text>
-                <Text className="text-caption text-muted">{o.sub}</Text>
-              </OptionButton>
-            );
-          })}
-        </View>
-      </Card>
-
-      <Card className="p-6">
-        <Overline className="mb-[14px]">Combien de temps ?</Overline>
-
-        {projection.coherent ? (
-          <>
-            <Text className="mb-[18px] text-body leading-[26px] text-ink">
-              En mangeant {kcal(metrics.target)} kcal par jour, vous atteindriez{' '}
-              <Text className="font-sans-semibold">{cible}</Text> en environ{' '}
-              <Text className="font-sans-semibold">
-                {projection.weeks} {projection.weeks > 1 ? 'semaines' : 'semaine'}
+                , soit vers {monthIn(projection.weeks)}.
               </Text>
-              , soit vers {monthIn(projection.weeks)}.
-            </Text>
 
-            <View className="mb-5 flex-row flex-wrap gap-5">
-              <Stat
-                label="À perdre ou à prendre"
-                value={fmtKg(projection.selected.w - metrics.poids)}
-              />
-              <Stat label="Rythme" value={fmtWeekly((projection.rate * 7700) / 7)} />
-              <Stat
-                label="Durée"
-                value={`${projection.weeks} ${projection.weeks > 1 ? 'semaines' : 'semaine'}`}
-                note={`≈ ${dec(Math.round(projection.months * 10) / 10)} mois`}
-              />
-              <Stat label="Objectif atteint vers" value={monthIn(projection.weeks)} />
-            </View>
+              <View className="mb-5 flex-row flex-wrap gap-5">
+                <Stat
+                  label="À perdre ou à prendre"
+                  value={fmtKg(projection.selected.w - metrics.poids)}
+                />
+                <Stat label="Rythme" value={fmtWeekly((projection.rate * 7700) / 7)} />
+                <Stat
+                  label="Durée"
+                  value={`${projection.weeks} ${projection.weeks > 1 ? 'semaines' : 'semaine'}`}
+                  note={`≈ ${dec(Math.round(projection.months * 10) / 10)} mois`}
+                />
+                <Stat label="Objectif atteint vers" value={monthIn(projection.weeks)} />
+              </View>
 
-            <View className="mb-1 flex-row items-baseline justify-between gap-2">
-              <Text className="min-w-0 flex-1 text-caption text-muted2">
-                Poids projeté, de {projection.hiLabel} à {projection.loLabel}
-              </Text>
-              <Text className="flex-none text-caption text-muted2">Cible {cible}</Text>
-            </View>
-            <ProjectionChart projection={projection} targetLabel={cible} />
-          </>
-        ) : null}
+              <View className="mb-1 flex-row items-baseline justify-between gap-2">
+                <Text className="min-w-0 flex-1 text-caption text-muted2">
+                  Poids projeté, de {projection.hiLabel} à {projection.loLabel}
+                </Text>
+                <Text className="flex-none text-caption text-muted2">Cible {cible}</Text>
+              </View>
+              <ProjectionChart projection={projection} targetLabel={cible} />
+            </>
+          ) : null}
 
-        <Text className={cx('text-base leading-[22px] text-muted', projection.coherent && 'mt-4')}>
-          {projection.note}
-        </Text>
-
-        {rythme ? (
-          <View
-            className={cx(
-              'mt-[14px] rounded-xl p-[14px]',
-              rythme.level === 'bon' ? 'bg-surface2' : 'bg-warn-bg',
-            )}
+          <Text
+            className={cx('text-base leading-[22px] text-muted', projection.coherent && 'mt-4')}
           >
-            <Text
+            {projection.note}
+          </Text>
+
+          {rythme ? (
+            <View
               className={cx(
-                'text-small leading-[20px]',
-                rythme.level === 'bon' ? 'text-ink' : 'text-warn-ink',
+                'mt-[14px] rounded-xl p-[14px]',
+                rythme.level === 'bon' ? 'bg-surface2' : 'bg-warn-bg',
               )}
             >
-              {rythme.text}
-            </Text>
-          </View>
-        ) : null}
-      </Card>
+              <Text
+                className={cx(
+                  'text-small leading-[20px]',
+                  rythme.level === 'bon' ? 'text-ink' : 'text-warn-ink',
+                )}
+              >
+                {rythme.text}
+              </Text>
+            </View>
+          ) : null}
+        </Card>
+      </Apparition>
     </View>
   );
 }

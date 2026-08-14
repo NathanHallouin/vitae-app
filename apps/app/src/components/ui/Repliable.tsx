@@ -1,5 +1,7 @@
 import { type ReactNode, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
+import Animated, { useAnimatedStyle, useDerivedValue, withTiming } from 'react-native-reanimated';
+import { MOTION, useMotionReduite } from '@/theme/motion';
 import { usePalette } from '@/theme/palette';
 import Icon from './Icon';
 import { Card, cx } from './primitives';
@@ -22,6 +24,11 @@ import { Card, cx } from './primitives';
  *
  * Le contenu fermé reste dans le document (`display: 'none'`, pas de rendu conditionnel), pour la
  * même raison qu'ailleurs : c'est lui qui donne à lire quelque chose à un moteur de recherche.
+ *
+ * C'est aussi ce qui dicte la façon d'animer. Un contenu jamais démonté n'a ni entrée ni sortie à
+ * jouer : c'est la carte elle-même qui change de taille, et `LinearTransition` anime ce
+ * changement. Le chevron pivote en même temps, ce qui suffit à faire lire le repli comme un
+ * mouvement plutôt que comme un saut.
  */
 export default function Repliable({
   titre,
@@ -37,9 +44,18 @@ export default function Repliable({
 }) {
   const [ouvert, setOuvert] = useState(ouvertParDefaut);
   const palette = usePalette();
+  const reduite = useMotionReduite();
 
+  const rotation = useDerivedValue(() =>
+    withTiming(ouvert ? 1 : 0, { duration: reduite ? 0 : MOTION.rapide }),
+  );
+  const styleChevron = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${rotation.value * 180}deg` }],
+  }));
+
+  // `taille` : c'est la hauteur de la carte qui change quand on déplie, pas son contenu.
   return (
-    <Card className={cx('px-6', ouvert ? 'pt-6 pb-6' : 'py-2')}>
+    <Card taille className={cx('px-6', ouvert ? 'pt-6 pb-6' : 'py-2')}>
       <Pressable
         accessibilityRole="button"
         accessibilityState={{ expanded: ouvert }}
@@ -52,11 +68,11 @@ export default function Repliable({
           <Text className="font-display text-stat3 leading-[24px] text-ink">{titre}</Text>
           <Text className="mt-[2px] text-small text-muted2">{resume}</Text>
         </View>
-        <Icon
-          name={ouvert ? 'flecheHaut' : 'flecheBas'}
-          size={18}
-          color={ouvert ? palette.primaryInk : palette.muted2}
-        />
+        {/* Une seule flèche qui pivote, plutôt que deux qui se remplacent : le demi-tour dit le
+            sens du geste, l'échange ne dit rien. */}
+        <Animated.View style={styleChevron}>
+          <Icon name="flecheBas" size={18} color={ouvert ? palette.primaryInk : palette.muted2} />
+        </Animated.View>
       </Pressable>
 
       <View style={{ display: ouvert ? 'flex' : 'none' }}>

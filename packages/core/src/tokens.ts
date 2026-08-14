@@ -178,3 +178,28 @@ export const FONT_SIZES = {
 } as const;
 
 export const RADII = { card: 16, control: 10 } as const;
+
+/**
+ * Les durées du mouvement, en millisecondes.
+ *
+ * Une échelle plutôt que des valeurs au cas par cas : c'est ce qui fait qu'une application paraît
+ * réglée plutôt qu'animée. Trois principes tiennent ces chiffres :
+ *
+ * — ce qui répond à un doigt doit être imperceptible (`instant`) ; au-delà de 150 ms, le contrôle
+ *   semble mou ;
+ * — ce qui apparaît ou se replie prend `normal` : assez pour que l'œil suive le mouvement et
+ *   comprenne d'où vient l'élément, pas assez pour attendre ;
+ * — `compteur` est plus long à dessein. Voir un chiffre monter est la seule animation de cette
+ *   application qui porte du sens : elle dit que le nombre vient d'être recalculé pour vous.
+ *
+ * `cascade` est le décalage entre deux éléments d'une même arrivée. Assez pour lire une direction,
+ * trop peu pour se remarquer élément par élément.
+ */
+export const MOTION = {
+  instant: 120,
+  rapide: 200,
+  normal: 320,
+  lent: 520,
+  compteur: 700,
+  cascade: 60,
+} as const;

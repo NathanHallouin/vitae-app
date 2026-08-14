@@ -4,6 +4,7 @@ import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 import { type ReactNode, useEffect, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { usePalette } from '@/theme/palette';
+import Chiffre from '../ui/Chiffre';
 import Icon from '../ui/Icon';
 import { Card, cx } from '../ui/primitives';
 
@@ -118,14 +119,13 @@ function Portions({
             disabled={valeur <= 1}
             onPress={() => onChange(Math.max(1, valeur - 1))}
           />
-          <Text
+          <View
             accessibilityLiveRegion="polite"
             accessibilityLabel={`${valeur} portion${valeur > 1 ? 's' : ''}`}
-            style={{ fontVariant: ['tabular-nums'] }}
-            className="w-10 text-center font-display text-stat text-ink"
+            className="w-10 items-center"
           >
-            {valeur}
-          </Text>
+            <Chiffre valeur={valeur} taille="moyen" />
+          </View>
           <BoutonPortion
             signe="+"
             label="Une portion de plus"

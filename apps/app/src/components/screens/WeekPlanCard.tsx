@@ -1,5 +1,6 @@
 import type { WeekPlan } from '@vitae/core/training';
 import { Text, View } from 'react-native';
+import Chiffre from '../ui/Chiffre';
 import Overline from '../ui/Overline';
 import { Bullet, Card } from '../ui/primitives';
 import Repliable from '../ui/Repliable';
@@ -20,14 +21,13 @@ export default function WeekPlanCard({ week }: { week: WeekPlan }) {
     <View className="gap-4">
       <Card className="p-6">
         <Overline className="mb-1">Votre semaine type</Overline>
-        <View className="my-2 flex-row items-baseline gap-2">
-          <Text
-            style={{ fontVariant: ['tabular-nums'] }}
-            className="font-display text-display leading-[42px] text-primary-ink"
-          >
-            {week.strengthPerWeek}
-          </Text>
-          <Text className="flex-1 text-option text-muted">séances de renforcement par semaine</Text>
+        <View className="my-2">
+          <Chiffre
+            valeur={week.strengthPerWeek}
+            unite="séances de renforcement par semaine"
+            taille="grand"
+            ton="primary"
+          />
         </View>
         <Text className="text-base leading-[22px] text-muted">{week.note}</Text>
         <Text className="mt-[10px] text-small text-muted2">

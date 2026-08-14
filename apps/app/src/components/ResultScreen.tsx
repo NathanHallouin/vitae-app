@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Text, View } from 'react-native';
 import ProfileBar from './ProfileBar';
+import Apparition from './ui/Apparition';
 import Page from './ui/Page';
 
 /**
@@ -13,6 +14,9 @@ import Page from './ui/Page';
  * Le défilement ne conserve pas sa position d'un onglet à l'autre par accident : les écrans
  * restant montés, `ScrollView` garde son décalage. Revenir sur un onglet le retrouve exactement où
  * on l'avait laissé, ce qui est le comportement attendu d'une application native.
+ *
+ * Les blocs arrivent en cascade au premier montage — l'intro, les chiffres, les explications. Les
+ * écrans restant montés, cela ne rejoue pas à chaque aller-retour entre onglets.
  */
 export default function ResultScreen({ children }: { children: ReactNode }) {
   return (
@@ -22,7 +26,7 @@ export default function ResultScreen({ children }: { children: ReactNode }) {
       keyboardShouldPersistTaps="handled"
     >
       <ProfileBar />
-      {children}
+      <Apparition>{children}</Apparition>
       <View className="mt-8">
         <Text className="text-caption leading-[19px] text-faint">
           Ces chiffres sont une estimation, pas un avis médical. La dépense réelle varie d’environ

@@ -11,7 +11,9 @@ import { useMemo } from 'react';
 import { Text, View } from 'react-native';
 import { usePalette } from '@/theme/palette';
 import { useProfile } from '../ProfileProvider';
+import Apparition from '../ui/Apparition';
 import CalculPrompt from '../ui/CalculPrompt';
+import Chiffre from '../ui/Chiffre';
 import Icon from '../ui/Icon';
 import OptionButton from '../ui/OptionButton';
 import Overline from '../ui/Overline';
@@ -49,128 +51,130 @@ export default function AlimentationScreen() {
 
   return (
     <View className="gap-6">
-      <Card className="p-6">
-        <Overline className="mb-1">Mon objectif</Overline>
-        <Text className="mb-[14px] text-small text-muted">
-          Changez-le quand vous voulez : tous les chiffres se recalculent.
-        </Text>
-        <View accessibilityRole="radiogroup" className="gap-[10px]">
-          {GOALS.map((g) => (
-            <OptionButton
-              key={g.key}
-              selected={profile.goal === g.key}
-              onPress={() => setGoal(g.key)}
-              className="px-4 py-[14px]"
-            >
-              <Text
-                className={
-                  profile.goal === g.key
-                    ? 'text-option font-sans-medium text-primary-ink'
-                    : 'text-option font-sans-medium text-ink'
-                }
+      <Apparition depuis={1}>
+        <Card className="p-6">
+          <Overline className="mb-1">Mon objectif</Overline>
+          <Text className="mb-[14px] text-small text-muted">
+            Changez-le quand vous voulez : tous les chiffres se recalculent.
+          </Text>
+          <View accessibilityRole="radiogroup" className="gap-[10px]">
+            {GOALS.map((g) => (
+              <OptionButton
+                key={g.key}
+                selected={profile.goal === g.key}
+                onPress={() => setGoal(g.key)}
+                className="px-4 py-[14px]"
               >
-                {g.label}
-              </Text>
-              <Text className="mt-[2px] text-small text-muted">{g.desc}</Text>
-              <Text className="text-caption text-muted">{g.detail}</Text>
-            </OptionButton>
-          ))}
-        </View>
-      </Card>
+                <Text
+                  className={
+                    profile.goal === g.key
+                      ? 'text-option font-sans-medium text-primary-ink'
+                      : 'text-option font-sans-medium text-ink'
+                  }
+                >
+                  {g.label}
+                </Text>
+                <Text className="mt-[2px] text-small text-muted">{g.desc}</Text>
+                <Text className="text-caption text-muted">{g.detail}</Text>
+              </OptionButton>
+            ))}
+          </View>
+        </Card>
 
-      <Card className="p-6">
-        <Overline>Votre repère quotidien</Overline>
-        <View className="mt-[10px] mb-2 flex-row items-baseline gap-2">
-          <Text
-            style={{ fontVariant: ['tabular-nums'] }}
-            className="font-display text-display leading-[42px] text-primary-ink"
-          >
-            {kcal(metrics.target)}
-          </Text>
-          <Text className="text-option text-muted">kcal par jour</Text>
-        </View>
-        <Text className="text-base leading-[22px] text-muted">{metrics.goal.note}</Text>
-
-        <View className="mt-5 border-t border-divider pt-[18px]">
-          <Overline className="mb-1">{rangeCaption(metrics.goal.key)}</Overline>
-          <Text className="mb-4 text-small text-muted">
-            Inutile de viser juste : tant que vous restez dans cette fourchette, ça marche.
-          </Text>
-
-          <View className="relative mb-[10px] h-[10px] rounded-[5px] bg-divider">
-            <View
-              className="absolute top-0 h-[10px] rounded-[5px] bg-primary-ink opacity-50"
-              style={{ left: `${bar.low}%`, width: `${bar.width}%` }}
+        <Card className="p-6">
+          <Overline>Votre repère quotidien</Overline>
+          <View className="mt-[10px] mb-2">
+            <Chiffre
+              valeur={metrics.target}
+              unite="kcal par jour"
+              taille="grand"
+              ton="primary"
+              anime
             />
-            {/* Repère de la dépense totale : un trait fin, pour situer la fourchette par rapport
+          </View>
+          <Text className="text-base leading-[22px] text-muted">{metrics.goal.note}</Text>
+
+          <View className="mt-5 border-t border-divider pt-[18px]">
+            <Overline className="mb-1">{rangeCaption(metrics.goal.key)}</Overline>
+            <Text className="mb-4 text-small text-muted">
+              Inutile de viser juste : tant que vous restez dans cette fourchette, ça marche.
+            </Text>
+
+            <View className="relative mb-[10px] h-[10px] rounded-[5px] bg-divider">
+              <View
+                className="absolute top-0 h-[10px] rounded-[5px] bg-primary-ink opacity-50"
+                style={{ left: `${bar.low}%`, width: `${bar.width}%` }}
+              />
+              {/* Repère de la dépense totale : un trait fin, pour situer la fourchette par rapport
                 à l'équilibre sans laisser croire à une cible précise. */}
-            <View
-              className="absolute -top-[3px] h-4 w-[2px] bg-marker"
-              style={{ left: `${bar.tdee}%` }}
-            />
-          </View>
-          <View className="mb-[18px] flex-row justify-between">
-            <Text className="text-micro text-muted2">Ce que vous brûlez au repos</Text>
-            <Text className="text-micro text-muted2">Ce que vous brûlez en tout</Text>
-          </View>
-
-          <TileRow>
-            <StatTile
-              label="Au minimum"
-              value={`${kcal(metrics.min)} kcal`}
-              note={`${fmtGap(gapAtMin)} par rapport à votre dépense · ${fmtWeekly(gapAtMin)}`}
-            />
-            <StatTile
-              label="Au maximum"
-              value={`${kcal(metrics.max)} kcal`}
-              note={`${fmtGap(gapAtMax)} par rapport à votre dépense · ${fmtWeekly(gapAtMax)}`}
-            />
-          </TileRow>
-
-          {warning ? (
-            <View className="mt-3 rounded-xl bg-warn-bg px-[14px] py-3">
-              <Text className="text-small leading-[20px] text-warn-ink">{warning}</Text>
+              <View
+                className="absolute -top-[3px] h-4 w-[2px] bg-marker"
+                style={{ left: `${bar.tdee}%` }}
+              />
             </View>
-          ) : null}
-        </View>
-      </Card>
+            <View className="mb-[18px] flex-row justify-between">
+              <Text className="text-micro text-muted2">Ce que vous brûlez au repos</Text>
+              <Text className="text-micro text-muted2">Ce que vous brûlez en tout</Text>
+            </View>
 
-      <Card className="p-6">
-        <Overline className="mb-1">Comment répartir ces calories</Overline>
-        <Text className="mb-[18px] text-small text-muted">
-          Des repères, pas des règles. Le plus important reste le total de la journée.{' '}
-          {proteinBasisNote(metrics)}
-        </Text>
-        <View className="gap-4">
-          {macros.map((m) => (
-            <View key={m.label}>
-              <View className="mb-[6px] flex-row items-center justify-between gap-4">
-                <View className="min-w-0 flex-1 flex-row items-center gap-2">
-                  <Icon name={m.icon} size={19} color={m.color} />
-                  <Text className="text-base font-sans-medium text-ink">{m.label}</Text>
-                  <Text numberOfLines={1} className="min-w-0 flex-1 text-small text-muted">
-                    {m.hint}
+            <TileRow>
+              <StatTile
+                label="Au minimum"
+                value={`${kcal(metrics.min)} kcal`}
+                note={`${fmtGap(gapAtMin)} par rapport à votre dépense · ${fmtWeekly(gapAtMin)}`}
+              />
+              <StatTile
+                label="Au maximum"
+                value={`${kcal(metrics.max)} kcal`}
+                note={`${fmtGap(gapAtMax)} par rapport à votre dépense · ${fmtWeekly(gapAtMax)}`}
+              />
+            </TileRow>
+
+            {warning ? (
+              <View className="mt-3 rounded-xl bg-warn-bg px-[14px] py-3">
+                <Text className="text-small leading-[20px] text-warn-ink">{warning}</Text>
+              </View>
+            ) : null}
+          </View>
+        </Card>
+
+        <Card className="p-6">
+          <Overline className="mb-1">Comment répartir ces calories</Overline>
+          <Text className="mb-[18px] text-small text-muted">
+            Des repères, pas des règles. Le plus important reste le total de la journée.{' '}
+            {proteinBasisNote(metrics)}
+          </Text>
+          <View className="gap-4">
+            {macros.map((m) => (
+              <View key={m.label}>
+                <View className="mb-[6px] flex-row items-center justify-between gap-4">
+                  <View className="min-w-0 flex-1 flex-row items-center gap-2">
+                    <Icon name={m.icon} size={19} color={m.color} />
+                    <Text className="text-base font-sans-medium text-ink">{m.label}</Text>
+                    <Text numberOfLines={1} className="min-w-0 flex-1 text-small text-muted">
+                      {m.hint}
+                    </Text>
+                  </View>
+                  <Text
+                    style={{ fontVariant: ['tabular-nums'] }}
+                    className="flex-none text-base text-muted"
+                  >
+                    {m.grams} g · {m.kcal} kcal
                   </Text>
                 </View>
-                <Text
-                  style={{ fontVariant: ['tabular-nums'] }}
-                  className="flex-none text-base text-muted"
-                >
-                  {m.grams} g · {m.kcal} kcal
-                </Text>
+                <View className="h-[6px] overflow-hidden rounded-[3px] bg-divider">
+                  <View
+                    className="h-full rounded-[3px]"
+                    style={{ width: `${m.pct}%`, backgroundColor: m.color }}
+                  />
+                </View>
               </View>
-              <View className="h-[6px] overflow-hidden rounded-[3px] bg-divider">
-                <View
-                  className="h-full rounded-[3px]"
-                  style={{ width: `${m.pct}%`, backgroundColor: m.color }}
-                />
-              </View>
-            </View>
-          ))}
-        </View>
-      </Card>
+            ))}
+          </View>
+        </Card>
 
-      <RecipesCard metrics={metrics} goal={profile.goal} />
+        <RecipesCard metrics={metrics} goal={profile.goal} />
+      </Apparition>
     </View>
   );
 }

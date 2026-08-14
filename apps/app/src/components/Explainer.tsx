@@ -2,7 +2,9 @@ import type { Explainer as ExplainerData } from '@vitae/core/explainers';
 import { Link } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
+import Animated, { useAnimatedStyle, useDerivedValue, withTiming } from 'react-native-reanimated';
 import { versRoute } from '@/lib/route';
+import { MOTION, useMotionReduite } from '@/theme/motion';
 import { usePalette } from '@/theme/palette';
 import Icon from './ui/Icon';
 import { Card, cx } from './ui/primitives';
@@ -33,9 +35,10 @@ import { Card, cx } from './ui/primitives';
 export default function Explainer({ data }: { data: ExplainerData }) {
   const [ouvert, setOuvert] = useState(0);
   const palette = usePalette();
+  const reduite = useMotionReduite();
 
   return (
-    <Card className="mt-6 p-6">
+    <Card taille className="mt-6 p-6">
       <Text accessibilityRole="header" className="mb-2 font-display text-h3 text-ink">
         {data.title}
       </Text>
@@ -82,11 +85,7 @@ export default function Explainer({ data }: { data: ExplainerData }) {
                   {item.titre}
                 </Text>
 
-                <Icon
-                  name={actif ? 'flecheHaut' : 'flecheBas'}
-                  size={16}
-                  color={actif ? palette.primaryInk : palette.muted2}
-                />
+                <Chevron actif={actif} />
               </Pressable>
 
               <View style={{ display: actif ? 'flex' : 'none' }}>
@@ -109,5 +108,23 @@ export default function Explainer({ data }: { data: ExplainerData }) {
         </Pressable>
       </Link>
     </Card>
+  );
+}
+
+/** La même flèche, tournée d'un demi-tour quand la question s'ouvre. */
+function Chevron({ actif }: { actif: boolean }) {
+  const palette = usePalette();
+  const reduite = useMotionReduite();
+  const rotation = useDerivedValue(() =>
+    withTiming(actif ? 1 : 0, { duration: reduite ? 0 : MOTION.rapide }),
+  );
+  const style = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${rotation.value * 180}deg` }],
+  }));
+
+  return (
+    <Animated.View style={style}>
+      <Icon name="flecheBas" size={16} color={actif ? palette.primaryInk : palette.muted2} />
+    </Animated.View>
   );
 }

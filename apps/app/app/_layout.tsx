@@ -32,6 +32,7 @@ import { enableFreeze } from 'react-native-screens';
 import AppHeader from '@/components/AppHeader';
 import ProfileProvider from '@/components/ProfileProvider';
 import ColorModeProvider, { useColorMode } from '@/theme/ColorMode';
+import { MOTION, useMotionReduite } from '@/theme/motion';
 import { usePalette } from '@/theme/palette';
 import '../global.css';
 
@@ -57,6 +58,7 @@ if (NATIF) SplashScreen.preventAutoHideAsync();
 function Navigation() {
   const palette = usePalette();
   const { mode } = useColorMode();
+  const reduite = useMotionReduite();
 
   return (
     <>
@@ -68,14 +70,21 @@ function Navigation() {
           // sur le site, une recette ouverte depuis un moteur de recherche était un cul-de-sac.
           header: () => <AppHeader />,
           contentStyle: { backgroundColor: palette.bg },
-          // La pile native rend les transitions au niveau du système : elles ne passent pas par
-          // le fil JavaScript, et restent donc fluides même pendant un recalcul.
-          animation: 'slide_from_right',
-          animationDuration: 220,
+          /**
+           * La pile native rend les transitions au niveau du système : elles ne passent pas par le
+           * fil JavaScript, et restent donc fluides même pendant un recalcul.
+           *
+           * Le glissement latéral dit la hiérarchie — on entre dans un détail, on en ressort par
+           * la gauche. Le réglage « moins de mouvement » le remplace par rien du tout : ralentir
+           * une translation ne règle pas le problème qu'elle pose.
+           */
+          animation: reduite ? 'none' : 'slide_from_right',
+          animationDuration: MOTION.normal,
         }}
       >
         <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="index" options={{ animation: 'fade' }} />
+        {/* L'accueil n'est pas un détail dont on ressort : il se substitue, il ne glisse pas. */}
+        <Stack.Screen name="index" options={{ animation: reduite ? 'none' : 'fade' }} />
         <Stack.Screen name="recettes/index" />
         <Stack.Screen name="recettes/[slug]" />
         <Stack.Screen name="confidentialite" />

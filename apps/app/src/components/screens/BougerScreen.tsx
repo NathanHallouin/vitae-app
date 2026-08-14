@@ -4,6 +4,7 @@ import { buildNeat, movementSplit } from '@vitae/core/neat';
 import { buildWeek } from '@vitae/core/training';
 import { Text, View } from 'react-native';
 import { useProfile } from '../ProfileProvider';
+import Apparition from '../ui/Apparition';
 import CalculPrompt from '../ui/CalculPrompt';
 import Overline from '../ui/Overline';
 import { TileRow } from '../ui/Page';
@@ -34,77 +35,79 @@ export default function BougerScreen() {
 
   return (
     <View className="gap-6">
-      <Card className="p-6">
-        <Overline className="mb-[10px]">{plan.title}</Overline>
-        <Text className={`text-base leading-[22px] text-muted ${plan.hasSplit ? 'mb-5' : ''}`}>
-          {plan.note}
-        </Text>
+      <Apparition depuis={1}>
+        <Card className="p-6">
+          <Overline className="mb-[10px]">{plan.title}</Overline>
+          <Text className={`text-base leading-[22px] text-muted ${plan.hasSplit ? 'mb-5' : ''}`}>
+            {plan.note}
+          </Text>
 
-        {plan.hasSplit ? (
-          <>
-            <Overline className="mb-3">{plan.splitLabel}</Overline>
-            <SplitBar pct={plan.movePct} />
-            <TileRow>
-              <StatTile
-                label={`${plan.moveLabel} · ${plan.movePct} %`}
-                value={`${kcal(plan.moveKcal)} kcal`}
-                accent
-              />
-              <StatTile
-                label={`${plan.foodLabel} · ${plan.foodPct} %`}
-                value={`${kcal(plan.foodKcal)} kcal`}
-              />
-            </TileRow>
-          </>
-        ) : null}
-      </Card>
+          {plan.hasSplit ? (
+            <>
+              <Overline className="mb-3">{plan.splitLabel}</Overline>
+              <SplitBar pct={plan.movePct} />
+              <TileRow>
+                <StatTile
+                  label={`${plan.moveLabel} · ${plan.movePct} %`}
+                  value={`${kcal(plan.moveKcal)} kcal`}
+                  accent
+                />
+                <StatTile
+                  label={`${plan.foodLabel} · ${plan.foodPct} %`}
+                  value={`${kcal(plan.foodKcal)} kcal`}
+                />
+              </TileRow>
+            </>
+          ) : null}
+        </Card>
 
-      <Card className="p-6">
-        <Overline className="mb-1">D’où vient le mouvement, chez vous</Overline>
-        <Text className="mb-4 text-base leading-[22px] text-muted">
-          Sur les {kcal(metrics.tdee - metrics.bmr)} kcal que vous dépensez chaque jour en plus de
-          votre métabolisme de base, voici ce qui revient à vos journées et ce qui revient à vos
-          séances, une fois celles-ci lissées sur la semaine.
-        </Text>
+        <Card className="p-6">
+          <Overline className="mb-1">D’où vient le mouvement, chez vous</Overline>
+          <Text className="mb-4 text-base leading-[22px] text-muted">
+            Sur les {kcal(metrics.tdee - metrics.bmr)} kcal que vous dépensez chaque jour en plus de
+            votre métabolisme de base, voici ce qui revient à vos journées et ce qui revient à vos
+            séances, une fois celles-ci lissées sur la semaine.
+          </Text>
 
-        <SplitBar pct={split.neatPct} />
+          <SplitBar pct={split.neatPct} />
 
-        <TileRow>
-          <StatTile
-            label={`Le quotidien · ${split.neatPct} %`}
-            value={`${kcal(split.neat)} kcal`}
-            note="tous les jours, sans récupération"
-            accent
-          />
-          <StatTile
-            label={`Les séances · ${split.sessionsPct} %`}
-            value={`${kcal(split.sessions)} kcal`}
-            note="lissées sur les sept jours"
-          />
-        </TileRow>
-      </Card>
+          <TileRow>
+            <StatTile
+              label={`Le quotidien · ${split.neatPct} %`}
+              value={`${kcal(split.neat)} kcal`}
+              note="tous les jours, sans récupération"
+              accent
+            />
+            <StatTile
+              label={`Les séances · ${split.sessionsPct} %`}
+              value={`${kcal(split.sessions)} kcal`}
+              note="lissées sur les sept jours"
+            />
+          </TileRow>
+        </Card>
 
-      <SectionHeading
-        icon="marche"
-        kicker="Premier levier · tous les jours"
-        title="Le mouvement du quotidien"
-        lead="Marcher, monter, porter, rester debout. Ce n’est pas du sport : c’est ce que fait votre corps entre les séances, et c’est ce qui creuse le plus grand écart entre deux personnes du même gabarit."
-      />
+        <SectionHeading
+          icon="marche"
+          kicker="Premier levier · tous les jours"
+          title="Le mouvement du quotidien"
+          lead="Marcher, monter, porter, rester debout. Ce n’est pas du sport : c’est ce que fait votre corps entre les séances, et c’est ce qui creuse le plus grand écart entre deux personnes du même gabarit."
+        />
 
-      <NeatCard neat={neat} />
+        <NeatCard neat={neat} />
 
-      {/* Juste après le catalogue de gestes, dont le premier est « se lever quelques minutes par
+        {/* Juste après le catalogue de gestes, dont le premier est « se lever quelques minutes par
           heure » : le réglage est la suite de cette phrase, pas une préférence à aller chercher. */}
-      <RappelsCard />
+        <RappelsCard />
 
-      <SectionHeading
-        icon="haltere"
-        kicker="Second levier · deux à quatre fois par semaine"
-        title="Vos séances"
-        lead={`Un stimulus, pas un moyen de brûler des calories. Le programme ci-dessous est calculé pour ${metrics.age} ans, ${Math.round(metrics.poids)} kg et votre objectif : volume, repos et variantes en découlent.`}
-      />
+        <SectionHeading
+          icon="haltere"
+          kicker="Second levier · deux à quatre fois par semaine"
+          title="Vos séances"
+          lead={`Un stimulus, pas un moyen de brûler des calories. Le programme ci-dessous est calculé pour ${metrics.age} ans, ${Math.round(metrics.poids)} kg et votre objectif : volume, repos et variantes en découlent.`}
+        />
 
-      <WeekPlanCard week={week} />
+        <WeekPlanCard week={week} />
+      </Apparition>
     </View>
   );
 }
