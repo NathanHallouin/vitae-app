@@ -8,10 +8,10 @@ import {
 } from '@vitae/core/rappels';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, Switch, Text, View } from 'react-native';
+import Overline from '@/components/ui/Overline';
+import { Card, cx } from '@/components/ui/primitives';
 import { appliquerRappels, RAPPELS_DISPONIBLES } from '@/lib/rappels';
 import { usePalette } from '@/theme/palette';
-import Overline from '../ui/Overline';
-import { Card, cx } from '../ui/primitives';
 
 /**
  * Le réglage des rappels anti-sédentarité.

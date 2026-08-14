@@ -1,13 +1,13 @@
 import { buildProjection, rateAssessment } from '@vitae/core/calc';
 import { dec, fmtKg, fmtWeekly, kcal, monthIn } from '@vitae/core/format';
 import { Text, View } from 'react-native';
-import { useProfile } from '../ProfileProvider';
-import ProjectionChart from '../result/ProjectionChart';
-import Apparition from '../ui/Apparition';
-import CalculPrompt from '../ui/CalculPrompt';
-import OptionButton from '../ui/OptionButton';
-import Overline from '../ui/Overline';
-import { Card, cx } from '../ui/primitives';
+import ProjectionChart from '@/components/screens/ProjectionChart';
+import Apparition from '@/components/ui/Apparition';
+import CalculPrompt from '@/components/ui/CalculPrompt';
+import OptionButton from '@/components/ui/OptionButton';
+import Overline from '@/components/ui/Overline';
+import { Card, cx } from '@/components/ui/primitives';
+import { useProfile } from '@/state/ProfileProvider';
 
 export default function PoidsScreen() {
   const { metrics, profile, targetKey, setTargetKey } = useProfile();

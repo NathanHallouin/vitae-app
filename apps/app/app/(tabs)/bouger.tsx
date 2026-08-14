@@ -1,9 +1,9 @@
 import { BOUGER_EXPLAINER } from '@vitae/core/explainers';
 import { SITE_URL } from '@vitae/core/site';
-import Explainer from '@/components/Explainer';
-import ResultScreen from '@/components/ResultScreen';
-import Seo from '@/components/Seo';
+import ResultScreen from '@/components/layout/ResultScreen';
+import Seo from '@/components/layout/Seo';
 import BougerScreen from '@/components/screens/BougerScreen';
+import Explainer from '@/components/screens/Explainer';
 import RunningDoodle from '@/components/ui/doodles/RunningDoodle';
 import PageIntro from '@/components/ui/PageIntro';
 

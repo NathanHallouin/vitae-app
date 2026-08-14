@@ -99,10 +99,5 @@ export async function appliquerRappels(config: RappelsConfig): Promise<boolean> 
   return true;
 }
 
-/** Combien de rappels le système a réellement en attente. Sert à vérifier, pas à décider. */
-export async function rappelsEnAttente(): Promise<number> {
-  return (await Notifications.getAllScheduledNotificationsAsync()).length;
-}
-
 /** Vrai quand la plateforme sait programmer des rappels. Faux sur le web. */
 export const RAPPELS_DISPONIBLES = true;

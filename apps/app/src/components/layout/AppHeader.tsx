@@ -13,12 +13,12 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { usePathname, useRouter } from 'expo-router';
 import { Pressable, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useProfile } from '@/components/ProfileProvider';
+import ResultTabs, { useTopNav } from '@/components/layout/ResultTabs';
+import Icon from '@/components/ui/Icon';
+import { MAX_CONTENT } from '@/components/ui/Page';
+import { useProfile } from '@/state/ProfileProvider';
 import { useColorMode } from '@/theme/ColorMode';
 import { usePalette } from '@/theme/palette';
-import ResultTabs, { useTopNav } from './ResultTabs';
-import Icon from './ui/Icon';
-import { MAX_CONTENT } from './ui/Page';
 
 export default function AppHeader() {
   const router = useRouter();

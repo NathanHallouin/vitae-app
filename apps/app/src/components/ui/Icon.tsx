@@ -10,7 +10,7 @@
  * appelants la tirent du thème via `useToken`, ce qui revient au même à l'écran.
  */
 
-import { ICON_NAMES, type IconName } from '@vitae/core/icons';
+import type { IconName } from '@vitae/core/icons';
 import type { ReactNode } from 'react';
 import { Circle, Path, Rect, Svg } from 'react-native-svg';
 
@@ -174,7 +174,6 @@ const PATHS: Record<IconName, ReactNode> = {
 };
 
 export type { IconName };
-export { ICON_NAMES };
 
 export default function Icon({
   name,

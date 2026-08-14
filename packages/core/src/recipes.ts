@@ -801,7 +801,7 @@ const MEALS: { name: string; share: number; slot: Slot }[] = [
   { name: 'Dîner', share: 0.3, slot: 'plat' },
 ];
 
-export const MEALS_SHARE = MEALS.reduce((sum, m) => sum + m.share, 0);
+const MEALS_SHARE = MEALS.reduce((sum, m) => sum + m.share, 0);
 
 export interface Suggestion extends Recipe {
   /** identifiant du créneau, pour demander un autre tirage à cette place précise */

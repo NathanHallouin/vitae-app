@@ -1,8 +1,8 @@
 /**
  * La forme d'une recette, et les deux calculs de durée qui l'accompagnent.
  *
- * Ce module ne lit aucun fichier et n'importe rien : il est chargé aussi bien par le site que par
- * l'application native, où `node:fs`, `gray-matter` et `marked` n'existent pas.
+ * Ce module ne lit aucun fichier et n'importe rien : il est chargé par les trois plateformes, où
+ * `node:fs` et `gray-matter` n'existent pas.
  */
 
 export interface RecipeMeta {
@@ -39,10 +39,10 @@ export interface RecipeMeta {
 /**
  * Un morceau de prose, hors étapes.
  *
- * Le site rend le HTML produit par `marked` ; l'application native, elle, n'a pas de moteur HTML
- * et ne va pas embarquer une WebView pour deux paragraphes. On publie donc les deux formes : le
- * HTML pour le web, ces blocs pour le natif. La duplication pèse quelques centaines d'octets et
- * évite qu'une des deux plateformes ne rende du balisage brut à l'écran.
+ * Des blocs typés plutôt que du HTML : l'application n'a pas de moteur de rendu HTML et n'en aura
+ * pas, le site étant lui-même produit par `react-native-web`. Le vocabulaire des recettes se limite
+ * aux paragraphes et aux titres de niveau deux — on s'arrête là plutôt que d'écrire un
+ * convertisseur Markdown complet dont personne n'a besoin.
  */
 export interface Block {
   type: 'p' | 'h2';
@@ -52,12 +52,9 @@ export interface Block {
 export interface Recipe extends RecipeMeta {
   /** étapes extraites du Markdown, pour `recipeInstructions` et pour l'affichage pas à pas */
   etapes: string[];
-  /** ce qui précède la liste numérotée, en HTML */
-  introHtml: string;
-  /** ce qui la suit, en HTML */
-  suiteHtml: string;
-  /** les mêmes textes, en blocs typés, pour le rendu natif */
+  /** ce qui précède la liste numérotée */
   introBlocks: Block[];
+  /** ce qui la suit */
   suiteBlocks: Block[];
 }
 

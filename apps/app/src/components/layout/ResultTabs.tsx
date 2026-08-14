@@ -15,11 +15,11 @@
 import { NAV_BREAKPOINT, RESULT_PAGES } from '@vitae/core/nav';
 import { Link, usePathname } from 'expo-router';
 import { Pressable, Text, useWindowDimensions, View } from 'react-native';
+import Icon from '@/components/ui/Icon';
+import { MAX_CONTENT } from '@/components/ui/Page';
+import { cx } from '@/components/ui/primitives';
 import { versRoute } from '@/lib/route';
 import { usePalette } from '@/theme/palette';
-import Icon from './ui/Icon';
-import { MAX_CONTENT } from './ui/Page';
-import { cx } from './ui/primitives';
 
 /** Vrai quand la navigation est en haut. Faux quand elle est en bas. Jamais les deux. */
 export function useTopNav(): boolean {

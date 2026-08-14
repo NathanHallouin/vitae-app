@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { Pressable, Text, View } from 'react-native';
-import { useProfile } from './ProfileProvider';
+import { useProfile } from '@/state/ProfileProvider';
 
 /**
  * Rappel discret de ce sur quoi les chiffres sont calculés, présent sur tous les écrans.

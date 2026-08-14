@@ -12,13 +12,13 @@ import {
 import type { ProfileInput } from '@vitae/core/storage';
 import { useReducer } from 'react';
 import { Text, View } from 'react-native';
+import LivePreview from '@/components/screens/LivePreview';
+import DateField from '@/components/ui/DateField';
+import Icon, { type IconName } from '@/components/ui/Icon';
+import OptionButton from '@/components/ui/OptionButton';
+import Overline from '@/components/ui/Overline';
+import { Button, Card, cx, NumberField, ProgressBar } from '@/components/ui/primitives';
 import { usePalette } from '@/theme/palette';
-import LivePreview from '../LivePreview';
-import DateField from '../ui/DateField';
-import Icon, { type IconName } from '../ui/Icon';
-import OptionButton from '../ui/OptionButton';
-import Overline from '../ui/Overline';
-import { Button, Card, cx, NumberField, ProgressBar } from '../ui/primitives';
 
 const MEASURES = [
   { field: 'taille', label: 'Taille', unit: 'cm', placeholder: '175' },

@@ -1,11 +1,11 @@
 import { kcal } from '@vitae/core/format';
 import type { NeatPlan } from '@vitae/core/neat';
 import { Text, View } from 'react-native';
-import Overline from '../ui/Overline';
-import { TileRow } from '../ui/Page';
-import { Bullet, Card } from '../ui/primitives';
-import Repliable from '../ui/Repliable';
-import StatTile from '../ui/StatTile';
+import Overline from '@/components/ui/Overline';
+import { TileRow } from '@/components/ui/Page';
+import { Bullet, Card } from '@/components/ui/primitives';
+import Repliable from '@/components/ui/Repliable';
+import StatTile from '@/components/ui/StatTile';
 
 /**
  * Le mouvement du quotidien, présenté séparément des séances.

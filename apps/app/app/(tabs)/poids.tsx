@@ -1,8 +1,8 @@
 import { POIDS_EXPLAINER } from '@vitae/core/explainers';
 import { SITE_URL } from '@vitae/core/site';
-import Explainer from '@/components/Explainer';
-import ResultScreen from '@/components/ResultScreen';
-import Seo from '@/components/Seo';
+import ResultScreen from '@/components/layout/ResultScreen';
+import Seo from '@/components/layout/Seo';
+import Explainer from '@/components/screens/Explainer';
 import PoidsScreen from '@/components/screens/PoidsScreen';
 import LevitateDoodle from '@/components/ui/doodles/LevitateDoodle';
 import PageIntro from '@/components/ui/PageIntro';

@@ -1,11 +1,10 @@
 /**
  * Compilation des recettes rédigées en Markdown, dans `packages/content/recettes/`.
  *
- * Ce script tourne une fois, avant les deux builds, et écrit `src/recettes.generated.ts`. Ni
- * `gray-matter` ni `marked` n'arrivent donc au navigateur — c'était déjà le cas — mais surtout ils
- * n'arrivent pas non plus dans le paquet natif, qui n'a ni système de fichiers ni parseur Markdown
- * à sa disposition. L'application embarque le résultat : une recette s'ouvre hors connexion et
- * sans une seule milliseconde d'analyse.
+ * Ce script tourne une fois, avant le build, et écrit `src/recettes.generated.ts`. `gray-matter`
+ * n'arrive donc jamais dans le paquet livré, qui n'a ni système de fichiers ni parseur Markdown à
+ * sa disposition. L'application embarque le résultat : une recette s'ouvre hors connexion et sans
+ * une seule milliseconde d'analyse.
  *
  * Le frontmatter porte les champs structurés (temps, portions, valeurs, ingrédients) parce que
  * c'est lui qui alimente le JSON-LD `Recipe`, celui qui déclenche les résultats enrichis. Le corps
@@ -19,7 +18,6 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { BASES, SLOTS } from '@vitae/core/recipes';
 import matter from 'gray-matter';
-import { marked } from 'marked';
 import type { Block, Recipe, RecipeMeta } from './types';
 
 const ICI = path.dirname(fileURLToPath(import.meta.url));
@@ -127,7 +125,7 @@ function decouper(markdown: string): { intro: string; etapes: string[]; suite: s
 }
 
 /**
- * La même prose, en blocs plutôt qu'en HTML, pour le rendu natif.
+ * La prose, en blocs typés.
  *
  * Le vocabulaire employé dans les recettes se limite aux paragraphes et aux titres de niveau 2 :
  * on s'arrête là plutôt que d'écrire un convertisseur Markdown complet dont personne n'a besoin.
@@ -185,8 +183,6 @@ async function lireRecette(slug: string): Promise<Recipe> {
   return {
     ...lireMeta(slug, data),
     etapes,
-    introHtml: await marked.parse(intro),
-    suiteHtml: await marked.parse(suite),
     introBlocks: enBlocs(intro),
     suiteBlocks: enBlocs(suite),
   };

@@ -2,10 +2,10 @@ import { type Criteres, DUREES, MOMENTS, TRIS } from '@vitae/content';
 import { EXCLUSIONS } from '@vitae/core/recipes';
 import { type ReactNode, useState } from 'react';
 import { Pressable, Text, TextInput, View } from 'react-native';
+import Icon from '@/components/ui/Icon';
+import { useLarge } from '@/components/ui/Page';
+import { cx } from '@/components/ui/primitives';
 import { usePalette } from '@/theme/palette';
-import Icon from '../ui/Icon';
-import { useLarge } from '../ui/Page';
-import { cx } from '../ui/primitives';
 
 /**
  * Le champ de recherche et les filtres de l'index des recettes.

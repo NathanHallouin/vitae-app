@@ -1,9 +1,9 @@
 import { formFromProfile } from '@vitae/core/state';
 import { Link, useRouter } from 'expo-router';
 import { View } from 'react-native';
-import { useProfile } from '@/components/ProfileProvider';
 import ProfilForm from '@/components/screens/ProfilForm';
 import Page from '@/components/ui/Page';
+import { useProfile } from '@/state/ProfileProvider';
 
 /**
  * La saisie du profil.

@@ -6,7 +6,7 @@
     "useIgnoreFile": true
   },
   "files": {
-    "includes": ["**", "!dist", "!**/*.generated.*", "!apps/app/expo-env.d.ts"]
+    "includes": ["**", "!dist", "!**/*.generated.*", "!apps/app/ios", "!apps/app/android"]
   },
   "formatter": {
     "enabled": true,

@@ -2,8 +2,8 @@ import { type Block, dureeISO, dureeTotale, getRecipe, getRecipeSlugs } from '@v
 import { SITE_NAME, SITE_URL } from '@vitae/core/site';
 import { Link, useLocalSearchParams } from 'expo-router';
 import { Text, View } from 'react-native';
+import Seo from '@/components/layout/Seo';
 import RecetteAtelier, { GarderEcranAllume } from '@/components/recette/RecetteAtelier';
-import Seo from '@/components/Seo';
 import Page from '@/components/ui/Page';
 
 /**

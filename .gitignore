@@ -1,26 +1,24 @@
 node_modules/
-out/
-build/
 dist/
+build/
 *.tsbuildinfo
-next-env.d.ts
 .env*.local
 .DS_Store
-npm-debug.log*
 
-# Expo et builds natifs
+# Expo : projets natifs et types engendrés, tous reconstruits par la commande
 .expo/
+expo-env.d.ts
 apps/app/ios/
 apps/app/android/
+
+# Fichiers écrits par `bun run generate`
 apps/app/public/sitemap.xml
 apps/app/public/robots.txt
 apps/app/assets/*.png
+
+# Signature d'applications : ne doit jamais entrer dans le dépôt
 *.jks
 *.p8
 *.p12
 *.key
 *.mobileprovision
-
-# Fichiers générés par Next.js
-AGENTS.md
-CLAUDE.md

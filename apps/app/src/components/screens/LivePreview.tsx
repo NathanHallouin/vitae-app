@@ -3,8 +3,8 @@ import { activityLabel, goalByKey } from '@vitae/core/constants';
 import { dec, kcal } from '@vitae/core/format';
 import type { FormState } from '@vitae/core/state';
 import { Text, View } from 'react-native';
-import Overline from './ui/Overline';
-import { Card, cx } from './ui/primitives';
+import Overline from '@/components/ui/Overline';
+import { Card, cx } from '@/components/ui/primitives';
 
 /**
  * Les chiffres se recalculent à chaque frappe.

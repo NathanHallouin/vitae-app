@@ -9,17 +9,17 @@ import { GOALS } from '@vitae/core/constants';
 import { fmtGap, fmtWeekly, kcal } from '@vitae/core/format';
 import { useMemo } from 'react';
 import { Text, View } from 'react-native';
+import Apparition from '@/components/ui/Apparition';
+import CalculPrompt from '@/components/ui/CalculPrompt';
+import Chiffre from '@/components/ui/Chiffre';
+import Icon from '@/components/ui/Icon';
+import OptionButton from '@/components/ui/OptionButton';
+import Overline from '@/components/ui/Overline';
+import { TileRow } from '@/components/ui/Page';
+import { Card } from '@/components/ui/primitives';
+import StatTile from '@/components/ui/StatTile';
+import { useProfile } from '@/state/ProfileProvider';
 import { usePalette } from '@/theme/palette';
-import { useProfile } from '../ProfileProvider';
-import Apparition from '../ui/Apparition';
-import CalculPrompt from '../ui/CalculPrompt';
-import Chiffre from '../ui/Chiffre';
-import Icon from '../ui/Icon';
-import OptionButton from '../ui/OptionButton';
-import Overline from '../ui/Overline';
-import { TileRow } from '../ui/Page';
-import { Card } from '../ui/primitives';
-import StatTile from '../ui/StatTile';
 import RecipesCard from './RecipesCard';
 
 export default function AlimentationScreen() {

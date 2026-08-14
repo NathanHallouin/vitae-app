@@ -16,7 +16,7 @@
 
 import { MOBILE_PAGES } from '@vitae/core/nav';
 import { Tabs } from 'expo-router';
-import { useTopNav } from '@/components/ResultTabs';
+import { useTopNav } from '@/components/layout/ResultTabs';
 import Icon from '@/components/ui/Icon';
 import { MAX_CONTENT } from '@/components/ui/Page';
 import { usePalette } from '@/theme/palette';

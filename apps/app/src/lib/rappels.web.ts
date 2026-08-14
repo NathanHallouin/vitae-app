@@ -21,7 +21,3 @@ export async function demanderPermission(): Promise<boolean> {
 export async function appliquerRappels(_config: RappelsConfig): Promise<boolean> {
   return false;
 }
-
-export async function rappelsEnAttente(): Promise<number> {
-  return 0;
-}

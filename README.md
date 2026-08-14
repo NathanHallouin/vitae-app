@@ -165,7 +165,7 @@ kcal en moins dans l'assiette = |écart| × (1 − part)
 La page « Ce que je mange » ne fabrique plus de menu au gramme près : elle propose des plats à
 cuisiner. Une liste de portions pesées se lit bien mais ne se cuisine pas.
 
-Le catalogue (`src/lib/recipes.ts`) tient en dur : l'app ne parle à aucun serveur et n'a pas de clé
+Le catalogue (`packages/core/src/recipes.ts`) tient en dur : l'app ne parle à aucun serveur et n'a pas de clé
 d'API. Chaque entrée porte un plat, ses kcal et protéines **pour une portion courante**, son
 `slot` (`matin` ou `plat`), sa `base` (ingrédient dominant, pour la variété) et ce qu'elle
 `contient` (pour les filtres). L'URL est **une recherche** sur Marmiton ou Femme Actuelle, pas une
@@ -201,7 +201,7 @@ est un bouton, et un bouton dans un lien est du HTML invalide. La zone cliquable
 
 Le mouvement est traité sur deux registres distincts, jamais additionnés dans une même liste.
 
-**1. Le NEAT** (`src/lib/neat.ts`, catalogue `NEAT_ACTIONS`) : des gestes du quotidien, répétables
+**1. Le NEAT** (`packages/core/src/neat.ts`, catalogue `NEAT_ACTIONS`) : des gestes du quotidien, répétables
 tous les jours, sans récupération. Indexés sur le seul axe `daily` : le nombre de séances n'y change
 rien. kcal ≈ `MET × poids × minutes / 60`, arrondi au multiple de 5.
 
@@ -220,7 +220,7 @@ Conseils NEAT par cran de mouvement quotidien : voir `NEAT_TIPS`, textes à repr
 `movementSplit()` départage les deux dépenses : le NEAT vaut `MB × (base − 1)`, les séances valent
 `MB × add`, chacun sur son axe de saisie. La somme redonne `DET − MB`.
 
-**2. Les séances** (`src/lib/training.ts`) : un stimulus, pas un moyen de dépenser. Le programme
+**2. Les séances** (`packages/core/src/training.ts`) : un stimulus, pas un moyen de dépenser. Le programme
 n'est pas un texte fixe : `buildSetup()` calcule séries, répétitions, repos et variantes à partir du
 profil, puis `explainSetup()` produit la liste des adaptations affichées à l'utilisateur, construite
 sur les valeurs finales.
@@ -240,104 +240,21 @@ sur les valeurs finales.
 | Poids | dépense estimée de chaque séance (`MET × poids × durée`, repos comptés à 2 MET) |
 
 
-## Écrans
+## Ce qui n'est plus ici
 
-### 1. Accueil (`screen: "home"`)
+Trois sections décrivaient le prototype d'origine : le détail des écrans au pixel près, un modèle
+d'état à trois vues (`screen: "home" | "input" | "result"`), et une palette Material bleue en
+Roboto avec ses ombres. Rien de tout cela n'a survécu au portage — l'application a des routes et
+non un état d'écran, et sa palette est crème et bleu profond, sans ombre, en Fraunces et Inter.
 
-- **Objectif** : expliquer en trois lignes et lancer la saisie.
-- **Layout** : grille 2 colonnes `repeat(auto-fit, minmax(280px, 1fr))`, gap 32 px, centrée verticalement. Conteneur `max-width: 1200px`, padding `32px 24px 64px`.
-- Colonne gauche : `h1` 34 px / 500 / line-height 1.2 (« Combien de calories votre corps dépense-t-il au repos ? »), paragraphe 16 px `--muted`, paragraphe 14 px `--muted2`, puis deux boutons : « COMMENCER » (contained) et « FORMULAIRE COMPLET » (outlined).
-- Colonne droite : carte « CE QUE VOUS OBTENEZ », 4 lignes numérotées (pastille ronde 28 px, fond `--primary-tint`, texte `--primary-ink`, 13 px / 700) séparées par `border-top: 1px solid --divider`.
+Ce qui les remplace, et qui fait autorité :
 
-### 2. Saisie (`screen: "input"`)
+- **les jetons** — couleurs, typographie, rayons, durées : `packages/core/src/tokens.ts` ;
+- **le système visuel et le mouvement** : la section « Architecture » ci-dessous ;
+- **les écrans** : `apps/app/app/`, une route par fichier ;
+- **l'état** : `packages/core/src/state.ts` pour la saisie, `ProfileProvider` pour le profil.
 
-- **Layout desktop** : en-tête de section (surtitre 12 px majuscules + titre 24 px, bouton texte de bascule de mode à droite), barre de progression 4 px en mode guidé, puis une ligne flex `gap: 24px`, `flex-wrap: wrap` : carte de formulaire `flex: 1 1 460px` et panneau latéral `flex: 1 1 280px; max-width: 340px; position: sticky; top: 88px`. Sur mobile, le panneau passe sous le formulaire.
-- **Mode guidé** (4 étapes) : 0 sexe, 1 mesures (âge/taille/poids), 2 activité, 3 objectif. Surtitre « Étape n sur 4 », titres : « Parlons de vous », « Vos mesures », « Votre activité », « Votre objectif ». Progression = (étape+1)/4.
-- **Mode formulaire** : les 4 groupes affichés d'un coup, surtitre « Formulaire complet », titre « Vos informations », bouton « CALCULER ».
-- **Sexe** : deux boutons 130 px min, padding 16 px. Sélection = fond `--primary-tint`, bordure `--primary-ink`, texte `--primary-ink` ; non sélectionné = fond `--surface`, bordure `--border`, texte `--text`.
-- **Mesures** : grille `repeat(auto-fit, minmax(160px, 1fr))`, gap 20 px. Champs numériques avec suffixe (`ans`, `cm`, `kg`), bordure 1 px `--border-strong`, rayon 4 px, hauteur de saisie 14 px de padding vertical, texte 16 px. Spinners masqués.
-- **Activité** : deux groupes radio successifs, « Votre quotidien, en dehors du sport ? » (4 lignes) puis « Du sport, combien de fois par semaine ? » (5 lignes). Lignes pleine largeur, pastille 18 px, libellé 15 px / 500, description 13 px `--muted2`, valeur alignée à droite en `--faint` (`×1,2` pour la base, `+0,12` pour l'apport, `+0` si aucune séance). Sous les deux listes, le facteur retenu est rappelé en `aria-live`.
-- **Objectif** : grille `repeat(auto-fit, minmax(180px, 1fr))`, gap 10 px, cartes cliquables titre + description.
-- **Validation** (messages exacts) : sexe manquant → « Sélectionnez un sexe biologique pour appliquer la bonne équation. » ; champ vide → « Renseignez l'âge, la taille et le poids. » ; âge hors [15, 100] → « L'âge doit être compris entre 15 et 100 ans. » ; taille hors [120, 230] → « La taille doit être comprise entre 120 et 230 cm. » ; poids hors [30, 300] → « Le poids doit être compris entre 30 et 300 kg. » Encart d'erreur : fond `--error-bg`, texte `--error-ink`, 14 px, rayon 4 px.
-- **Pied de carte** : `border-top 1px --divider`, bouton texte « RETOUR » / « ANNULER » à gauche, bouton contained « CONTINUER » / « CALCULER » à droite.
-- **Panneau « APERÇU EN DIRECT »** : 4 lignes label / valeur (MB, dépense totale, apport recommandé en `--primary-ink`, IMC + libellé de bande), recalculées à chaque frappe, `…` si les données sont incomplètes. Note de bas de panneau 12 px `--faint`.
-
-### 3. Résultats (`screen: "result"`)
-
-Ligne flex `gap: 24px`, `flex-wrap: wrap`.
-
-**Colonne gauche** : `flex: 1 1 320px; max-width: 420px; position: sticky; top: 88px`, gap 24 px :
-1. Carte pleine couleur `--primary`, texte blanc, ombre elevation 3, padding 32 px : surtitre « MÉTABOLISME DE BASE », valeur 56 px / 300 tabular-nums + « kcal / jour », légende « au repos absolu, sans aucune activité » ; séparateur `rgba(255,255,255,.25)` ; bloc « DÉPENSE TOTALE · <niveau en minuscules> » valeur 34 px ; bloc « IMC » avec valeur 34 px, libellé de bande 15 px / 500, « Poids santé : x – y kg » à droite, jauge 4 segments 8 px de haut avec curseur blanc 4×16 px (ombre `0 0 0 2px rgba(0,0,0,.18)`), libellés de bandes 11 px, mention « L'IMC ne distingue pas muscle et graisse : il surestime la corpulence des personnes très musclées. »
-2. Carte « VOS DONNÉES » : chips 13 px (fond `--divider`, rayon 16 px) listant sexe, âge, taille, poids, niveau d'activité ; boutons « MODIFIER » (outlined, renvoie en mode formulaire) et « RECOMMENCER » (texte) ; avertissement 12 px `--faint` : « Estimation statistique, pas un avis médical. La dépense réelle varie de ±10 % selon la génétique, la masse musculaire et l'état hormonal. »
-
-**Colonne droite** : `flex: 2 1 460px`, gap 24 px :
-1. Carte « OBJECTIF · <libellé> » : valeur recommandée 40 px `--primary-ink` + « kcal / jour recommandées », note de l'objectif 14 px, puis section « FOURCHETTE DE DÉFICIT / DE SURPLUS / D'APPORT RECOMMANDÉE » : barre 10 px situant [min, max] entre MB et DET (repère vertical `#90a4ae` sur la DET, échelle 0 → MB, 100 % → DET×1,2), deux tuiles Minimum / Maximum (valeur 22 px, écart en kcal et variation kg/semaine), encart d'avertissement conditionnel.
-2. Carte « POIDS CIBLE » : 3 boutons cible (valeur 18 px, libellé, sous-libellé), puis 4 statistiques (écart à combler, durée estimée en semaines + mois, rythme, mois d'atteinte), légende d'échelle, graphique de projection (aire `--primary-tint`, courbe `--primary` 3 px, ligne cible pointillée `--primary-ink` 1,5 px `5 5`, point d'arrivée 5 px), repères de semaines, note 12 px.
-3. Carte « RÉPARTITION INDICATIVE » (macros) : 3 lignes label + « x g · y kcal » et barre 6 px.
-
-**Pleine largeur, sous les deux colonnes**, carte « Construire l'écart » (« Construire le surplus » en prise de masse) : titre 20 px, sous-titre « <objectif> · <activité> », paragraphe explicatif, bloc de répartition (barre empilée mouvement/assiette + deux tuiles avec % et kcal), puis grille 2 colonnes : liste d'exercices (libellé 15 px, détail 13 px, kcal ≈ à droite en `--primary-ink`) et liste de conseils « CASSER LA SÉDENTARITÉ » (puces 6 px, fond `--surface2`).
-
-## Interactions et comportement
-
-- Bascule mode guidé ↔ formulaire à tout moment ; le retour à l'étape 0 est fait à la bascule.
-- « Modifier » depuis les résultats ouvre le formulaire complet en conservant les valeurs.
-- « Recommencer » (en-tête et résultats) remet tout à zéro sauf le thème.
-- Sélection d'un objectif → réinitialise le poids cible choisi manuellement.
-- Aucune animation complexe : transitions `all .15s ease` sur les options, `width .3s ease` sur la barre de progression.
-- Validation à la soumission de l'étape, pas à la frappe ; l'aperçu en direct, lui, se met à jour à chaque frappe.
-- Responsive : l'essentiel tient dans une colonne qui s'étire, sans point de rupture. Le seul seuil est 768 px, au-delà duquel les illustrations d'écran apparaissent — une décision de contenu, pas de gabarit.
-- Mode sombre : bouton pilule dans l'en-tête (pastille + libellé « Clair » / « Sombre »).
-
-## État
-
-```
-screen      : "home" | "input" | "result"
-mode        : "wizard" | "form"
-step        : 0..3
-sexe        : "" | "femme" | "homme"
-age, taille, poids : string (champs contrôlés)
-daily       : 0..3        (défaut 1)  quotidien hors sport
-sessions    : 0..4        (défaut 1)  séances par semaine
-goal        : "seche" | "recomp" | "masse" | "maintien"   (défaut "seche")
-targetKey   : string | null   (poids cible choisi ; null = automatique)
-theme       : "light" | "dark" | null (null = valeur par défaut)
-error       : string
-```
-
-Tout est dérivé de cet état, aucune donnée distante. En pratique : un `useReducer` pour le formulaire de saisie (`packages/core/src/state.ts`) et un contexte unique pour le profil enregistré (`ProfileProvider`), dont les écrans ne tirent que des calculs purs.
-
-## Design tokens
-
-Mode clair → mode sombre :
-
-| Token | Clair | Sombre |
-|---|---|---|
-| `--bg` | `#f4f6f8` | `#121417` |
-| `--surface` | `#ffffff` | `#1c1f24` |
-| `--surface2` | `#f7f9fa` | `#23272e` |
-| `--text` | `#212121` | `#e8eaed` |
-| `--muted` | `#5f6368` | `#b0b6bd` |
-| `--muted2` | `#757575` | `#9aa1a9` |
-| `--faint` | `#9e9e9e` | `#7c848d` |
-| `--divider` | `#eceff1` | `#2c3138` |
-| `--border` | `#e0e0e0` | `#343a42` |
-| `--border-strong` | `#bdbdbd` | `#4a5158` |
-| `--primary` | `#1976d2` | `#1565c0` |
-| `--primary-dark` | `#1565c0` | `#0d47a1` |
-| `--primary-ink` (texte/bordure accent) | `#1565c0` | `#90caf9` |
-| `--primary-tint` | `rgba(25,118,210,.08)` | `rgba(144,202,249,.12)` |
-| `--error-bg` / `--error-ink` | `#fdecea` / `#b71c1c` | `#3a1f1e` / `#ffb4ab` |
-| `--warn-bg` / `--warn-ink` | `#fff8e1` / `#8d6e00` | `#33291a` / `#ffd28a` |
-
-Couleurs fixes (identiques dans les deux thèmes) : lipides `#f9a825`, glucides `#00897b`, repère DET `#90a4ae`, bandes IMC listées plus haut.
-
-Ombres : elevation 1 = `0 2px 1px -1px rgba(0,0,0,.2), 0 1px 1px 0 rgba(0,0,0,.14), 0 1px 3px 0 rgba(0,0,0,.12)` ; elevation 3 = `0 3px 5px -1px rgba(0,0,0,.2), 0 6px 10px 0 rgba(0,0,0,.14)`. En sombre : `0 1px 2px rgba(0,0,0,.5)` et `0 6px 14px rgba(0,0,0,.55)`.
-
-Typographie : **Roboto** 400 / 500 / 700, fallback Helvetica, Arial, sans-serif. Échelle utilisée : 56 / 40 / 34 / 24 / 22 / 20 / 18 / 16 / 15 / 14 / 13 / 12 / 11 px. Surtitres : 12 px, 500, `letter-spacing .08em`, majuscules. Libellés de boutons : 14–15 px, 500, `letter-spacing .04em`, majuscules. Chiffres : `font-variant-numeric: tabular-nums` partout.
-
-Rayons : 4 px (cartes, champs, boutons), 16 px (chips et bouton de thème), 50 % (pastilles). Espacements : 2, 4, 6, 8, 10, 12, 14, 16, 20, 24, 28, 32 px. Gouttières de grille : 10, 12, 20, 24, 28, 32 px. Conteneur : 1200 px max, padding horizontal 24 px, en-tête haut 64 px, offset sticky 88 px.
-
-Formats numériques : `toLocaleString('fr-FR')` pour les kcal (espace insécable comme séparateur de milliers), virgule décimale pour IMC, kg et rythme, `−` (U+2212) pour les valeurs négatives.
+Les formules ci-dessus, elles, n'ont pas bougé et restent la référence du métier.
 
 ---
 
@@ -421,11 +338,21 @@ app/
   (tabs)/               les cinq onglets, tirés de `MOBILE_PAGES`
   recettes/            index et détail, `generateStaticParams` pour le pré-rendu
 src/
-  components/           écrans, cartes, primitives, icônes, illustrations
-  theme/                bascule clair / sombre, palette du thème courant
-  lib/store.ts          MMKV — et `store.web.ts`, que Metro choisit sur le web
-  lib/rappels.ts        notifications locales — et `rappels.web.ts`, qui ne fait rien
+  components/
+    layout/             ce qui encadre un écran : en-tête, onglets, cadre, balises de tête
+    screens/            le contenu d'un écran, découpé en cartes
+    recette/            l'atelier de cuisine et les filtres du catalogue
+    ui/                 le système visuel : Hero, Chiffre, Card, Repliable, icônes…
+  state/                le profil, point de passage unique vers les données persistées
+  theme/                palette, mouvement, bascule clair / sombre
+  lib/                  les adaptateurs de plateforme, et eux seuls
+    store.ts            MMKV — et `store.web.ts`, que Metro choisit sur le web
+    rappels.ts          notifications locales — et `rappels.web.ts`, qui ne fait rien
+    route.ts            le seul endroit où une adresse du métier devient une route typée
 ```
+
+`lib/` ne contient que ce qui dépend de la plateforme, et c'est une règle : quand un fichier y
+atterrit sans avoir de variante `.web`, c'est qu'il appartient au métier ou à un composant.
 
 ### Les rappels anti-sédentarité
 
@@ -535,7 +462,7 @@ Le moment de la lecture du stockage, et rien d'autre. En natif, MMKV lit tout de
 les pages sont pré-rendues par Node, où `localStorage` n'existe pas : lire au premier rendu
 produirait un balisage différent de celui qui a été livré, et React refuserait l'hydratation.
 
-`LECTURE_IMMEDIATE`, exporté par `src/lib/store.ts` et `src/lib/store.web.ts`, porte cette
+`LECTURE_IMMEDIATE`, exporté par `apps/app/src/lib/store.ts` et sa variante `.web.ts`, porte cette
 différence — décidée par le fichier que Metro choisit, pas par un test à l'exécution.
 
 ## Commandes

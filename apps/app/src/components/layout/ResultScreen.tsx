@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react';
 import { Text, View } from 'react-native';
-import ProfileBar from './ProfileBar';
-import Apparition from './ui/Apparition';
-import Page from './ui/Page';
+import ProfileBar from '@/components/layout/ProfileBar';
+import Apparition from '@/components/ui/Apparition';
+import Page from '@/components/ui/Page';
 
 /**
  * Le cadre commun des écrans de résultats : rappel du profil, contenu, avertissement.

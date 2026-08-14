@@ -1,9 +1,9 @@
 import { ALIMENTATION_EXPLAINER } from '@vitae/core/explainers';
 import { SITE_URL } from '@vitae/core/site';
-import Explainer from '@/components/Explainer';
-import ResultScreen from '@/components/ResultScreen';
-import Seo from '@/components/Seo';
+import ResultScreen from '@/components/layout/ResultScreen';
+import Seo from '@/components/layout/Seo';
 import AlimentationScreen from '@/components/screens/AlimentationScreen';
+import Explainer from '@/components/screens/Explainer';
 import PlantDoodle from '@/components/ui/doodles/PlantDoodle';
 import PageIntro from '@/components/ui/PageIntro';
 

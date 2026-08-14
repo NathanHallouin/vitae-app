@@ -1,7 +1,12 @@
 import type { ExpoConfig } from 'expo/config';
 
 /**
- * Configuration de l'application native.
+ * Configuration de l'application, pour les trois plateformes.
+ *
+ * Tout est ici, et nulle part ailleurs. Deux `app.json` traînaient à côté — l'un à la racine du
+ * dépôt, l'autre dans ce dossier — écrits automatiquement par `expo install` au fil des ajouts de
+ * modules. Expo fusionne les deux avec ce fichier, si bien qu'un greffon pouvait être actif sans
+ * figurer ici : c'est le genre d'écart qu'on ne découvre qu'au premier build cassé.
  *
  * Deux choses méritent d'être dites, parce qu'elles se paient cher si on les découvre à la
  * soumission :
@@ -9,9 +14,10 @@ import type { ExpoConfig } from 'expo/config';
  * — `version` est la version lisible par l'utilisateur, commune aux deux magasins. Les numéros de
  *   build, eux, sont gérés par EAS (`appVersionSource: 'remote'`), qui les incrémente à chaque
  *   envoi. Les tenir à la main garantit un rejet le jour où l'on oublie.
- * — Aucune permission n'est demandée, et c'est un choix d'architecture, pas un oubli : tout est
- *   calculé sur l'appareil, rien n'est envoyé nulle part. C'est ce qui permet de déclarer « aucune
- *   donnée collectée » chez Apple comme chez Google, la déclaration la plus simple à défendre.
+ * — Les permissions sont réduites au strict nécessaire, et c'est un choix d'architecture : tout est
+ *   calculé sur l'appareil, rien n'est envoyé nulle part. Voir `blockedPermissions` plus bas pour
+ *   le détail de ce qui est refusé et pourquoi. C'est ce qui permet de déclarer « aucune donnée
+ *   collectée » chez Apple comme chez Google, la déclaration la plus simple à défendre.
  */
 
 const VERSION = '1.0.0';
@@ -113,7 +119,11 @@ const config: ExpoConfig = {
       },
     ],
     'expo-font',
+    'expo-status-bar',
     'expo-web-browser',
+    // Le sélecteur de date natif de l'écran du profil. Le greffon est indispensable : sans lui, le
+    // module n'est pas lié au projet natif et l'écran plante à l'ouverture du sélecteur.
+    '@react-native-community/datetimepicker',
   ],
 
   /**
@@ -122,7 +132,7 @@ const config: ExpoConfig = {
    * `output: 'static'` écrit un fichier HTML par route au moment de l'export — y compris une page
    * par recette, grâce au `generateStaticParams` de `app/recettes/[slug].tsx`. C'est ce qui permet
    * à un moteur de recherche de lire le contenu et les données structurées sans exécuter la
-   * moindre ligne de JavaScript, comme le faisait la version Next.
+   * moindre ligne de JavaScript.
    */
   web: {
     bundler: 'metro',

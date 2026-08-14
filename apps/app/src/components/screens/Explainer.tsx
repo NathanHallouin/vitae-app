@@ -3,11 +3,11 @@ import { Link } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useDerivedValue, withTiming } from 'react-native-reanimated';
+import Icon from '@/components/ui/Icon';
+import { Card, cx } from '@/components/ui/primitives';
 import { versRoute } from '@/lib/route';
 import { MOTION, useMotionReduite } from '@/theme/motion';
 import { usePalette } from '@/theme/palette';
-import Icon from './ui/Icon';
-import { Card, cx } from './ui/primitives';
 
 /**
  * Les explications d'un écran de résultats, en parcours plutôt qu'en pavé.

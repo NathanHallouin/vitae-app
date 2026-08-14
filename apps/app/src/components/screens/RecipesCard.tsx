@@ -14,12 +14,12 @@ import { useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
+import Icon from '@/components/ui/Icon';
+import Overline from '@/components/ui/Overline';
+import { Bullet, Card, cx } from '@/components/ui/primitives';
 import { versRoute } from '@/lib/route';
+import { useProfile } from '@/state/ProfileProvider';
 import { usePalette } from '@/theme/palette';
-import { useProfile } from '../ProfileProvider';
-import Icon from '../ui/Icon';
-import Overline from '../ui/Overline';
-import { Bullet, Card, cx } from '../ui/primitives';
 
 /**
  * Des plats à cuisiner plutôt qu'un menu fabriqué.

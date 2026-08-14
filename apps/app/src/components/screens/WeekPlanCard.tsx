@@ -1,9 +1,9 @@
 import type { WeekPlan } from '@vitae/core/training';
 import { Text, View } from 'react-native';
-import Chiffre from '../ui/Chiffre';
-import Overline from '../ui/Overline';
-import { Bullet, Card } from '../ui/primitives';
-import Repliable from '../ui/Repliable';
+import Chiffre from '@/components/ui/Chiffre';
+import Overline from '@/components/ui/Overline';
+import { Bullet, Card } from '@/components/ui/primitives';
+import Repliable from '@/components/ui/Repliable';
 
 /**
  * Programme hebdomadaire : quoi faire, dans quel ordre, et comment progresser.

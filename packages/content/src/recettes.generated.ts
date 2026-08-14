@@ -38,8 +38,6 @@ export const RECETTES: Recipe[] = [
       "Versez des petites louches et laissez cuire 2 minutes, jusqu'à ce que des bulles apparaissent et éclatent en surface. Retournez et comptez 1 minute de plus.",
       "Empilez-les sur une assiette et servez avec des fruits frais."
     ],
-    "introHtml": "<p>La pâte doit reposer dix minutes avant cuisson : les flocons absorbent le liquide et gonflent. Cuits\ntout de suite, les pancakes restent granuleux et s&#39;effritent au retournement.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>Sans sucre ajouté, la banane suffit. La pâte se garde trois jours au réfrigérateur, ce qui donne\ntrois petits-déjeuners préparés en une seule fois.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -91,8 +89,6 @@ export const RECETTES: Recipe[] = [
       "Mélangez les légumes rôtis avec les pois chiches, le reste d'huile et le jus de citron.",
       "Posez le halloumi dessus, poivrez et parsemez de menthe."
     ],
-    "introHtml": "<p>Le halloumi ne fond pas parce qu&#39;il est chauffé pendant sa fabrication, ce qui fige ses protéines.\nC&#39;est le seul fromage qu&#39;on peut poser directement sur un gril. En revanche il est très salé : ne\nsalez rien d&#39;autre dans ce plat.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>Le halloumi apporte 25 g de protéines aux 100 g, mais aussi 2,5 g de sel. Le citron et la menthe ne\nsont pas décoratifs : ils équilibrent cette salinité.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -142,8 +138,6 @@ export const RECETTES: Recipe[] = [
       "Enfournez 8 minutes de plus. Le saumon est prêt quand la chair se sépare à la fourchette mais reste rosée au centre.",
       "Servez avec le citron en quartiers et l'aneth ciselé."
     ],
-    "introHtml": "<p>Le saumon se rate presque toujours par excès de cuisson : à cœur, il doit rester translucide au\ncentre. Deux minutes de trop et il devient sec et farineux, ce qu&#39;aucune sauce ne rattrape.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>La peau concentre une bonne part des oméga-3 : grillée sur la plaque, elle devient croustillante et\nse mange. Comptez 60 g de riz cru par personne pour un repas complet à environ 670 kcal.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -194,8 +188,6 @@ export const RECETTES: Recipe[] = [
       "Ajoutez l'ail et le paprika, remuez 1 minute.",
       "Remettez la viande et son jus, mélangez 30 secondes et servez sur le boulgour."
     ],
-    "introHtml": "<p>Une viande émincée jetée d&#39;un coup dans la poêle fait chuter la température, rend son eau et bout au\nlieu de dorer. En deux fournées, elle colore — et c&#39;est cette coloration qui fait tout le goût.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>Le paprika fumé arrive toujours en fin de cuisson : brûlé, il devient amer. Ce plat accepte\nn&#39;importe quel légume ferme — courgette, brocoli, haricot vert.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -249,8 +241,6 @@ export const RECETTES: Recipe[] = [
       "Parsemez du reste de parmesan et passez 2 minutes sous le gril, le temps que le dessus dore.",
       "Laissez reposer 5 minutes avant de couper : chaude, elle s'effondre."
     ],
-    "introHtml": "<p>Une frittata n&#39;est pas une omelette pliée : elle cuit lentement, à découvert, et finit sous le gril.\nC&#39;est ce qui lui donne sa tenue et permet de la manger froide le lendemain.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>Les deux blancs supplémentaires ajoutent 7 g de protéines pour 35 kcal : c&#39;est le meilleur rapport\nde tout le réfrigérateur. Elle se mange froide, ce qui en fait une gamelle du lendemain toute prête.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -300,8 +290,6 @@ export const RECETTES: Recipe[] = [
       "Couvrez et laissez au réfrigérateur au moins six heures, idéalement toute la nuit.",
       "Le matin, détendez avec une cuillère de lait si le mélange a trop épaissi."
     ],
-    "introHtml": "<p>Le bircher a été inventé pour être préparé la veille : les flocons crus deviennent digestes en\ntrempant. Le préparer le matin même donne un mélange sableux, sans intérêt.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>La peau de la pomme porte l&#39;essentiel de ses fibres : la râper avec évite d&#39;en jeter la moitié.\nPréparez trois bocaux d&#39;un coup, ils tiennent trois jours.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -352,8 +340,6 @@ export const RECETTES: Recipe[] = [
       "Ajoutez les pommes de terre égouttées, les lardons et le carvi, poursuivez 5 minutes.",
       "Poivrez. Ne salez pas : les lardons s'en chargent."
     ],
-    "introHtml": "<p>Le chou vert a mauvaise presse parce qu&#39;on le fait bouillir. Sauté à feu vif dans la graisse des\nlardons, il caramélise sur les bords et n&#39;a plus rien du légume d&#39;hôpital.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>Les lardons sont la charcuterie la plus grasse du plat mais aussi tout son assaisonnement : 150 g\npour deux suffisent. Le carvi est traditionnellement associé au chou parce qu&#39;il en atténue les\neffets digestifs.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -402,8 +388,6 @@ export const RECETTES: Recipe[] = [
       "Déposez le saumon en le froissant plutôt qu'à plat : il se tient mieux et se mange mieux.",
       "Donnez un dernier tour de moulin et servez aussitôt."
     ],
-    "introHtml": "<p>Le saumon fumé se sale déjà lui-même : ajouter du sel par-dessus est l&#39;erreur la plus courante de\ncette tartine. Le zeste de citron fait tout le travail à sa place.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>Cent grammes de saumon fumé couvrent les besoins hebdomadaires en oméga-3 à eux seuls, mais\napportent aussi près de 3 g de sel. C&#39;est un petit-déjeuner d&#39;une ou deux fois par semaine, pas un\nquotidien.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -451,8 +435,6 @@ export const RECETTES: Recipe[] = [
       "Mixez 45 secondes, jusqu'à ce qu'il n'y ait plus de morceaux.",
       "Buvez dans les minutes qui suivent : passé un quart d'heure, il se sépare."
     ],
-    "introHtml": "<p>Une banane congelée en rondelles la veille change tout : le smoothie devient épais et froid sans\nglaçons, qui le diluent. C&#39;est aussi le meilleur usage des bananes trop mûres.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>Boire ses calories cale moins bien que les mâcher : ce smoothie est un dépannage pour un matin\npressé, pas un petit-déjeuner à installer tous les jours. Vérifiez la liste du beurre de cacahuète —\nelle doit tenir en un mot, « cacahuètes ».</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -504,8 +486,6 @@ export const RECETTES: Recipe[] = [
       "Parsemez du reste de parmesan et enfournez 35 minutes, jusqu'à ce que le dessus soit doré et le centre pris.",
       "Laissez reposer 10 minutes avant de servir : le gratin se tient beaucoup mieux tiède."
     ],
-    "introHtml": "<p>Un gratin de courgettes rate presque toujours de la même façon : il rend son eau et finit en soupe.\nLa parade tient en une étape, faire dégorger les courgettes au sel avant de les enfourner. Sauter\ncette étape, c&#39;est vingt minutes de cuisson en plus pour un résultat plus pâle.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>Le fromage blanc remplace la crème pour un cinquième des calories et vingt fois plus de protéines.\nIl tranche s&#39;il bout : à 190 °C, dans un plat, il ne dépasse pas 100 °C au cœur et tient sans\nproblème.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -557,8 +537,6 @@ export const RECETTES: Recipe[] = [
       "Faites cuire les nouilles à part selon leur paquet, puis répartissez-les dans les bols. Cuites dans le bouillon, elles l'épaississent en amidon.",
       "Versez le bouillon dessus, ajoutez le jus de citron vert hors du feu, la coriandre et le piment."
     ],
-    "introHtml": "<p>Le lait de coco ne doit jamais bouillir : il se sépare en une couche grasse et un liquide granuleux.\nOn l&#39;ajoute en fin de cuisson, feu baissé, et le bouillon reste lié.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>Le citron vert se met toujours à la fin : chauffé, il perd son parfum et ne laisse que l&#39;acidité.\nLa sauce de poisson remplace le sel — n&#39;ajoutez pas les deux.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -611,8 +589,6 @@ export const RECETTES: Recipe[] = [
       "Couvrez et laissez pocher 5 à 6 minutes à feu doux, jusqu'à ce que les blancs soient opaques.",
       "Parsemez de coriandre et servez dans la poêle."
     ],
-    "introHtml": "<p>Le seul moment délicat est la fin : les œufs doivent avoir le blanc pris et le jaune coulant. Une\nminute de trop et le jaune durcit, ce qui change complètement le plat.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>La sauce se prépare la veille et se réchauffe en trois minutes : il ne reste alors qu&#39;à casser les\nœufs. C&#39;est ce qui rend ce plat tenable un matin de semaine.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -665,8 +641,6 @@ export const RECETTES: Recipe[] = [
       "Posez les ramequins dans un plat, versez de l'eau bouillante à mi-hauteur et enfournez 15 minutes.",
       "Servez avec le pain grillé taillé en mouillettes."
     ],
-    "introHtml": "<p>Le bain-marie n&#39;est pas une coquetterie : il empêche les parois du ramequin de dépasser 100 °C, et\nc&#39;est ce qui permet au blanc de prendre sans que le jaune ne durcisse. Sans lui, les deux cuisent\nensemble.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>Trois cents grammes d&#39;épinards frais tombent à une centaine de grammes cuits : leur volume est\npresque entièrement de l&#39;eau. C&#39;est cette eau qu&#39;il faut chasser, sinon elle noie les œufs.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -719,8 +693,6 @@ export const RECETTES: Recipe[] = [
       "Ajoutez les haricots égouttés et poursuivez 5 minutes. Salez, poivrez.",
       "Parsemez de coriandre au moment de servir."
     ],
-    "introHtml": "<p>Les légumineuses manquent de méthionine, les céréales de lysine : ensemble, elles forment une\nprotéine aussi complète qu&#39;un œuf. Ce n&#39;est pas une astuce de cuisine mais la raison pour laquelle\nharicots et céréales se retrouvent dans presque toutes les cuisines du monde.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>Il n&#39;est pas nécessaire d&#39;associer céréale et légumineuse au même repas : le corps dispose d&#39;un\nréservoir d&#39;acides aminés sur la journée. Les faire coïncider reste plus simple à retenir.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -772,8 +744,6 @@ export const RECETTES: Recipe[] = [
       "Sortez-les et laissez reposer 5 minutes sur une assiette tiède : c'est aussi long que la cuisson d'une face, et ce n'est pas négociable.",
       "Faites sauter les légumes dans la poêle déglacée et servez."
     ],
-    "introHtml": "<p>On a longtemps cuit le porc à cœur par peur du parasite ; ce risque a disparu des élevages\neuropéens. Une côte rosée au centre, à 63 °C, est sûre et sans commune mesure avec une côte grise.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>La côte dans le filet est le morceau le plus maigre du porc après le filet mignon. Le repos permet\nau jus, chassé vers le centre par la chaleur, de se redistribuer dans toute la viande.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -826,8 +796,6 @@ export const RECETTES: Recipe[] = [
       "Laissez mijoter 40 minutes à couvert, à petit feu. Goûtez avant de saler : le jambon a probablement suffi.",
       "Retirez le jambon, tranchez-le et servez sur les lentilles."
     ],
-    "introHtml": "<p>Le jambon demi-sel doit dessaler avant cuisson, sinon le plat entier devient immangeable. Deux\nheures dans l&#39;eau froide, changée une fois, suffisent.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>Les lentilles vertes du Puy tiennent mieux que les blondes et ne se transforment pas en purée. Le\nfer qu&#39;elles apportent est mieux absorbé en présence de vitamine C : un filet de citron y aide.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -878,8 +846,6 @@ export const RECETTES: Recipe[] = [
       "Saisissez les pavés 1 minute par face, pas davantage. Le centre doit rester rouge.",
       "Tranchez, posez sur les haricots, râpez le zeste de citron par-dessus."
     ],
-    "introHtml": "<p>Le thon frais se traite comme une viande rouge : saisi très fort, très court, et rosé au centre. Cuit\nà cœur, il devient sec et gris — c&#39;est la texture du thon en boîte, obtenue au prix d&#39;un pavé frais.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>Le thon est un grand prédateur et concentre du mercure : les autorités recommandent de s&#39;en tenir à\nune portion par semaine, et de l&#39;éviter en cas de grossesse.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -927,8 +893,6 @@ export const RECETTES: Recipe[] = [
       "Versez dans une poêle de 24 cm avec une cuillère de l'huile récupérée, à feu doux. Laissez 8 minutes : les bords se détachent, le centre reste souple.",
       "Posez une assiette plate sur la poêle, retournez d'un geste franc, puis refaites glisser la tortilla pour 4 minutes de l'autre côté."
     ],
-    "introHtml": "<p>Les pommes de terre d&#39;une tortilla ne sont pas frites mais confites : à feu doux, dans l&#39;huile, sans\ncoloration. Frites, elles restent croquantes et la tortilla ne se tient pas.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>Le retournement effraie mais tient à une seule chose : une assiette plus grande que la poêle, et un\ngeste rapide plutôt que prudent. La tortilla se mange tiède ou froide, et se transporte\nparfaitement.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -978,8 +942,6 @@ export const RECETTES: Recipe[] = [
       "Ajoutez l'ail et le gingembre, remuez 30 secondes, puis remettez le tofu.",
       "Versez la sauce soja, laissez réduire 1 minute et parsemez de graines de sésame."
     ],
-    "introHtml": "<p>Le tofu a mauvaise réputation pour une seule raison : on le cuisine mouillé. Un tofu ferme contient\nbeaucoup d&#39;eau, et tant qu&#39;elle est là il bout dans la poêle au lieu de dorer, reste mou et ne prend\naucun goût. Le presser vingt minutes change tout.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>Le tofu ferme monte à 16 g de protéines aux 100 g, soit autant qu&#39;un œuf à poids égal, et c&#39;est une\nprotéine complète — elle contient les neuf acides aminés que le corps ne fabrique pas. C&#39;est la\nseule source végétale dont on puisse dire cela sans nuance.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -1033,8 +995,6 @@ export const RECETTES: Recipe[] = [
       "Coupez le feu, incorporez le fromage blanc, puis remettez la viande et les champignons.",
       "Ajoutez le persil et servez sur le riz complet."
     ],
-    "introHtml": "<p>Les champignons se salent en fin de cuisson, jamais au début. Le sel les fait rendre leur eau\nimmédiatement, ils bouillent dans leur jus et ne dorent plus jamais.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>Le fromage blanc lie la sauce hors du feu, sans crème. Remis à bouillir, il tranche : c&#39;est la seule\nrègle à retenir.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -1090,8 +1050,6 @@ export const RECETTES: Recipe[] = [
       "Saisissez le poulet 4 minutes par face, laissez reposer 5 minutes, puis tranchez.",
       "Mélangez la romaine coupée avec la sauce, ajoutez le poulet, les croûtons et le reste de parmesan."
     ],
-    "introHtml": "<p>Une vraie sauce César contient des anchois, et c&#39;est ce qui lui donne son goût — pas le fromage. Les\nretirer donne une sauce fade que personne ne reconnaît.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>La sauce du commerce tourne autour de 450 kcal aux 100 g ; celle-ci, montée au yaourt grec, en fait\n120. C&#39;est le seul changement, et il pèse près de 250 kcal sur l&#39;assiette.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -1144,8 +1102,6 @@ export const RECETTES: Recipe[] = [
       "Mélangez la moutarde, le jaune d'œuf, le Tabasco, du sel et du poivre, puis incorporez la viande et les aromates. Ne travaillez pas trop.",
       "Servez aussitôt avec le mesclun assaisonné à l'huile d'olive."
     ],
-    "introHtml": "<p>Un tartare se coupe au couteau, jamais au hachoir : haché, le bœuf rend son jus et prend une texture\npâteuse. Coupé en petits dés, il garde du mordant. Et il se mange le jour de l&#39;achat, pas le\nlendemain.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>De la viande crue suppose une chaîne du froid irréprochable : achetez le jour même, chez un boucher,\net consommez dans la foulée. À éviter en cas de grossesse ou d&#39;immunité affaiblie.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -1195,8 +1151,6 @@ export const RECETTES: Recipe[] = [
       "Faites sauter les courgettes en rondelles 5 minutes dans la même poêle.",
       "Tranchez le poulet et servez sur le quinoa."
     ],
-    "introHtml": "<p>Le blanc de poulet sèche parce qu&#39;il n&#39;a presque pas de gras pour le protéger. Une saumure de quinze\nminutes lui fait retenir son eau à la cuisson : c&#39;est la seule chose qui sépare un blanc moelleux\nd&#39;un blanc filandreux.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>Le quinoa est l&#39;une des rares sources végétales de protéines complètes, avec environ 14 g aux 100 g\ncrus. Ne sautez pas le repos de la viande : couper tout de suite fait perdre le jus dans l&#39;assiette.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -1245,8 +1199,6 @@ export const RECETTES: Recipe[] = [
       "Retirez du feu, laissez tiédir deux minutes et incorporez le skyr.",
       "Faites dorer les amandes à sec dans une poêle 2 minutes et parsemez-les au dernier moment."
     ],
-    "introHtml": "<p>Le cacao non sucré est amer et il faut l&#39;assumer : c&#39;est ce qui distingue ce porridge d&#39;un dessert.\nLa pincée de sel et le gras des amandes suffisent à l&#39;équilibrer sans sucre.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>Les amandes se torréfient sans matière grasse et le goût n&#39;a rien à voir avec des amandes crues. Ne\nles quittez pas des yeux : entre dorées et brûlées, il y a trente secondes.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -1299,8 +1251,6 @@ export const RECETTES: Recipe[] = [
       "Versez les tomates et les haricots, salez, poivrez, et laissez mijoter 20 minutes à découvert. Le chili doit épaissir, pas rester liquide.",
       "Goûtez et rectifiez le piment en fin de cuisson, jamais au début."
     ],
-    "introHtml": "<p>Un chili sans viande manque rarement de goût mais souvent de tenue en bouche. Les protéines de soja\ntexturées règlent les deux : réhydratées dans un bouillon puis mijotées, elles prennent la texture\nd&#39;une viande hachée et apportent 50 g de protéines aux 100 g de poids sec.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>Ce plat est meilleur le lendemain, quand les épices ont diffusé. Il se congèle en portions et\nsupporte très bien le réchauffage. Avec 60 g de riz cru par personne, le repas monte à environ\n590 kcal et 32 g de protéines.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -1352,8 +1302,6 @@ export const RECETTES: Recipe[] = [
       "Laissez refroidir complètement sur la plaque sans y toucher : c'est en refroidissant que le granola devient croustillant et forme des amas.",
       "Servez 40 g par bol sur 150 g de yaourt grec."
     ],
-    "introHtml": "<p>Un granola du commerce contient couramment 25 g de sucre aux 100 g. Fait maison, on descend à 8 et\nla différence ne se sent pas, parce que ce qu&#39;on cherche est le croquant, pas le sucré.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>Le granola se garde trois semaines dans un bocal hermétique. Le yaourt grec monte à 9 g de protéines\naux 100 g, contre 4 pour un yaourt nature classique.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -1404,8 +1352,6 @@ export const RECETTES: Recipe[] = [
       "Montez à feu vif, jetez les crevettes et faites-les sauter 2 minutes, jusqu'à ce qu'elles soient roses et fermes.",
       "Coupez le feu, ajoutez le jus de citron et le persil, mélangez et servez sur le riz."
     ],
-    "introHtml": "<p>Une crevette cuit en deux minutes et devient caoutchouteuse à la troisième. Le repère est visuel :\nelle est prête quand elle forme un C. Enroulée en O, elle est déjà trop cuite.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>Les crevettes apportent 20 g de protéines aux 100 g pour moins de 1 g de lipides. Décongelées, elles\nrendent beaucoup d&#39;eau : séchez-les vraiment, sinon elles bouillent.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -1459,8 +1405,6 @@ export const RECETTES: Recipe[] = [
       "Au bout d'une minute, retournez la galette, posez le jambon, le fromage, et cassez un œuf au centre.",
       "Rabattez les quatre côtés en carré et laissez 3 minutes à couvert, le temps que le blanc prenne et que le jaune reste coulant."
     ],
-    "introHtml": "<p>La pâte à galettes doit reposer au moins deux heures, idéalement une nuit. Sans repos, le sarrasin\nn&#39;a pas absorbé l&#39;eau et la galette se déchire dès qu&#39;on la décolle.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>Le sarrasin n&#39;est pas une céréale mais une polygonacée, sans gluten et avec un profil d&#39;acides\naminés plus complet que le blé. La pâte se garde deux jours au frais.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -1511,8 +1455,6 @@ export const RECETTES: Recipe[] = [
       "Étalez-les sur une plaque avec les patates douces en cubes et l'huile. Laissez de l'espace : trop serrés, ils cuisent à la vapeur.",
       "Enfournez 30 minutes en retournant à mi-cuisson."
     ],
-    "introHtml": "<p>La fécule est ce qui transforme le tofu au four : elle forme une croûte fine qui croustille et\nretient la marinade. Sans elle, le tofu ressort mou et la marinade reste au fond du plat.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>La marinade ne pénètre pas le tofu en profondeur, quoi qu&#39;on lise : elle reste en surface. C&#39;est\npour cela qu&#39;il faut le couper petit et l&#39;enrober — la surface, c&#39;est tout le goût.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -1563,8 +1505,6 @@ export const RECETTES: Recipe[] = [
       "Saisissez-les 3 minutes côté peau dans le reste d'huile, à feu vif, puis 2 minutes de l'autre côté.",
       "Arrosez de jus de citron hors du feu et servez sur la purée."
     ],
-    "introHtml": "<p>Les pois cassés n&#39;ont pas besoin de trempage, contrairement aux pois chiches, mais ils réclament un\nœil : ils passent de fermes à purée en cinq minutes, et attachent au fond dès qu&#39;ils épaississent.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>Saler les légumineuses en début de cuisson durcit leur peau et allonge le temps de cuisson : on sale\ntoujours à la fin. Le colin est deux fois moins cher que le cabillaud pour des valeurs voisines.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -1610,8 +1550,6 @@ export const RECETTES: Recipe[] = [
       "Parsemez les noix, ajoutez le miel en filet et la cannelle.",
       "Mangez sans mélanger : les noix ramollissent en quelques minutes."
     ],
-    "introHtml": "<p>Le fromage blanc à 3 % plutôt qu&#39;à 0 % : la différence est de 25 kcal pour 300 g, et la texture n&#39;a\nrien à voir. Un 0 % se compense presque toujours au sucre, ce qui coûte bien davantage.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>Trente grammes de noix apportent l&#39;essentiel des oméga-3 végétaux d&#39;une journée, pour 200 kcal. Au\ndelà, on paie surtout en calories.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -1664,8 +1602,6 @@ export const RECETTES: Recipe[] = [
       "Parsemez du reste de parmesan et de la chapelure.",
       "Enfournez 30 minutes, jusqu'à ce que le dessus soit doré et le centre pris."
     ],
-    "introHtml": "<p>Les brocolis doivent être blanchis, pas cuits : ils finiront trente minutes au four. Cuits à cœur\navant d&#39;enfourner, ils ressortent en bouillie verte.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>La ricotta est un fromage de petit-lait : environ 11 g de protéines aux 100 g pour 150 kcal, contre\n340 kcal pour la crème épaisse. Le brocoli est aussi l&#39;un des légumes les plus riches en vitamine C,\nque le blanchiment court préserve mieux qu&#39;une longue cuisson.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -1715,8 +1651,6 @@ export const RECETTES: Recipe[] = [
       "Refermez en pliant les bords plusieurs fois sur eux-mêmes, hermétiquement.",
       "Enfournez 18 minutes. La papillote doit gonfler — c'est le signe qu'elle est étanche."
     ],
-    "introHtml": "<p>Une papillote cuit à la vapeur, pas au four sec : il lui faut du liquide et une fermeture étanche.\nMal pliée, elle laisse la vapeur s&#39;échapper et le poisson sèche exactement comme à découvert.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>Ouvrez les papillotes à table : le parfum qui s&#39;en échappe fait la moitié du plat. Le lieu noir est\nl&#39;un des poissons blancs les moins chers et les mieux gérés côté ressource.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -1770,8 +1704,6 @@ export const RECETTES: Recipe[] = [
       "Faites griller 12 minutes en tournant régulièrement, au four en position gril ou à la poêle.",
       "Servez sur le riz."
     ],
-    "introHtml": "<p>Une marinade au citron cuit la surface de la viande et la raidit ; le yaourt, lui, agit en douceur\ngrâce à son acidité modérée et à ses enzymes. C&#39;est pour cela que toutes les cuisines qui grillent\nla viande au feu marinent au lait fermenté.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>La marinade se jette : elle a été en contact avec la viande crue. Si vous voulez une sauce, réservez\nen trois cuillères avant d&#39;y mettre le poulet.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -1821,8 +1753,6 @@ export const RECETTES: Recipe[] = [
       "Ajoutez le tofu émietté, le curcuma et la levure maltée. Faites sauter 5 minutes à feu moyen, jusqu'à ce que l'eau se soit évaporée.",
       "Coupez le feu, ajoutez le sel noir et la ciboulette. Le sel noir se met toujours hors du feu : chauffé, son parfum s'évapore."
     ],
-    "introHtml": "<p>Le sel noir kala namak est ce qui fait la différence : il est naturellement soufré et donne au tofu\nun goût d&#39;œuf saisissant. Sans lui, on obtient du tofu émietté jaune, pas des œufs brouillés.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>La levure maltée apporte un goût de fromage et de la vitamine B12, que les régimes végétaliens\npeinent à couvrir. Elle n&#39;a rien à voir avec la levure de boulanger.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -1876,8 +1806,6 @@ export const RECETTES: Recipe[] = [
       "Sortez et laissez reposer 5 minutes sous une feuille d'aluminium. Couper tout de suite ferait fuir tout le jus dans l'assiette.",
       "Tranchez et servez sur les lentilles égouttées."
     ],
-    "introHtml": "<p>Le filet mignon est au porc ce que le blanc est au poulet : environ 3 g de lipides aux 100 g, contre\n20 pour une côte. C&#39;est aussi le morceau qui sèche le plus vite — d&#39;où le repos, qui n&#39;est pas\nfacultatif.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>Les lentilles apportent près de 8 g de fibres par portion, soit un quart des 30 g recommandés par\njour. Le plat se réchauffe très bien, mais tranchez la viande froide : réchauffée entière, elle sèche.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -1926,8 +1854,6 @@ export const RECETTES: Recipe[] = [
       "Posez le cabillaud dessus, salez, poivrez et enfournez 12 minutes de plus.",
       "Vérifiez avec la pointe d'un couteau : elle doit entrer sans résistance."
     ],
-    "introHtml": "<p>Le cabillaud est un poisson très maigre : il n&#39;a aucun gras pour pardonner deux minutes de trop. Il\nest cuit quand la chair devient opaque et se détache en lamelles, et pas une seconde après.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>Cent grammes de cabillaud apportent 18 g de protéines pour moins de 1 g de lipides — c&#39;est le\nmeilleur rapport de tout l&#39;étal. Servi avec des féculents, il tient parfaitement un repas de déficit.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -1982,8 +1908,6 @@ export const RECETTES: Recipe[] = [
       "Dressez les légumes, ajoutez le thon en gros morceaux, les œufs écalés coupés en deux, les anchois et les olives.",
       "Arrosez d'huile d'olive, poivrez, ajoutez le basilic déchiré à la main."
     ],
-    "introHtml": "<p>Un œuf dur se rate de deux façons : trop cuit, il a un jaune gris cerclé de vert ; sorti trop tôt,\nil ne se pèle pas. Neuf minutes exactement, puis l&#39;eau glacée.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>La salade niçoise traditionnelle ne contient aucun légume cuit : c&#39;est une salade de crudités. Le\nbasilic se déchire, ne se coupe jamais au couteau — la lame l&#39;oxyde et le noircit.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -2034,8 +1958,6 @@ export const RECETTES: Recipe[] = [
       "Coupez le feu et ajoutez le thon égoutté en gros morceaux. Mélangez à peine.",
       "Parsemez de persil et servez."
     ],
-    "introHtml": "<p>Le thon s&#39;ajoute au dernier moment et ne cuit pas : il est déjà cuit dans sa boîte. Mijoté, il se\ndélite en filaments secs et perd tout intérêt.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>C&#39;est un des rares plats complets qui ne demande aucun produit frais : haricots, tomates et thon en\nconserve tiennent des mois. Rincez les haricots, leur jus de conserve est très salé.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -2086,8 +2008,6 @@ export const RECETTES: Recipe[] = [
       "Versez les pâtes dans la poêle avec un peu d'eau de cuisson et faites sauter 1 minute : l'amidon émulsionne avec l'huile et enrobe les pâtes.",
       "Hors du feu, ajoutez le jus de citron, le persil et du poivre."
     ],
-    "introHtml": "<p>L&#39;eau de cuisson des pâtes est chargée d&#39;amidon : une louche suffit à lier une sauce sans une goutte\nde crème. La jeter entièrement est l&#39;erreur la plus courante en cuisine italienne.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>Les pâtes complètes apportent trois fois plus de fibres que les blanches et un index glycémique plus\nbas. Le zeste porte le parfum du citron, le jus n&#39;apporte que l&#39;acidité : il faut les deux.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -2138,8 +2058,6 @@ export const RECETTES: Recipe[] = [
       "Posez les filets peau vers le haut sur les légumes, salez, et enfournez 8 à 10 minutes.",
       "Arrosez de jus de citron à la sortie du four."
     ],
-    "introHtml": "<p>Le maquereau a un goût prononcé que le citron équilibre. Il est aussi très fragile : posé sur des\nlégumes déjà chauds, il cuit en huit minutes, et se dessèche à la neuvième.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>Un seul filet de maquereau couvre les besoins hebdomadaires en oméga-3 à longue chaîne. C&#39;est aussi\nun petit poisson en bout de chaîne courte, donc peu chargé en métaux lourds — l&#39;inverse du thon.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -2193,8 +2111,6 @@ export const RECETTES: Recipe[] = [
       "Ajoutez les pois chiches égouttés et les épinards encore surgelés. Laissez 6 minutes, le temps qu'ils fondent et que leur eau s'évapore.",
       "Coupez le feu, attendez deux minutes, puis incorporez le yaourt en trois fois."
     ],
-    "introHtml": "<p>Le yaourt s&#39;ajoute hors du feu et détendu à la cuillère : versé froid dans une sauce bouillante, il\ntranche systématiquement. C&#39;est ce qui distingue un curry crémeux d&#39;un curry granuleux.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>Les épinards surgelés valent mieux que les frais pour ce plat : ils sont surgelés à maturité, coûtent\ntrois fois moins cher et il n&#39;y a rien à laver. Les pois chiches apportent 8 g de protéines et 7 g de\nfibres aux 100 g cuits.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -2244,8 +2160,6 @@ export const RECETTES: Recipe[] = [
       "Écrasez l'avocat à la fourchette avec le citron, le sel et le poivre, étalez sur le pain grillé.",
       "Posez les œufs dessus et saupoudrez de piment d'Espelette."
     ],
-    "introHtml": "<p>Un œuf poché réussi tient à une seule chose : la fraîcheur de l&#39;œuf. Passé une semaine, le blanc se\nliquéfie et part en filaments, quel que soit le tourbillon qu&#39;on fait dans la casserole.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>Le vinaigre fait coaguler le blanc plus vite ; il ne se goûte pas. L&#39;avocat pèse lourd en calories\npour peu de protéines : un demi suffit largement.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -2292,8 +2206,6 @@ export const RECETTES: Recipe[] = [
       "Parsemez le muesli au dernier moment, sinon il ramollit.",
       "Goûtez avant de sucrer : les fruits suffisent souvent."
     ],
-    "introHtml": "<p>Le skyr n&#39;est pas un yaourt : c&#39;est un fromage frais égoutté, ce qui explique ses 11 g de protéines\naux 100 g contre 4 pour un yaourt nature. À calories égales, il cale nettement plus longtemps.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>Le muesli fait presque la moitié des calories pour un dixième des protéines. Si vous visez un\ndéficit, descendez à 20 g : vous perdez 75 kcal et gardez tout le reste.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -2347,8 +2259,6 @@ export const RECETTES: Recipe[] = [
       "Versez les tomates, salez, poivrez, et laissez mijoter 30 minutes à découvert.",
       "Ajoutez les haricots égouttés et poursuivez 10 minutes."
     ],
-    "introHtml": "<p>Les épices se font chauffer dans le gras avant d&#39;ajouter le liquide. Jetées dans la tomate, elles\nrestent poudreuses et le chili a un goût de terre plutôt qu&#39;un goût d&#39;épices.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>Le chili est meilleur réchauffé et se congèle en portions. Les haricots rouges en conserve sont déjà\ncuits — ajoutés trop tôt, ils se défont en purée.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -2397,8 +2307,6 @@ export const RECETTES: Recipe[] = [
       "Retirez du feu quand les œufs sont encore brillants et coulants, puis incorporez le fromage frais. Il arrête la cuisson et donne le crémeux.",
       "Parsemez de ciboulette et servez sur le pain grillé."
     ],
-    "introHtml": "<p>Des œufs brouillés ratés sont presque toujours des œufs brouillés trop cuits. Ils doivent quitter le\nfeu quand ils paraissent encore trop liquides : la chaleur de la casserole finit le travail.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>Le fromage frais remplace la crème pour un tiers des calories et six fois plus de protéines. Salez\nles œufs avant cuisson, pas après : le sel les aide à retenir leur eau.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -2450,8 +2358,6 @@ export const RECETTES: Recipe[] = [
       "Mélangez les légumes tièdes à la vinaigrette : tièdes, ils l'absorbent, froids, ils la repoussent.",
       "Ajoutez le thon égoutté en gros morceaux, l'oignon émincé, les tomates coupées et le persil."
     ],
-    "introHtml": "<p>Les haricots verts doivent être plongés dans l&#39;eau glacée dès la sortie de la casserole. Sans ce\nchoc, ils continuent de cuire dans leur chaleur et virent au kaki mou en dix minutes.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>Le thon au naturel apporte 26 g de protéines aux 100 g pour 100 kcal — l&#39;un des meilleurs rapports\ndu placard. Égouttez-le bien : l&#39;eau de conserve dilue la vinaigrette.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -2499,8 +2405,6 @@ export const RECETTES: Recipe[] = [
       "Incorporez le skyr en trois fois, en fouettant à chaque ajout.",
       "Servez aussitôt, éventuellement avec quelques fruits."
     ],
-    "introHtml": "<p>Le skyr est ajouté hors du feu, jamais pendant la cuisson : chauffé, il tranche et le porridge\ndevient granuleux. C&#39;est la seule chose qui demande de l&#39;attention dans cette recette.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>La pincée de sel n&#39;est pas décorative : sans elle, l&#39;avoine reste plate et on compense au sucre.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -2553,8 +2457,6 @@ export const RECETTES: Recipe[] = [
       "Remettez la viande, versez le bouillon, ajoutez le thym et le laurier. Couvrez et laissez mijoter 2 h 30 à feu très doux.",
       "Ajoutez les carottes en tronçons et les champignons, et poursuivez 30 minutes à découvert pour que la sauce réduise."
     ],
-    "introHtml": "<p>Un bourguignon ne se rate que d&#39;une façon : trop peu de temps. Le paleron est plein de collagène,\nqui ne devient fondant qu&#39;après trois heures à petit feu. À une heure et demie, il est encore dur.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>Sans lardons ni farine, la sauce lie par la réduction et le collagène de la viande. On économise\nenviron 120 kcal par portion, et la sauce est plus nette en bouche. Meilleur réchauffé le lendemain.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -2604,8 +2506,6 @@ export const RECETTES: Recipe[] = [
       "Posez les steaks et ne les touchez plus pendant 3 minutes. Retournez, comptez 2 minutes de plus pour un cœur rosé.",
       "Salez à la sortie de la poêle, laissez reposer 2 minutes et servez sur la purée."
     ],
-    "introHtml": "<p>Un steak haché ne se retourne qu&#39;une fois et ne s&#39;écrase jamais à la spatule : chaque pression fait\nsortir le jus, et c&#39;est ce jus qui fait la différence entre moelleux et carton.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>Le steak haché à 5 % apporte 20 g de protéines aux 100 g pour 130 kcal ; à 15 %, c&#39;est 200 kcal pour\nles mêmes protéines. Sur deux steaks, l&#39;écart fait 140 kcal.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -2660,8 +2560,6 @@ export const RECETTES: Recipe[] = [
       "Faites revenir le reste d'oignon et l'ail, versez les tomates et l'origan, laissez 10 minutes.",
       "Remettez les boulettes et laissez mijoter 15 minutes à couvert."
     ],
-    "introHtml": "<p>Le pain trempé dans le lait n&#39;est pas là pour économiser de la viande : c&#39;est une panade, et elle\nretient l&#39;eau pendant la cuisson. Sans elle, des boulettes de bœuf maigre deviennent sèches et\ncompactes.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>Trop pétrir la viande hachée développe ses protéines et la rend élastique : on mélange jusqu&#39;à ce\nque ce soit homogène, et on s&#39;arrête. Se congèle très bien, cuites, avec leur sauce.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -2713,8 +2611,6 @@ export const RECETTES: Recipe[] = [
       "Versez la vinaigrette sur les lentilles encore tièdes, ajoutez l'échalote ciselée et le persil.",
       "Laissez tiédir, puis émiettez le chèvre frais par-dessus au dernier moment."
     ],
-    "introHtml": "<p>Les lentilles s&#39;assaisonnent tièdes, jamais froides. Tièdes, elles boivent la vinaigrette ;\nrefroidies, elles la laissent au fond du saladier.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>L&#39;huile de noix se marie particulièrement bien avec la lentille, mais elle rancit vite : gardez-la\nau réfrigérateur et consommez-la dans les trois mois. Cette salade se transporte et se mange froide\nle lendemain.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -2767,8 +2663,6 @@ export const RECETTES: Recipe[] = [
       "Retirez le laurier, mixez la moitié de la soupe seulement : le reste apporte de la mâche.",
       "Ajoutez le jambon en dés, poivrez, et laissez chauffer 5 minutes. Salez seulement si nécessaire."
     ],
-    "introHtml": "<p>Une soupe de pois cassés attache au fond dès qu&#39;elle épaissit, et une fois attachée elle a un goût\nde brûlé jusqu&#39;à la dernière louche. Il faut remuer toutes les dix minutes, sans exception.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>Le jambon apporte déjà beaucoup de sel : goûtez avant d&#39;en ajouter. La soupe épaissit encore en\nrefroidissant, il faudra la détendre à l&#39;eau chaude pour la réchauffer.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -2821,8 +2715,6 @@ export const RECETTES: Recipe[] = [
       "Ajoutez les tomates cerises coupées en deux, le reste d'huile, le jus de citron, les herbes ciselées.",
       "Émiettez la feta par-dessus au dernier moment."
     ],
-    "introHtml": "<p>Le boulgour ne se cuit pas dans l&#39;eau bouillante comme du riz : il est précuit. On le couvre d&#39;eau\nchaude et on le laisse gonfler hors du feu, sinon il devient collant.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>Ce plat se mange tiède ou froid et se transporte très bien. C&#39;est le moins protéiné de la liste : il\ngagne à accompagner un reste de viande ou d&#39;œuf dur, ou à servir de garniture plutôt que de plat\nunique.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -2873,8 +2765,6 @@ export const RECETTES: Recipe[] = [
       "Jetez l'ail et le gingembre dans le wok, puis les brocolis. Faites sauter 2 minutes.",
       "Remettez la viande, versez la sauce soja, mélangez 30 secondes et servez sur le riz."
     ],
-    "introHtml": "<p>Un sauté ne se prépare pas pendant la cuisson : tout doit être coupé et à portée de main avant\nd&#39;allumer. Une fois le wok chaud, il reste huit minutes et aucune ne peut servir à émincer de l&#39;ail.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>Cent grammes de bœuf couvrent environ un quart des besoins quotidiens en fer, sous une forme que le\ncorps absorbe bien mieux que celle des végétaux.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -2925,8 +2815,6 @@ export const RECETTES: Recipe[] = [
       "Coupez le feu. Ajoutez la moutarde et le fromage blanc, et mélangez : la chaleur résiduelle suffit à lier.",
       "Remettez les escalopes et leur jus, ajoutez l'estragon et servez avec les haricots."
     ],
-    "introHtml": "<p>Le fromage blanc tranche s&#39;il bout : la sauce se monte hors du feu, toujours. C&#39;est la seule\ndifficulté de cette recette, et elle se règle en éteignant le gaz.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>L&#39;escalope de dinde est la viande la plus maigre du rayon — environ 1 g de lipides aux 100 g. C&#39;est\naussi la plus prompte à devenir sèche : trois minutes par face suffisent.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -2976,8 +2864,6 @@ export const RECETTES: Recipe[] = [
       "Ramenez les bords vers le centre à la spatule en inclinant la poêle, pour que le cru file dessous. Répétez trois ou quatre fois.",
       "Parsemez le jambon, roulez l'omelette sur elle-même et faites-la glisser dans l'assiette."
     ],
-    "introHtml": "<p>Une omelette se cuit à feu moyen, pas à feu vif. Trop chaude, elle gonfle, brunit et retombe sèche ;\nle dessus doit rester légèrement baveux au moment de la rouler.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>Le jambon blanc découenné est l&#39;une des rares charcuteries maigres — environ 3 g de lipides aux\n100 g, contre 25 pour un saucisson. Les herbes fraîches ne se mettent jamais en fin de cuisson :\nchauffées avec les œufs, elles parfument toute l&#39;omelette.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -3028,8 +2914,6 @@ export const RECETTES: Recipe[] = [
       "Versez les tomates, ajoutez le thym et le laurier, remettez le poulet et son jus.",
       "Couvrez et laissez mijoter 25 minutes à feu doux. Retirez le couvercle les 5 dernières minutes si la sauce est trop liquide."
     ],
-    "introHtml": "<p>Les hauts de cuisse plutôt que les blancs : dans un mijoté, un blanc devient sec en dix minutes\ntandis qu&#39;une cuisse gagne en moelleux plus elle cuit. C&#39;est le seul cas où le morceau le plus gras\nest le bon choix.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>Ce plat est meilleur le lendemain et se congèle très bien. Retirer la peau avant cuisson économise\nenviron 100 kcal par portion sans rien enlever au goût, qui vient des poivrons.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -3081,8 +2965,6 @@ export const RECETTES: Recipe[] = [
       "Ajoutez l'ail et le gingembre, remuez 30 secondes.",
       "Versez les nouilles, la sauce soja et le vinaigre, mélangez 1 minute et parsemez de sésame."
     ],
-    "introHtml": "<p>Le tempeh a une amertume que dix minutes de vapeur font disparaître. C&#39;est l&#39;étape que tout le monde\nsaute, et c&#39;est pour cela que le tempeh a la réputation d&#39;être amer.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>Le tempeh est du soja fermenté entier : il conserve les fibres, contrairement au tofu, et la\nfermentation réduit les composés qui gênent l&#39;absorption des minéraux. Il monte à 19 g de protéines\naux 100 g.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -3134,8 +3016,6 @@ export const RECETTES: Recipe[] = [
       "Ajoutez la courgette et le lait de coco, puis remettez le poulet. Laissez mijoter 6 minutes à feu doux, sans faire bouillir.",
       "Rectifiez l'assaisonnement et parsemez de coriandre au moment de servir."
     ],
-    "introHtml": "<p>Le poulet apporte l&#39;essentiel des 34 g de protéines par portion ; le lait de coco, l&#39;essentiel des\nlipides. Si vous visez un déficit, remplacez-le par du lait de coco allégé : vous descendez à\nenviron 320 kcal sans toucher aux protéines.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>Servez avec 60 g de riz basmati cru par personne pour un repas complet à environ 610 kcal. Le\ncurry se conserve trois jours au réfrigérateur et gagne en goût le lendemain.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -3185,8 +3065,6 @@ export const RECETTES: Recipe[] = [
       "Laissez cuire 15 minutes à couvert, en remuant de temps en temps pour éviter que ça n'attache.",
       "Versez le lait de coco, mélangez et laissez encore 3 minutes hors ébullition. Salez."
     ],
-    "introHtml": "<p>Les lentilles corail sont la seule légumineuse qui ne demande ni trempage ni longue cuisson : elles\nse délitent en une quinzaine de minutes, ce qui donne au dahl sa texture. Comptez 18 g de protéines\net près de 10 g de fibres par portion.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>Le dahl se congèle très bien en portions individuelles. Pour monter à 25 g de protéines, servez-le\navec un yaourt nature ou 50 g de fromage blanc.</p>\n",
     "introBlocks": [
       {
         "type": "p",
@@ -3234,8 +3112,6 @@ export const RECETTES: Recipe[] = [
       "Baissez le feu, versez les œufs sur les champignons et laissez prendre 3 minutes, en ramenant les bords vers le centre à la spatule.",
       "Pliez l'omelette en deux, parsemez de persil et servez sans attendre."
     ],
-    "introHtml": "<p>L&#39;erreur classique est de jeter les champignons dans l&#39;omelette sans les avoir fait rendre leur\neau : l&#39;omelette devient alors détrempée. Poêlez-les d&#39;abord seuls, à feu vif.</p>\n",
-    "suiteHtml": "<h2>Pour aller plus loin</h2>\n<p>Avec deux tranches de pain complet, le repas monte à environ 460 kcal et 30 g de protéines.</p>\n",
     "introBlocks": [
       {
         "type": "p",

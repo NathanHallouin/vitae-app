@@ -3,10 +3,10 @@ import { scaleIngredient } from '@vitae/core/quantites';
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 import { type ReactNode, useEffect, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
+import Chiffre from '@/components/ui/Chiffre';
+import Icon from '@/components/ui/Icon';
+import { Card, cx } from '@/components/ui/primitives';
 import { usePalette } from '@/theme/palette';
-import Chiffre from '../ui/Chiffre';
-import Icon from '../ui/Icon';
-import { Card, cx } from '../ui/primitives';
 
 /**
  * Le plan de travail d'une recette : portions, ingrédients à cocher, étapes à suivre.

@@ -13,7 +13,7 @@
  */
 
 import { type ReactNode, useState } from 'react';
-import { ActivityIndicator, Pressable, Text, TextInput, View, type ViewProps } from 'react-native';
+import { Pressable, Text, TextInput, View, type ViewProps } from 'react-native';
 import { LinearTransition } from 'react-native-reanimated';
 import { MOTION, useMotionReduite } from '@/theme/motion';
 import { usePalette } from '@/theme/palette';
@@ -243,10 +243,4 @@ export function Bullet({ children }: { children: ReactNode }) {
       <Text className="flex-1 text-base leading-[22px] text-ink">{children}</Text>
     </View>
   );
-}
-
-/** Attente. Rare ici : tout est calculé sur l'appareil, et lu de façon synchrone. */
-export function Spinner({ label = 'Chargement' }: { label?: string }) {
-  const palette = usePalette();
-  return <ActivityIndicator accessibilityLabel={label} color={palette.primary} />;
 }

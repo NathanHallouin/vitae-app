@@ -3,7 +3,7 @@ import { CONFIDENTIALITE, CONFIDENTIALITE_MAJ, CONFIDENTIALITE_RESUME } from '@v
 import { SITE_URL } from '@vitae/core/site';
 
 import { Text, View } from 'react-native';
-import Seo from '@/components/Seo';
+import Seo from '@/components/layout/Seo';
 import Page from '@/components/ui/Page';
 
 /**

@@ -4,13 +4,13 @@ import { SITE_URL } from '@vitae/core/site';
 import { useRouter } from 'expo-router';
 import { useEffect } from 'react';
 import { Platform, Text, View } from 'react-native';
-import { useProfile } from '@/components/ProfileProvider';
-import Seo from '@/components/Seo';
+import Seo from '@/components/layout/Seo';
 import HomeIllustration from '@/components/ui/HomeIllustration';
 import Icon from '@/components/ui/Icon';
 import Overline from '@/components/ui/Overline';
 import Page, { useColumns, useLarge } from '@/components/ui/Page';
 import { Button, Card } from '@/components/ui/primitives';
+import { useProfile } from '@/state/ProfileProvider';
 import { usePalette } from '@/theme/palette';
 
 /**

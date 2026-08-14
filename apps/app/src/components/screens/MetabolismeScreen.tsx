@@ -2,16 +2,16 @@ import { bmiGaugePosition, energyBreakdown } from '@vitae/core/calc';
 import { activityFactor, activityLabel, BMI_BANDS, BMI_GAUGE_LABELS } from '@vitae/core/constants';
 import { dec, fmtFactor, kcal } from '@vitae/core/format';
 import { Text, View } from 'react-native';
+import Apparition from '@/components/ui/Apparition';
+import CalculPrompt from '@/components/ui/CalculPrompt';
+import Chiffre from '@/components/ui/Chiffre';
+import Hero from '@/components/ui/Hero';
+import Overline from '@/components/ui/Overline';
+import { TileRow } from '@/components/ui/Page';
+import { Card } from '@/components/ui/primitives';
+import StatTile from '@/components/ui/StatTile';
+import { useProfile } from '@/state/ProfileProvider';
 import { usePalette } from '@/theme/palette';
-import { useProfile } from '../ProfileProvider';
-import Apparition from '../ui/Apparition';
-import CalculPrompt from '../ui/CalculPrompt';
-import Chiffre from '../ui/Chiffre';
-import Hero from '../ui/Hero';
-import Overline from '../ui/Overline';
-import { TileRow } from '../ui/Page';
-import { Card } from '../ui/primitives';
-import StatTile from '../ui/StatTile';
 
 export default function MetabolismeScreen() {
   const { metrics, profile } = useProfile();

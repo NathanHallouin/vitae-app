@@ -9,8 +9,8 @@ import { SITE_URL } from '@vitae/core/site';
 import { Link } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
+import Seo from '@/components/layout/Seo';
 import FiltresRecettes from '@/components/recette/FiltresRecettes';
-import Seo from '@/components/Seo';
 import Page, { useColumns } from '@/components/ui/Page';
 import { Button, Card } from '@/components/ui/primitives';
 
