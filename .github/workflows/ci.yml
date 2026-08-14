@@ -1,9 +1,14 @@
 # Ce qui garde le vert entre deux commits.
 #
-# L'ordre n'est pas indifférent : les fichiers engendrés viennent en premier, parce que le reste en
-# dépend. `recettes.generated.ts` est importé par les écrans, et la feuille de jetons par
+# L'ordre n'est pas indifférent : `bun run generate` vient en premier, parce que le reste en
+# dépend. `recettes.generated.ts` est importé par les écrans, et la feuille de jetons est lue par
 # NativeWind — sans eux, la vérification de types échoue pour une raison qui n'a rien à voir avec
 # le code écrit.
+#
+# La CI est le seul endroit où le dépôt est vu tel qu'il est cloné. Une machine de développement
+# porte des fichiers engendrés depuis le premier `expo start` qui masquent complètement certains
+# manques : c'est ainsi qu'un typecheck vert ici a échoué là. `apps/app/types.d.ts` existe pour
+# cette raison.
 #
 # La dernière étape vérifie que les fichiers engendrés committés correspondent bien à leur source.
 # Sans elle, une recette modifiée sans recompilation passerait la CI et sortirait absente du
