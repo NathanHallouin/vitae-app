@@ -946,9 +946,20 @@ function maisonEnDernier(list: Recipe[], reservees: Set<Base>): Recipe[] {
   return [...libres, ...list.filter((r) => r.slug), ...bloquants];
 }
 
+/**
+ * Une liste d'ingrédients passe-t-elle les filtres cochés ?
+ *
+ * Exportée parce que deux écrans en ont besoin et doivent répondre pareil : les suggestions de
+ * « Ce que je mange », et la recherche de l'index des recettes. Si « Végétarien » écartait le
+ * poisson d'un côté et pas de l'autre, la même recette apparaîtrait à un endroit et pas à l'autre.
+ */
+export function respecteExclusions(contient: readonly string[], excluded: Exclusion[]): boolean {
+  return !excluded.some((e) => ECARTE[e].some((i) => contient.includes(i)));
+}
+
 /** Une recette passe si aucun filtre coché ne touche l'un de ses ingrédients. */
 function autorisee(recipe: Recipe, excluded: Exclusion[]): boolean {
-  return !excluded.some((e) => ECARTE[e].some((i) => recipe.contient.includes(i)));
+  return respecteExclusions(recipe.contient, excluded);
 }
 
 /**

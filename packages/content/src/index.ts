@@ -13,6 +13,17 @@ import { type Ingredient, type Recipe as PlatSuggere, platMaison } from '@vitae/
 import { RECETTES } from './recettes.generated';
 import type { Recipe } from './types';
 
+export {
+  aDesCriteres,
+  aplatir,
+  type Criteres,
+  chercherRecettes,
+  DUREES,
+  MOMENTS,
+  type Moment,
+  TRIS,
+  type Tri,
+} from './recherche';
 export type { Block, Recipe, RecipeMeta } from './types';
 export { dureeISO, dureeTotale } from './types';
 export { RECETTES };

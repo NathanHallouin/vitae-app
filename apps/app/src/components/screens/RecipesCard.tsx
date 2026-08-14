@@ -14,6 +14,7 @@ import { useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
+import { versRoute } from '@/lib/route';
 import { usePalette } from '@/theme/palette';
 import { useProfile } from '../ProfileProvider';
 import Icon from '../ui/Icon';
@@ -160,7 +161,7 @@ function RecipeLink({ recipe, onChange }: { recipe: Suggestion; onChange: () => 
           : `${recipe.title} — chercher des recettes sur ${recipe.source}`
       }
       onPress={() =>
-        maison ? router.navigate(recipe.url) : WebBrowser.openBrowserAsync(recipe.url)
+        maison ? router.navigate(versRoute(recipe.url)) : WebBrowser.openBrowserAsync(recipe.url)
       }
       className={cx(
         'gap-[6px] rounded-xl border p-[14px] active:border-primary-ink active:bg-surface2',

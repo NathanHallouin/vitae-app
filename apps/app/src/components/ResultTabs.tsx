@@ -15,6 +15,7 @@
 import { NAV_BREAKPOINT, RESULT_PAGES } from '@vitae/core/nav';
 import { Link, usePathname } from 'expo-router';
 import { Pressable, Text, useWindowDimensions, View } from 'react-native';
+import { versRoute } from '@/lib/route';
 import { usePalette } from '@/theme/palette';
 import Icon from './ui/Icon';
 import { MAX_CONTENT } from './ui/Page';
@@ -39,7 +40,7 @@ export default function ResultTabs() {
         {RESULT_PAGES.map((page) => {
           const actif = pathname === page.href;
           return (
-            <Link key={page.href} href={page.href} asChild>
+            <Link key={page.href} href={versRoute(page.href)} asChild>
               <Pressable
                 accessibilityRole="tab"
                 accessibilityState={{ selected: actif }}

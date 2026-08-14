@@ -2,6 +2,7 @@ import type { Explainer as ExplainerData } from '@vitae/core/explainers';
 import { Link } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
+import { versRoute } from '@/lib/route';
 import { usePalette } from '@/theme/palette';
 import Icon from './ui/Icon';
 import { Card, cx } from './ui/primitives';
@@ -98,7 +99,7 @@ export default function Explainer({ data }: { data: ExplainerData }) {
         })}
       </View>
 
-      <Link href={data.suite.href} asChild>
+      <Link href={versRoute(data.suite.href)} asChild>
         <Pressable
           accessibilityRole="link"
           className="mt-5 flex-row items-center gap-2 self-start rounded-control py-1 active:opacity-70"

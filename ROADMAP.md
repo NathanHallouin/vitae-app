@@ -157,6 +157,9 @@ Tout ce qui suit tient dans le navigateur et s'appuie sur le module de stockage 
   Trois tests gardent cet état : aucune proposition extérieure sur trente-six combinaisons de
   profil, aucun titre qui double un plat du catalogue extérieur, et des valeurs nutritionnelles
   cohérentes entre elles.
+  L'index des recettes a sa recherche et ses filtres : texte libre sur le titre, la description et
+  les ingrédients, moment de la journée, durée totale, exclusions d'ingrédients — les mêmes que sur
+  « Ce que je mange » —, et quatre classements. Tout se fait en mémoire, sans index ni délai.
   Ce qui reste :
   - **Faire relire les valeurs nutritionnelles.** Elles sont estimées à partir des ingrédients, pas
     mesurées. Sur soixante-deux fiches d'une application de santé, un œil de diététicien avant
@@ -165,6 +168,9 @@ Tout ce qui suit tient dans le navigateur et s'appuie sur le module de stockage 
     Le retirer un jour supprimerait toute dépendance à un site tiers ; le garder coûte peu.
   - **Photographier les recettes** : les fiches n'ont aucune image, et le JSON-LD `Recipe` accepte
     un champ `image` qui pèse lourd dans les résultats enrichis.
+  - **Porter les critères de recherche dans l'adresse**, si un jour on veut partager « les recettes
+    végétariennes de moins de 30 minutes ». Aujourd'hui ils vivent dans l'état de l'écran, pour que
+    la page livrée aux moteurs contienne bien les soixante-deux recettes.
 - **Choix du menu** : 1 j
   La journée type est faite (`packages/core/src/nutrition.ts`). Reste à proposer des variantes : version
   végétarienne, sans lactose, et un bouton « une autre journée » qui change les sources.
