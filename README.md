@@ -348,7 +348,7 @@ Un dépôt, quatre paquets, deux cibles de livraison.
 ```
 apps/app/            application Expo — iOS, Android, et le site par export statique
 packages/core/       métier pur : calculs, plan, entraînement, recettes, persistance, textes
-packages/content/    recettes en Markdown, compilées en module TypeScript
+packages/content/    62 recettes en Markdown, compilées en module TypeScript
 tools/               scripts de génération (jetons, icônes, sitemap)
 store/               fiches App Store et Play Store, conformité
 ```

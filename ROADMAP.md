@@ -149,18 +149,22 @@ Tout ce qui suit tient dans le navigateur et s'appuie sur le module de stockage 
   Soi, un proche, ou des clients si l'utilisateur est coach. Sélecteur de profil, chaque profil
   ayant son historique. Sans comptes, la limite à assumer et à afficher : les profils sont liés au
   navigateur, pas à une identité.
-- **Catalogue de recettes : fait pour les cas courants.**
-  Douze recettes couvrent désormais une journée entière sans aucun lien extérieur, sur les quatre
-  objectifs et avec chacun des filtres d'ingrédients pris isolément. Un test le vérifie sur
-  trente-six combinaisons de profil et refuse toute recette qui doublerait un plat du catalogue
-  extérieur.
-  Ce qui reste à couvrir, par ordre d'intérêt :
-  - **Végétarien et sans œufs à la fois** : 75 % des propositions. Il manque une base végétale
-    dense de plus — les seules disponibles sans œufs sont les légumineuses, le soja et le laitier.
-  - **Deux propositions par repas de la même base** : impossible par construction, la règle de
-    variété l'interdit. Ce n'est pas un manque, c'est une contrainte à connaître avant d'écrire.
-  Chaque Markdown ajouté — avec son `moment` et sa `base` — enrichit le tirage sans une ligne de
-  code.
+- **Catalogue de recettes : fait.**
+  Soixante-deux recettes couvrent une journée entière sans aucun lien extérieur, sur les quatre
+  objectifs et avec chacun des filtres d'ingrédients — y compris « végétarien et sans œufs », qui
+  était le dernier trou. Les propositions renvoyant vers Marmiton ou Femme Actuelle ont disparu de
+  l'écran « Ce que je mange ».
+  Trois tests gardent cet état : aucune proposition extérieure sur trente-six combinaisons de
+  profil, aucun titre qui double un plat du catalogue extérieur, et des valeurs nutritionnelles
+  cohérentes entre elles.
+  Ce qui reste :
+  - **Faire relire les valeurs nutritionnelles.** Elles sont estimées à partir des ingrédients, pas
+    mesurées. Sur soixante-deux fiches d'une application de santé, un œil de diététicien avant
+    publication n'est pas du luxe.
+  - **Le catalogue extérieur de 76 plats** ne sert plus qu'aux combinaisons de filtres non testées.
+    Le retirer un jour supprimerait toute dépendance à un site tiers ; le garder coûte peu.
+  - **Photographier les recettes** : les fiches n'ont aucune image, et le JSON-LD `Recipe` accepte
+    un champ `image` qui pèse lourd dans les résultats enrichis.
 - **Choix du menu** : 1 j
   La journée type est faite (`packages/core/src/nutrition.ts`). Reste à proposer des variantes : version
   végétarienne, sans lactose, et un bouton « une autre journée » qui change les sources.

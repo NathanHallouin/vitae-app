@@ -15,7 +15,7 @@
 import { describe, expect, test } from 'bun:test';
 import { computeMetrics, type Metrics } from '@vitae/core/calc';
 import type { GoalKey } from '@vitae/core/constants';
-import { buildRecipeSuggestions, type Exclusion } from '@vitae/core/recipes';
+import { buildRecipeSuggestions, type Exclusion, RECIPES } from '@vitae/core/recipes';
 import { platsMaison } from './index';
 
 const MAISON = platsMaison();
@@ -91,6 +91,29 @@ describe('couverture du catalogue', () => {
         );
       });
     }
+  });
+
+  test('aucune recette ne double un plat du catalogue extérieur', () => {
+    /**
+     * Le doublon est invisible à l'usage et coûteux : le même plat proposé deux fois, une fois en
+     * recette rédigée et une fois en lien de recherche. Quatre sont passés en écrivant les
+     * cinquante dernières recettes, parce que le test d'alors comparait à une liste figée de trois.
+     * Celui-ci lit le catalogue publié.
+     */
+    const dehors = new Set(RECIPES.map((r) => r.title.toLowerCase()));
+    const doublons = MAISON.filter((r) => dehors.has(r.title.toLowerCase())).map((r) => r.title);
+    expect(doublons).toEqual([]);
+  });
+
+  test('les titres de nos recettes sont uniques', () => {
+    const vus = new Set<string>();
+    const doublons: string[] = [];
+    for (const r of MAISON) {
+      const cle = r.title.toLowerCase();
+      if (vus.has(cle)) doublons.push(r.title);
+      vus.add(cle);
+    }
+    expect(doublons).toEqual([]);
   });
 
   test('les valeurs annoncées sont cohérentes', () => {

@@ -129,12 +129,14 @@ describe('macronutriments', () => {
 });
 
 /**
- * Les trois recettes de l'application, recopiées ici plutôt qu'importées.
+ * Trois recettes fictives, recopiées ici plutôt qu'importées.
  *
  * `packages/content` dépend de ce module ; l'importer en retour fermerait le cycle. Et ces tests
  * portent sur le moteur, pas sur le contenu : ils doivent rester vrais quel que soit le catalogue
- * publié. C'est le script de compilation du contenu qui vérifie, lui, que les Markdown déclarent
- * bien un `moment` et une `base` connus.
+ * publié, et ne doivent surtout pas servir à vérifier quoi que ce soit sur les recettes réelles —
+ * une assertion sur les doublons a vécu ici, et n'en voyait que trois sur soixante-deux.
+ *
+ * Ce qui porte sur le catalogue publié est dans `packages/content/src/suggestions.test.ts`.
  */
 const MAISON = [
   {
@@ -192,15 +194,6 @@ describe('recettes proposées', () => {
         .flatMap((meal) => meal.recipes.map((r) => r.base));
       expect(new Set(bases).size).toBe(4);
     });
-  });
-
-  test('aucun plat du catalogue extérieur ne double une recette de l’application', () => {
-    // Le doublon exact qui a motivé le changement : « Omelette aux champignons » existait en lien
-    // de recherche et en recette rédigée.
-    const titres = MAISON.map((r) => r.title.toLowerCase());
-    for (const plat of RECIPES) {
-      expect(titres).not.toContain(plat.title.toLowerCase());
-    }
   });
 
   test('une recette de l’application est toujours la première proposition de son repas', () => {

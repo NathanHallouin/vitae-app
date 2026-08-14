@@ -247,14 +247,6 @@ const CATALOGUE: Entree[] = [
     base: 'laitier',
   },
   {
-    title: 'Smoothie banane et beurre de cacahuète',
-    source: 'Marmiton',
-    kcal: 420,
-    prot: 18,
-    slot: 'matin',
-    base: 'laitier',
-  },
-  {
     title: 'Yaourt grec, compote et noix',
     source: 'Femme Actuelle',
     kcal: 340,
@@ -293,14 +285,6 @@ const CATALOGUE: Entree[] = [
 
   // ─── Volaille ──────────────────────────────────────────────────────────────
   {
-    title: 'Poulet basquaise',
-    source: 'Marmiton',
-    kcal: 380,
-    prot: 35,
-    slot: 'plat',
-    base: 'volaille',
-  },
-  {
     title: 'Poulet rôti et pommes de terre',
     source: 'Marmiton',
     kcal: 520,
@@ -338,15 +322,6 @@ const CATALOGUE: Entree[] = [
     source: 'Marmiton',
     kcal: 450,
     prot: 35,
-    slot: 'plat',
-    base: 'volaille',
-    contient: ['laitier'],
-  },
-  {
-    title: 'Salade César au poulet',
-    source: 'Marmiton',
-    kcal: 430,
-    prot: 30,
     slot: 'plat',
     base: 'volaille',
     contient: ['laitier'],
@@ -402,14 +377,6 @@ const CATALOGUE: Entree[] = [
   },
 
   // ─── Bœuf ──────────────────────────────────────────────────────────────────
-  {
-    title: 'Chili con carne',
-    source: 'Marmiton',
-    kcal: 430,
-    prot: 30,
-    slot: 'plat',
-    base: 'boeuf',
-  },
   {
     title: 'Bœuf bourguignon',
     source: 'Marmiton',
