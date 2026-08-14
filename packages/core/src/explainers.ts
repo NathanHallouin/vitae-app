@@ -19,11 +19,29 @@ export interface ExplainerItem {
 export interface Explainer {
   /** titre de la section, en tête de carte */
   title: string;
+  /**
+   * Le fil : ce qu'on va lire, et dans quel ordre.
+   *
+   * Sans lui, quatre paragraphes se suivent sans qu'on sache si c'est une liste, une progression
+   * ou un fourre-tout — et on les saute tous. Une phrase qui annonce la suite fait la différence
+   * entre un pavé et un parcours.
+   */
+  fil: string;
   items: ExplainerItem[];
+  /**
+   * L'écran suivant dans la progression.
+   *
+   * Les quatre écrans de résultats se lisent dans l'ordre : ce que le corps dépense, ce que ça
+   * change dans l'assiette, où cela mène, et ce que le mouvement peut prendre en charge. Le dire à
+   * la fin de chaque carte transforme quatre blocs indépendants en un seul parcours.
+   */
+  suite: { href: string; label: string };
 }
 
 export const METABOLISME_EXPLAINER: Explainer = {
   title: 'Comprendre ces chiffres',
+  fil: 'Quatre questions, dans l’ordre où elles se posent : ce que ce chiffre mesure, d’où il sort, ce qui le fait varier d’une personne à l’autre, et ce que l’IMC ne dit pas.',
+  suite: { href: '/alimentation', label: 'Ce que ces chiffres changent dans l’assiette' },
   items: [
     {
       titre: 'Le métabolisme de base, c’est quoi ?',
@@ -50,6 +68,8 @@ export const METABOLISME_EXPLAINER: Explainer = {
 
 export const ALIMENTATION_EXPLAINER: Explainer = {
   title: 'Comprendre ces repères',
+  fil: 'D’abord pourquoi une fourchette plutôt qu’un chiffre précis, puis les trois macronutriments par ordre d’importance, et enfin ce qui rend un déficit tenable sur la durée.',
+  suite: { href: '/poids', label: 'Où ces repères vous mènent, et en combien de temps' },
   items: [
     {
       titre: 'Pourquoi une fourchette, et pas un chiffre',
@@ -76,6 +96,8 @@ export const ALIMENTATION_EXPLAINER: Explainer = {
 
 export const POIDS_EXPLAINER: Explainer = {
   title: 'À quoi vous attendre en chemin',
+  fil: 'Quatre choses que la courbe ne montre pas, dans l’ordre où elles arrivent : les variations d’un jour à l’autre, les premières semaines, le palier, puis le moment de tout recalculer.',
+  suite: { href: '/bouger', label: 'Ce que le mouvement peut prendre en charge' },
   items: [
     {
       titre: 'La balance monte et descend de 1 à 2 kg sans raison',
@@ -102,6 +124,8 @@ export const POIDS_EXPLAINER: Explainer = {
 
 export const BOUGER_EXPLAINER: Explainer = {
   title: 'Deux leviers, qu’on confond souvent',
+  fil: 'Les deux leviers l’un après l’autre, puis pourquoi ils ne s’additionnent pas, et enfin les repères officiels pour se situer.',
+  suite: { href: '/recettes', label: 'Des recettes pour tenir ces repères' },
   items: [
     {
       titre: 'Le mouvement du quotidien, ou NEAT',

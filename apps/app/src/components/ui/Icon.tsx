@@ -117,6 +117,13 @@ const PATHS: Record<IconName, ReactNode> = {
       <Path d="M6.5 12 12 6.5 17.5 12" />
     </>
   ),
+  // « La suite » : la même flèche, tournée d'un quart de tour.
+  flecheDroite: (
+    <>
+      <Path d="M4.5 12h13" />
+      <Path d="M12 6.5 17.5 12 12 17.5" />
+    </>
+  ),
   flechesOpposees: (
     <>
       <Path d="M7.5 20V5M7.5 5 4 8.5M7.5 5 11 8.5" />

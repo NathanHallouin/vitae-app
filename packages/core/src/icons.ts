@@ -27,6 +27,7 @@ export const ICON_NAMES = [
   // Objectifs
   'flecheBas',
   'flecheHaut',
+  'flecheDroite',
   'flechesOpposees',
   'egal',
   // Macronutriments et repères

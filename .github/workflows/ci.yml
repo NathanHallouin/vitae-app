@@ -67,6 +67,11 @@ jobs:
           # le jour où `/` n'était qu'une redirection.
           verifie index.html 'Combien votre corps'
           verifie metabolisme.html 'Mon métabolisme'
+          # Les explications sont repliées à l'écran mais restent dans le document : c'est ce qui
+          # donne à lire quelque chose à un moteur de recherche sur une page dont les chiffres
+          # dépendent de l'appareil du visiteur. Un rendu conditionnel les ferait disparaître sans
+          # que rien n'échoue.
+          verifie metabolisme.html 'Par l’équation de Mifflin-St Jeor'
           verifie recettes/index.html 'Recettes'
           verifie confidentialite.html 'aucune donnée'
 
