@@ -121,6 +121,16 @@ type de page, soit une génération à la compilation avec `sharp`, déjà prés
 - **Suivi des séances** : 1 j
   Cocher une séance faite dans la semaine, et voir la régularité sur le mois. Local, comme le
   reste.
+- **Rappels anti-sédentarité : faits.** Réglables sur l'écran « Bouger » (intervalle, plage
+  horaire), notifications locales, silencieuses, absentes du site. Deux suites possibles, aucune
+  urgente :
+  - **Restreindre à la semaine** : demande un déclencheur hebdomadaire par jour et par heure, soit
+    cinq fois plus de notifications en attente. iOS en plafonne soixante-quatre : il faudrait
+    reprogrammer glissant, à l'ouverture de l'application, plutôt que tout poser d'un coup.
+  - **Déclencher sur l'inactivité réelle** plutôt qu'à heure fixe : podomètre (`expo-sensors`) ou
+    données de santé. Change la nature du produit — permission sensible, déclaration de collecte
+    dans les deux fiches, et la promesse « aucune donnée » tombe. À n'ouvrir que si les retours le
+    réclament.
 
 ## v2 : Local-first, sans backend (≈ 7 j)
 

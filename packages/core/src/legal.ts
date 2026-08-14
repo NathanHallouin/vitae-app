@@ -15,7 +15,7 @@ export interface Section {
 }
 
 /** Date de dernière révision, affichée en bas de page. À corriger à chaque modification du texte. */
-export const CONFIDENTIALITE_MAJ = '2026-08-13';
+export const CONFIDENTIALITE_MAJ = '2026-08-14';
 
 export const CONFIDENTIALITE_RESUME =
   'Cette application ne collecte aucune donnée. Vos réponses sont enregistrées sur votre appareil, et nulle part ailleurs.';
@@ -41,6 +41,13 @@ export const CONFIDENTIALITE: Section[] = [
       'Le bouton « Tout effacer », sur l’écran de votre profil, supprime immédiatement et définitivement l’ensemble des informations enregistrées.',
       'Désinstaller l’application produit le même effet. Sur le site, vider les données du navigateur pour ce domaine suffit.',
       'Comme rien n’est envoyé nulle part, il n’y a aucune demande de suppression à nous adresser : nous n’avons rien à supprimer.',
+    ],
+  },
+  {
+    titre: 'Les rappels de mouvement',
+    paragraphes: [
+      'Si vous activez les rappels qui invitent à vous lever, ils sont programmés sur votre téléphone, par votre téléphone. Aucun serveur ne nous prévient, et aucun identifiant d’appareil n’est créé : ce sont des notifications locales, pas des notifications poussées.',
+      'Nous ne savons donc ni que vous les avez activés, ni à quelle heure ils sonnent, ni si vous les ouvrez. Les désactiver se fait au même endroit, sur l’écran « Bouger ».',
     ],
   },
   {

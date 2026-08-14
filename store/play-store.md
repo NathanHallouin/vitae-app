@@ -46,6 +46,8 @@ paliers, variations d'eau, ralentissements.
 • Un programme d'entraînement sans matériel, calculé pour votre âge, votre poids et votre objectif.
 • Des recettes avec leurs calories et leurs protéines, et un mode cuisine : quantités ajustées au
 nombre de convives, ingrédients et étapes à cocher, écran qui reste allumé.
+• Des rappels pour casser la sédentarité : une invitation discrète à vous lever, à l'intervalle et
+sur la plage horaire de votre choix. Silencieux, et programmés sur votre téléphone.
 
 CE QUI LA DISTINGUE
 
@@ -116,15 +118,30 @@ Classement attendu : **PEGI 3 / Tout public**.
 
 ## Autorisations déclarées
 
-Une seule figure dans le manifeste assemblé : `android.permission.INTERNET`.
+Trois figurent dans le manifeste assemblé :
+
+| Autorisation | Pourquoi |
+|---|---|
+| `INTERNET` | ouvrir une recette sur un site de cuisine, quand l'utilisateur en touche une |
+| `POST_NOTIFICATIONS` | afficher les rappels de mouvement (exigée par Android 13 et au-delà) |
+| `RECEIVE_BOOT_COMPLETED` | reprogrammer ces rappels après un redémarrage du téléphone |
+
+Les deux dernières viennent d'`expo-notifications`. **Aucune des trois n'est classée sensible par
+Google** : il n'y a donc aucun formulaire de déclaration d'usage à remplir.
 
 Six autres, ajoutées d'office par les modules embarqués, sont explicitement retirées dans
 `app.config.ts` (`blockedPermissions`) : caméra, micro, lecture et écriture du stockage externe,
 affichage par-dessus les autres applications, vibreur. Aucune n'aurait été utilisée, et
 `SYSTEM_ALERT_WINDOW` en particulier aurait demandé une justification auprès de Google.
 
-Il n'y a donc **aucune autorisation sensible à déclarer**, et aucun formulaire de déclaration
-d'usage à remplir.
+Le vibreur est refusé sciemment, alors même que les notifications pourraient s'en servir : le
+rappel est une invitation, pas une alarme, et quatorze vibrations par jour font désinstaller
+l'application le jour même.
+
+**Les rappels ne changent rien à la déclaration de sécurité des données.** Ce sont des
+notifications *locales* : programmées sur l'appareil, sans jeton d'envoi, sans serveur et sans
+identifiant. Rien n'est transmis, donc la réponse reste « non ». Elle deviendrait fausse avec des
+notifications poussées, qui exigent un jeton d'appareil.
 
 ## Test fermé obligatoire, si le compte est personnel
 

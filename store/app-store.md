@@ -45,6 +45,8 @@ CE QUE VOUS OBTENEZ
 • Un programme d'entraînement sans matériel, calculé pour votre âge, votre poids et votre objectif.
 • Des recettes avec leurs calories et leurs protéines, et un mode cuisine : quantités ajustées au
   nombre de convives, ingrédients et étapes à cocher, écran qui reste allumé.
+• Des rappels pour casser la sédentarité : une invitation discrète à vous lever, à l'intervalle et
+  sur la plage horaire de votre choix. Silencieux, et programmés sur votre téléphone.
 
 
 CE QUI LA DISTINGUE
@@ -66,6 +68,9 @@ VOS DONNÉES NE SORTENT PAS DE VOTRE TÉLÉPHONE
 Il n'y a ni compte, ni serveur, ni base de données. Vos réponses sont enregistrées sur votre
 appareil et nulle part ailleurs. Aucun traceur, aucune publicité, aucune mesure d'audience. Le
 bouton « Tout effacer » supprime tout, immédiatement.
+
+Les rappels de mouvement, si vous les activez, sont des notifications locales : votre téléphone se
+les programme lui-même. Aucun serveur n'est prévenu, aucun identifiant d'appareil n'est créé.
 
 L'application fonctionne entièrement hors connexion. Elle n'ouvre le réseau que si vous touchez une
 suggestion de recette, qui renvoie vers un site de cuisine.
@@ -109,9 +114,11 @@ Dans App Store Connect, section « Confidentialité de l'app » :
 
 > **Non, nous ne collectons pas de données de cette app.**
 
-C'est la seule réponse exacte, et elle est défendable : aucun SDK tiers, aucun réseau sortant, une
-seule permission Android (`INTERNET`), rien côté iOS. Un examinateur qui inspecte le trafic ne
-verra rien partir.
+C'est la seule réponse exacte, et elle est défendable : aucun SDK tiers, aucun réseau sortant, rien
+côté iOS. Un examinateur qui inspecte le trafic ne verra rien partir.
+
+Les rappels de mouvement n'y changent rien : notifications *locales*, sans jeton distant. Des
+notifications poussées, elles, imposeraient de déclarer un identifiant d'appareil.
 
 Attention : cette réponse devient fausse le jour où un outil de mesure d'audience est ajouté. Ne
 pas l'ajouter sans revenir ici et sur `packages/core/src/legal.ts`.
@@ -132,6 +139,11 @@ poids, objectif). Les quatre onglets de résultats se remplissent aussitôt. Les
 chaque onglet sont lisibles même sans avoir rien saisi.
 
 L'onglet Recettes fonctionne sans profil.
+
+Les rappels de mouvement se règlent sur l'onglet « Bouger », sous la carte « Où aller la chercher ».
+Ce sont des notifications locales (UNUserNotificationCenter, déclencheurs quotidiens) : aucun jeton
+distant n'est demandé et aucune requête réseau n'est émise. L'autorisation n'est demandée qu'au
+moment où l'utilisateur active l'interrupteur, jamais au lancement.
 
 Aucun identifiant de test n'est nécessaire.
 ```

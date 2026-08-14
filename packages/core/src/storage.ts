@@ -173,3 +173,28 @@ export function clearProfile(): void {
     // idem
   }
 }
+
+/**
+ * Lecture et écriture brutes, pour les autres données locales que le profil.
+ *
+ * Le profil garde ses fonctions dédiées, parce qu'il a un format versionné et une lecture
+ * tolérante. Les réglages plus simples — les rappels, le thème — n'ont pas besoin de tout cela,
+ * mais ils doivent passer par le même support injecté : sans ces deux fonctions, chaque nouveau
+ * réglage rouvrirait MMKV ou `localStorage` de son côté, et la règle « un seul point de passage »
+ * ne tiendrait pas une version.
+ */
+export function lireCle(key: string): string | null {
+  try {
+    return store.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+export function ecrireCle(key: string, value: string): void {
+  try {
+    store.setItem(key, value);
+  } catch {
+    // Stockage indisponible : le réglage vaut pour la session en cours.
+  }
+}

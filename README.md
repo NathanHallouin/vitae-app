@@ -381,6 +381,7 @@ ligne de JavaScript. La CI le vérifie sur le fichier produit, pas sur l'intenti
 | `recipes.ts` | catalogue de plats, filtres d'ingrédients et tirage par repas |
 | `nutrition.ts` | conseils alimentaires selon l'objectif |
 | `quantites.ts` | mise à l'échelle des quantités d'une recette |
+| `rappels.ts` | rappels anti-sédentarité : créneaux, messages, réglage persisté |
 | `state.ts` | état du formulaire de saisie et validation |
 | `storage.ts` | profil versionné (`vitae.v1.profile`), support de stockage **injecté** |
 | `format.ts` | formats français (espace insécable, virgule décimale, `−` U+2212) |
@@ -423,7 +424,30 @@ src/
   components/           écrans, cartes, primitives, icônes, illustrations
   theme/                bascule clair / sombre, palette du thème courant
   lib/store.ts          MMKV — et `store.web.ts`, que Metro choisit sur le web
+  lib/rappels.ts        notifications locales — et `rappels.web.ts`, qui ne fait rien
 ```
+
+### Les rappels anti-sédentarité
+
+L'écran « Bouger » explique que se lever quelques minutes par heure est le geste qui casse le mieux
+la sédentarité. Le réglage est posé juste sous cette phrase, et non dans un écran de préférences :
+c'en est la suite immédiate.
+
+Le partage des rôles est le même que partout ailleurs. `packages/core/src/rappels.ts` calcule
+*quand* et *quoi*, en fonctions pures couvertes par quinze tests — c'est là que sont les cas
+tordus : bornes incluses, plage inversée, plafond de soixante-quatre notifications en attente
+qu'impose iOS. `apps/app/src/lib/rappels.ts` se contente de le dire au système.
+
+Trois décisions à connaître avant d'y toucher :
+
+- **Notifications locales, jamais poussées.** Programmées sur l'appareil, sans jeton d'envoi et
+  sans serveur. C'est ce qui permet de garder « aucune donnée collectée » chez Apple comme chez
+  Google. Passer aux notifications distantes exigerait un identifiant d'appareil, donc une
+  déclaration de collecte dans les deux fiches.
+- **À heure fixe, pas sur une inactivité constatée.** Détecter l'immobilité demanderait le
+  podomètre ou les données de santé — une permission sensible, pour un gain discutable.
+- **Silencieux, sans vibration.** `VIBRATE` est refusée exprès dans `app.config.ts` : quatorze
+  vibrations par jour font désinstaller l'application le jour même.
 
 ### D'où vient la navigation instantanée
 

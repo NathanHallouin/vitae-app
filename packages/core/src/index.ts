@@ -18,6 +18,7 @@ export * from './nav';
 export * from './neat';
 export * from './nutrition';
 export * from './quantites';
+export * from './rappels';
 export * from './recipes';
 export * from './state';
 export * from './storage';

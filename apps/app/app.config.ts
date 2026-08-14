@@ -54,12 +54,22 @@ const config: ExpoConfig = {
     /**
      * Ce que les modules embarqués déclarent d'office, et dont l'application ne se sert pas.
      *
-     * Le manifeste assemblé en réclamait sept ; il n'en reste qu'`INTERNET`, nécessaire pour
-     * ouvrir les recettes du site de cuisine. Les autres se retirent, et ce n'est pas cosmétique :
-     * « Afficher par-dessus d'autres applications » et l'accès au stockage sont des permissions
-     * sensibles qu'il faudrait justifier auprès de Google, pour des fonctions que l'application
-     * n'a pas. Une seule permission, c'est aussi ce qui rend défendable la déclaration « aucune
-     * donnée collectée ».
+     * Il n'en reste que trois dans le manifeste assemblé. `INTERNET`, déclarée ici, pour ouvrir
+     * les recettes du site de cuisine. Puis `POST_NOTIFICATIONS` et `RECEIVE_BOOT_COMPLETED`, que
+     * `expo-notifications` apporte par son propre manifeste : la première est exigée par
+     * Android 13 et au-delà pour afficher un rappel, la seconde pour que les rappels survivent à
+     * un redémarrage du téléphone. Aucune n'est classée sensible par Google.
+     *
+     * Les autres se retirent, et ce n'est pas cosmétique : « Afficher par-dessus d'autres
+     * applications » et l'accès au stockage sont des permissions sensibles qu'il faudrait
+     * justifier auprès de Google, pour des fonctions que l'application n'a pas.
+     *
+     * `VIBRATE` est refusée sciemment, alors même que les notifications pourraient s'en servir :
+     * quatorze vibrations par jour se désinstallent le jour même. Le rappel est une invitation,
+     * pas une alarme.
+     *
+     * Les rappels sont des notifications *locales* : programmées sur l'appareil, sans jeton
+     * d'envoi et sans serveur. La déclaration « aucune donnée collectée » reste donc exacte.
      */
     blockedPermissions: [
       'android.permission.CAMERA',
@@ -88,6 +98,18 @@ const config: ExpoConfig = {
         resizeMode: 'contain',
         backgroundColor: '#fbf7f2',
         dark: { backgroundColor: '#16120e' },
+      },
+    ],
+    [
+      'expo-notifications',
+      {
+        // L'icône de notification d'Android doit être monochrome sur fond transparent : le système
+        // n'en garde que la silhouette. Le calque avant de l'icône adaptative remplit exactement
+        // cette condition.
+        icon: './assets/adaptive-icon.png',
+        color: '#084684',
+        // Ni son ni vibration : voir `blockedPermissions` ci-dessus.
+        sounds: [],
       },
     ],
     'expo-font',

@@ -11,6 +11,7 @@ import { Card, SplitBar } from '../ui/primitives';
 import SectionHeading from '../ui/SectionHeading';
 import StatTile from '../ui/StatTile';
 import NeatCard from './NeatCard';
+import RappelsCard from './RappelsCard';
 import WeekPlanCard from './WeekPlanCard';
 
 /**
@@ -91,6 +92,10 @@ export default function BougerScreen() {
       />
 
       <NeatCard neat={neat} />
+
+      {/* Juste après le catalogue de gestes, dont le premier est « se lever quelques minutes par
+          heure » : le réglage est la suite de cette phrase, pas une préférence à aller chercher. */}
+      <RappelsCard />
 
       <SectionHeading
         icon="haltere"
