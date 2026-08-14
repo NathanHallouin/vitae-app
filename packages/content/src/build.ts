@@ -197,8 +197,17 @@ async function main(): Promise<void> {
     noms = [];
   }
 
+  /**
+   * De la plus récente à la plus ancienne, puis par slug.
+   *
+   * Le second critère n'est pas cosmétique : trente-huit recettes partagent la même date de
+   * publication, et un tri sur la seule date les laisse dans l'ordre où le système de fichiers les
+   * a rendues — qui n'est pas le même d'une machine à l'autre. Le fichier engendré différait donc
+   * intégralement entre un poste de travail et l'intégration continue, laquelle vérifie justement
+   * qu'il correspond à sa source.
+   */
   const recettes = (await Promise.all(noms.map((n) => lireRecette(n.replace(/\.md$/, ''))))).sort(
-    (a, b) => b.publiee.localeCompare(a.publiee),
+    (a, b) => b.publiee.localeCompare(a.publiee) || a.slug.localeCompare(b.slug),
   );
 
   const entete = [
