@@ -22,11 +22,22 @@ export default function OptionButton({
   children: ReactNode;
   className?: string;
   accessibilityLabel?: string;
+  /**
+   * Sans effet ici : il n'y a pas de clavier à écouter sur un téléphone.
+   *
+   * La propriété existe quand même pour que les appelants soient les mêmes des deux côtés — voir
+   * `OptionButton.web.tsx`, que Metro choisit sur le web et qui, lui, s'en sert.
+   */
+  onNavigate?: (direction: -1 | 1 | 'premier' | 'dernier') => void;
 }) {
   return (
     <Pressable
       accessibilityRole="radio"
       accessibilityState={{ selected, checked: selected }}
+      // `accessibilityState` renseigne les lecteurs d'écran natifs, mais `react-native-web` ne le
+      // traduit pas en `aria-checked` pour ce rôle : un `role="radio"` sans état est invalide, et
+      // un lecteur d'écran de navigateur annonce l'option sans jamais dire si elle est choisie.
+      aria-checked={selected}
       accessibilityLabel={accessibilityLabel}
       onPress={onPress}
       className={cx(

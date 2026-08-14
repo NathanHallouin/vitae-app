@@ -47,7 +47,10 @@ froid, le sélecteur de date natif sur les deux plateformes, l'écran maintenu a
 recette, le rendu des polices sur Android, le comportement des marges de sécurité sur un iPhone à
 encoche et sur un Android à barre gestuelle.
 
-## v1.1 : Finitions avant de montrer l'app (≈ 3 j)
+## v1.1 : Finitions avant de montrer l'app — fait
+
+Les cinq points sont livrés. Ce qui reste avant publication est administratif, et se trouve
+au jalon v1.0 ci-dessus : ouvrir les comptes, mettre le site en ligne, prendre les captures.
 
 ### 1. Contraste des textes : fait
 
@@ -55,16 +58,17 @@ Réglé lors de la refonte visuelle : le `faint` de la maquette (`#9e9e9e`, 2,7:
 remplacé par `#6f7d75` (4,6:1), et la palette sombre a été reconstruite sur la même exigence.
 Mesuré dans le navigateur : les petits textes tournent autour de 7:1 en mode sombre.
 
-### 2. Groupes d'options : fait pour les rôles, reste le clavier (0,25 j)
+### 2. Groupes d'options : fait
 
-**Livré** : `OptionButton` annonce `radio` et son état de sélection, et chaque groupe est déclaré
-`radiogroup`. Les lecteurs d'écran annoncent désormais correctement « sélectionné ». Concerne le
-sexe, le niveau d'activité, l'objectif et le poids cible.
+`OptionButton` annonce `radio`, chaque groupe est déclaré `radiogroup`, et le web a sa variante
+clavier : flèches, Home et End déplacent la sélection, et un seul membre par groupe est dans
+l'ordre de tabulation — le motif du *roving tabindex*.
 
-**Reste à faire**, et uniquement sur le web, où il y a un clavier : navigation par flèches et
-Home/End à l'intérieur d'un groupe, avec un seul point d'entrée dans l'ordre de tabulation.
-React Native n'a pas d'équivalent de `roving tabindex` ; il faudra le poser à la main sur la
-plateforme web.
+Deux choses ont été trouvées en vérifiant dans le navigateur plutôt qu'en lisant le code.
+`react-native-web` ne traduit pas `accessibilityState.checked` en `aria-checked` pour ce rôle : les
+quinze options annonçaient leur libellé sans jamais dire laquelle était choisie. L'attribut est
+désormais posé explicitement. Et la tabulation demandait quinze arrêts pour traverser l'écran du
+profil ; il en reste quatre, un par groupe.
 
 ### 3. Persistance : fait
 
@@ -82,9 +86,10 @@ qualité de cette couche conditionne le suivi de poids et les profils multiples.
 connaît aucun support et le reçoit par injection ; toute nouvelle donnée persistée doit passer par
 lui, jamais par MMKV ou `localStorage` depuis un écran.
 
-**Reste à faire** : respecter `prefers-color-scheme` tant que l'utilisateur n'a pas choisi
-explicitement. La préférence est aujourd'hui retenue dès la première bascule, mais un thème jamais
-choisi suit déjà le système (`colorScheme` à `system`).
+**Livré aussi** : tant que rien n'a été choisi, le thème suit le système. Vérifié dans le
+navigateur — sur un système en sombre, le fond sort à `#16120e` sans qu'aucune préférence ne soit
+enregistrée ; après une bascule explicite, le choix est retenu et prime au rechargement, même si le
+système dit le contraire.
 
 ### 4. Intégration continue : fait
 
@@ -92,13 +97,15 @@ choisi suit déjà le système (`colorScheme` à `system`).
 site. Une étape vérifie le HTML produit — titre, canonique, JSON-LD — parce qu'une page vide
 passait toutes les autres, ce qui est précisément arrivé au premier export.
 
-### 5. SEO et partage : fait, sauf l'image de partage (0,5 j)
+### 5. SEO et partage : fait
 
-**Livré** : `robots.txt` et `sitemap.xml` engendrés, balises de titre, description et canonique par
-route, JSON-LD `Recipe` sur chaque recette, pré-rendu statique de toutes les routes.
+`robots.txt` et `sitemap.xml` engendrés, balises de titre, description et canonique par route,
+JSON-LD `Recipe` sur chaque recette, pré-rendu statique de toutes les routes.
 
-**Reste à faire** : l'image Open Graph. `next/og` n'existe plus ; il faut soit une image fixe par
-type de page, soit une génération à la compilation avec `sharp`, déjà présent pour les icônes.
+Et soixante-trois images de partage, une par recette plus celle de la marque, dessinées par
+`tools/build-og.ts` avec les polices du projet plutôt que celles du système — sans quoi une image
+engendrée en intégration continue n'aurait pas la même typographie que la même image engendrée sur
+un poste de travail, et l'écart ne se verrait qu'une fois un lien partagé.
 
 ## v1.2 : Ce qui fait revenir l'utilisateur (≈ 5 j)
 

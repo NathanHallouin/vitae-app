@@ -10,7 +10,7 @@
  * système), et l'appeler avec des balises web n'aurait pas de sens.
  */
 
-import { SITE_NAME } from '@vitae/core/site';
+import { SITE_NAME, SITE_URL } from '@vitae/core/site';
 import Head from 'expo-router/head';
 import { Platform } from 'react-native';
 
@@ -18,12 +18,20 @@ export default function Seo({
   title,
   description,
   canonical,
+  image,
   jsonLd,
 }: {
   title: string;
   description: string;
   /** URL absolue de la page */
   canonical: string;
+  /**
+   * L'image affichée quand le lien est collé dans une conversation.
+   *
+   * Par défaut la carte de marque ; les recettes passent la leur, avec leur titre et leurs
+   * valeurs. Elles sont engendrées par `tools/build-og.ts`, pas dessinées à la main.
+   */
+  image?: string;
   /** données structurées schema.org, sérialisées telles quelles */
   jsonLd?: Record<string, unknown>;
 }) {
@@ -40,6 +48,11 @@ export default function Seo({
       <meta property="og:url" content={canonical} />
       <meta property="og:site_name" content={SITE_NAME} />
       <meta property="og:locale" content="fr_FR" />
+      <meta property="og:image" content={image ?? `${SITE_URL}/og.png`} />
+      {/* Les dimensions évitent que le réseau ne recadre pendant qu'il télécharge l'image. */}
+      <meta property="og:image:width" content="1200" />
+      <meta property="og:image:height" content="630" />
+      <meta name="twitter:card" content="summary_large_image" />
       {jsonLd ? (
         // Le contenu passe par les enfants et non par `dangerouslySetInnerHTML` : la bibliothèque
         // qui alimente `Head` lit le texte du script, pas la propriété de React.

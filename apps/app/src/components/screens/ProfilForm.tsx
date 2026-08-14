@@ -1,4 +1,11 @@
-import { activityFactor, DAILY, GOALS, SESSIONS, STEP_TITLES } from '@vitae/core/constants';
+import {
+  activityFactor,
+  DAILY,
+  GOALS,
+  SESSIONS,
+  type Sexe,
+  STEP_TITLES,
+} from '@vitae/core/constants';
 import { ageFrom, formatLongDate } from '@vitae/core/date';
 import { fmtFactor } from '@vitae/core/format';
 import {
@@ -18,6 +25,7 @@ import Icon, { type IconName } from '@/components/ui/Icon';
 import OptionButton from '@/components/ui/OptionButton';
 import Overline from '@/components/ui/Overline';
 import { Button, Card, cx, NumberField, ProgressBar } from '@/components/ui/primitives';
+import { useGroupeRadio } from '@/components/ui/useGroupeRadio';
 import { usePalette } from '@/theme/palette';
 
 const MEASURES = [
@@ -42,6 +50,30 @@ export default function ProfilForm({
   const palette = usePalette();
 
   const fields = stepFields(form);
+
+  // Les flèches déplacent la sélection dans chaque groupe ; sans effet sur mobile.
+  // `form.sexe` vaut la chaîne vide tant que rien n'est choisi : le groupe entre alors par son
+  // premier membre, ce que `useGroupeRadio` fait déjà pour une valeur hors liste.
+  const naviguerSexe = useGroupeRadio<Exclude<Sexe, ''>>(
+    ['femme', 'homme'],
+    form.sexe as Exclude<Sexe, ''>,
+    (value) => dispatch({ type: 'setSexe', value }),
+  );
+  const naviguerDaily = useGroupeRadio(
+    DAILY.map((_, i) => i),
+    form.daily,
+    (value) => dispatch({ type: 'setDaily', value }),
+  );
+  const naviguerSessions = useGroupeRadio(
+    SESSIONS.map((_, i) => i),
+    form.sessions,
+    (value) => dispatch({ type: 'setSessions', value }),
+  );
+  const naviguerGoal = useGroupeRadio(
+    GOALS.map((g) => g.key),
+    form.goal,
+    (value) => dispatch({ type: 'setGoal', value }),
+  );
   const isWizard = form.mode === 'wizard';
   const age = ageFrom(form.naissance);
 
@@ -93,6 +125,7 @@ export default function ProfilForm({
                   key={sexe}
                   selected={form.sexe === sexe}
                   onPress={() => dispatch({ type: 'setSexe', value: sexe })}
+                  onNavigate={naviguerSexe}
                   className="min-w-0 flex-1 p-4"
                 >
                   <Text
@@ -170,6 +203,7 @@ export default function ProfilForm({
                     key={d.label}
                     selected={form.daily === i}
                     onPress={() => dispatch({ type: 'setDaily', value: i })}
+                    onNavigate={naviguerDaily}
                     icon={d.icon}
                     label={d.label}
                     desc={d.desc}
@@ -187,6 +221,7 @@ export default function ProfilForm({
                     key={sess.label}
                     selected={form.sessions === i}
                     onPress={() => dispatch({ type: 'setSessions', value: i })}
+                    onNavigate={naviguerSessions}
                     icon={sess.icon}
                     label={sess.label}
                     desc={sess.desc}
@@ -217,6 +252,7 @@ export default function ProfilForm({
                     key={g.key}
                     selected={choisi}
                     onPress={() => dispatch({ type: 'setGoal', value: g.key })}
+                    onNavigate={naviguerGoal}
                     className="px-4 py-[14px]"
                   >
                     <View className="mb-[6px]">
@@ -300,6 +336,7 @@ function FieldLabel({ children, compact = false }: { children: string; compact?:
 function ChoiceRow({
   selected,
   onPress,
+  onNavigate,
   icon,
   label,
   desc,
@@ -307,6 +344,8 @@ function ChoiceRow({
 }: {
   selected: boolean;
   onPress: () => void;
+  /** relayé au bouton : c'est lui qui écoute le clavier, sur le web seulement */
+  onNavigate?: (direction: -1 | 1 | 'premier' | 'dernier') => void;
   icon: IconName;
   label: string;
   desc: string;
@@ -317,6 +356,7 @@ function ChoiceRow({
     <OptionButton
       selected={selected}
       onPress={onPress}
+      onNavigate={onNavigate}
       accessibilityLabel={`${label}. ${desc}`}
       className="flex-row items-center gap-[14px] px-4 py-[14px]"
     >

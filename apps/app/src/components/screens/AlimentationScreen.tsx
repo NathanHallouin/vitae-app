@@ -17,6 +17,7 @@ import OptionButton from '@/components/ui/OptionButton';
 import Overline from '@/components/ui/Overline';
 import { TileRow } from '@/components/ui/Page';
 import { Card } from '@/components/ui/primitives';
+import Repliable from '@/components/ui/Repliable';
 import StatTile from '@/components/ui/StatTile';
 import { useProfile } from '@/state/ProfileProvider';
 import { usePalette } from '@/theme/palette';
@@ -52,10 +53,12 @@ export default function AlimentationScreen() {
   return (
     <View className="gap-6">
       <Apparition depuis={1}>
-        <Card className="p-6">
-          <Overline className="mb-1">Mon objectif</Overline>
+        <Repliable
+          titre="Mon objectif"
+          resume={`${metrics.goal.label} · changez-le quand vous voulez`}
+        >
           <Text className="mb-[14px] text-small text-muted">
-            Changez-le quand vous voulez : tous les chiffres se recalculent.
+            Tous les chiffres de l’application se recalculent aussitôt.
           </Text>
           <View accessibilityRole="radiogroup" className="gap-[10px]">
             {GOALS.map((g) => (
@@ -79,7 +82,7 @@ export default function AlimentationScreen() {
               </OptionButton>
             ))}
           </View>
-        </Card>
+        </Repliable>
 
         <Card className="p-6">
           <Overline>Votre repère quotidien</Overline>
@@ -138,8 +141,10 @@ export default function AlimentationScreen() {
           </View>
         </Card>
 
-        <Card className="p-6">
-          <Overline className="mb-1">Comment répartir ces calories</Overline>
+        <Repliable
+          titre="Comment répartir ces calories"
+          resume={macros.map((m) => `${m.grams} g de ${m.label.toLowerCase()}`).join(' · ')}
+        >
           <Text className="mb-[18px] text-small text-muted">
             Des repères, pas des règles. Le plus important reste le total de la journée.{' '}
             {proteinBasisNote(metrics)}
@@ -171,7 +176,7 @@ export default function AlimentationScreen() {
               </View>
             ))}
           </View>
-        </Card>
+        </Repliable>
 
         <RecipesCard metrics={metrics} goal={profile.goal} />
       </Apparition>

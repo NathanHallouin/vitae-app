@@ -13,7 +13,7 @@
     "content": "bun run --cwd packages/content build",
     "tokens": "bun run tools/build-tokens.ts",
     "seo": "bun run tools/build-seo.ts",
-    "generate": "bun run tokens && bun run icons && bun run content && bun run seo",
+    "generate": "bun run tokens && bun run icons && bun run content && bun run og && bun run seo",
     "build:web": "bun run generate && bun run --cwd apps/app export:web",
     "prebuild": "bun run generate && bun run --cwd apps/app prebuild",
     "test": "bun test packages",
@@ -21,7 +21,8 @@
     "check:fix": "biome check --write",
     "format": "biome format --write",
     "typecheck": "bun run --cwd apps/app typecheck",
-    "icons": "bun run tools/build-icons.ts"
+    "icons": "bun run tools/build-icons.ts",
+    "og": "bun run tools/build-og.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.7",

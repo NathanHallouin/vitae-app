@@ -79,6 +79,7 @@ export default function RecettePage() {
         title={`${recette.titre} : ${recette.kcal} kcal et ${recette.proteines} g de protéines`}
         description={recette.description}
         canonical={url}
+        image={`${SITE_URL}/og/${recette.slug}.png`}
         jsonLd={jsonLd}
       />
       <GarderEcranAllume />
