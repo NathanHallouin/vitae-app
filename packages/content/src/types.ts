@@ -20,6 +20,16 @@ export interface RecipeMeta {
   ingredients: string[];
   /** repris tel quel dans le JSON-LD : « Plat principal », « Petit-déjeuner »… */
   categorie: string;
+  /**
+   * À quel moment de la journée le plat se prête, et son ingrédient dominant.
+   *
+   * Ces deux champs ne servent pas à la page de la recette : ils la font entrer dans les
+   * suggestions de l'écran « Ce que je mange », qui range les propositions par repas et évite de
+   * servir deux fois le même ingrédient dans la journée. Les valeurs admises sont celles de
+   * `@vitae/core/recipes` — `Slot` et `Base` —, et le script de compilation les vérifie.
+   */
+  moment: 'matin' | 'plat';
+  base: string;
   /** date ISO de publication, pour le sitemap et le JSON-LD */
   publiee: string;
   /** correspond aux filtres de `@vitae/core/recipes` : viande, poisson, porc, oeufs, laitier */

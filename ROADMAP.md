@@ -149,6 +149,13 @@ Tout ce qui suit tient dans le navigateur et s'appuie sur le module de stockage 
   Soi, un proche, ou des clients si l'utilisateur est coach. Sélecteur de profil, chaque profil
   ayant son historique. Sans comptes, la limite à assumer et à afficher : les profils sont liés au
   navigateur, pas à une identité.
+- **Étoffer le catalogue de recettes** : au fil de l'eau
+  Les suggestions de l'écran « Ce que je mange » servent d'abord les recettes de l'application, et
+  ne comblent avec des recherches extérieures que ce qu'elles ne couvrent pas. Avec trois recettes,
+  la moitié des propositions vient encore de Marmiton ou de Femme Actuelle. Chaque Markdown ajouté
+  — avec son `moment` et sa `base` — remplace mécaniquement un lien de recherche par une recette
+  rédigée, sans une ligne de code. Un test refuse toute recette qui doublerait un plat du catalogue
+  extérieur.
 - **Choix du menu** : 1 j
   La journée type est faite (`packages/core/src/nutrition.ts`). Reste à proposer des variantes : version
   végétarienne, sans lactose, et un bouton « une autre journée » qui change les sources.

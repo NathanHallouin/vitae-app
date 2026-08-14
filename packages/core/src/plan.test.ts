@@ -13,7 +13,14 @@ import {
   rateAssessment,
 } from './calc';
 import type { GoalKey } from './constants';
-import { buildRecipeSuggestions, EXCLUSIONS, MAX_PORTIONS, RECIPES, snackKcal } from './recipes';
+import {
+  buildRecipeSuggestions,
+  EXCLUSIONS,
+  MAX_PORTIONS,
+  platMaison,
+  RECIPES,
+  snackKcal,
+} from './recipes';
 import { buildWeek } from './training';
 
 /** Éventail de profils : léger / lourd, sédentaire / très actif, les quatre objectifs. */
@@ -121,6 +128,41 @@ describe('macronutriments', () => {
   });
 });
 
+/**
+ * Les trois recettes de l'application, recopiées ici plutôt qu'importées.
+ *
+ * `packages/content` dépend de ce module ; l'importer en retour fermerait le cycle. Et ces tests
+ * portent sur le moteur, pas sur le contenu : ils doivent rester vrais quel que soit le catalogue
+ * publié. C'est le script de compilation du contenu qui vérifie, lui, que les Markdown déclarent
+ * bien un `moment` et une `base` connus.
+ */
+const MAISON = [
+  {
+    slug: 'omelette-aux-champignons',
+    title: 'Omelette aux champignons',
+    kcal: 300,
+    prot: 22,
+    slot: 'matin',
+    base: 'oeufs',
+  },
+  {
+    slug: 'curry-de-poulet-aux-legumes',
+    title: 'Curry de poulet aux légumes',
+    kcal: 400,
+    prot: 34,
+    slot: 'plat',
+    base: 'volaille',
+  },
+  {
+    slug: 'dahl-de-lentilles-corail',
+    title: 'Dahl de lentilles corail',
+    kcal: 380,
+    prot: 18,
+    slot: 'plat',
+    base: 'legumineuse',
+  },
+].map((r) => platMaison({ ...r, slot: r.slot as 'matin' | 'plat', base: r.base as 'oeufs' }));
+
 describe('recettes proposées', () => {
   test('chaque repas propose deux recettes, sans jamais répéter la même', () => {
     forEachProfile((m, _d, _s, goal, nom) => {
@@ -149,6 +191,92 @@ describe('recettes proposées', () => {
         .filter((meal) => meal.name !== 'Petit-déjeuner')
         .flatMap((meal) => meal.recipes.map((r) => r.base));
       expect(new Set(bases).size).toBe(4);
+    });
+  });
+
+  test('aucun plat du catalogue extérieur ne double une recette de l’application', () => {
+    // Le doublon exact qui a motivé le changement : « Omelette aux champignons » existait en lien
+    // de recherche et en recette rédigée.
+    const titres = MAISON.map((r) => r.title.toLowerCase());
+    for (const plat of RECIPES) {
+      expect(titres).not.toContain(plat.title.toLowerCase());
+    }
+  });
+
+  test('une recette de l’application est toujours la première proposition de son repas', () => {
+    forEachProfile((m, _d, _s, goal, nom) => {
+      const proposes = buildRecipeSuggestions(m, goal, { maison: MAISON }).flatMap(
+        (meal) => meal.recipes,
+      );
+      const maison = proposes.filter((r) => r.slug);
+
+      expect(maison.length).toBeGreaterThan(0);
+      // Jamais reléguée en seconde proposition, quel que soit le profil.
+      for (const r of maison) expect(r.slotKey.endsWith('-0')).toBe(true);
+      expect(nom).toBeTruthy();
+    });
+  });
+
+  test('hors déficit, les trois recettes de l’application sont proposées', () => {
+    forEachProfile((m, _d, _s, goal) => {
+      if (goal === 'seche' || goal === 'recomp') return;
+      const slugs = buildRecipeSuggestions(m, goal, { maison: MAISON })
+        .flatMap((meal) => meal.recipes)
+        .filter((r) => r.slug)
+        .map((r) => r.slug);
+      expect(new Set(slugs).size).toBe(MAISON.length);
+    });
+  });
+
+  test('en déficit, le plancher de densité protéique s’applique aussi à nos recettes', () => {
+    // Le dahl tombe à 4,7 g de protéines pour 100 kcal, sous le plancher de 7. Le faire passer
+    // devant parce qu'il est « maison » reviendrait à conseiller moins bien pour se citer soi-même :
+    // la priorité joue à l'intérieur de ce qui convient à l'objectif, jamais contre.
+    forEachProfile((m, _d, _s, goal) => {
+      if (goal !== 'seche' && goal !== 'recomp') return;
+      const slugs = buildRecipeSuggestions(m, goal, { maison: MAISON })
+        .flatMap((meal) => meal.recipes)
+        .filter((r) => r.slug)
+        .map((r) => r.slug);
+      expect(slugs).toContain('omelette-aux-champignons');
+      expect(slugs).toContain('curry-de-poulet-aux-legumes');
+      expect(slugs).not.toContain('dahl-de-lentilles-corail');
+    });
+  });
+
+  test('une recette de l’application ouvre l’application, pas un site tiers', () => {
+    forEachProfile((m, _d, _s, goal) => {
+      for (const meal of buildRecipeSuggestions(m, goal, { maison: MAISON })) {
+        for (const r of meal.recipes) {
+          if (r.slug) {
+            expect(r.url).toBe(`/recettes/${r.slug}`);
+            expect(r.source).toBe('Nos recettes');
+          } else {
+            expect(r.url.startsWith('https://')).toBe(true);
+          }
+        }
+      }
+    });
+  });
+
+  test('les filtres d’ingrédients s’appliquent aussi aux recettes de l’application', () => {
+    forEachProfile((m, _d, _s, goal) => {
+      const proposes = buildRecipeSuggestions(m, goal, {
+        maison: MAISON,
+        excluded: ['oeufs', 'vegetarien'],
+      }).flatMap((meal) => meal.recipes);
+
+      // L'omelette est écartée par « sans œufs », le curry par « végétarien » : reste le dahl.
+      const slugs = proposes.filter((r) => r.slug).map((r) => r.slug);
+      expect(slugs).toEqual(['dahl-de-lentilles-corail']);
+    });
+  });
+
+  test('sans catalogue maison, les propositions restent celles d’avant', () => {
+    forEachProfile((m, _d, _s, goal) => {
+      const proposes = buildRecipeSuggestions(m, goal).flatMap((meal) => meal.recipes);
+      expect(proposes.every((r) => !r.slug)).toBe(true);
+      expect(proposes).toHaveLength(6);
     });
   });
 

@@ -17,6 +17,7 @@
 import { readdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { BASES, SLOTS } from '@vitae/core/recipes';
 import matter from 'gray-matter';
 import { marked } from 'marked';
 import type { Block, Recipe, RecipeMeta } from './types';
@@ -47,11 +48,26 @@ function lireMeta(slug: string, data: Record<string, unknown>): RecipeMeta {
     return champManquant(slug, champ);
   };
 
+  /**
+   * Vérifié contre les unions du moteur de suggestions, et non contre une liste recopiée : une
+   * base ajoutée là-bas devient utilisable ici sans rien toucher, et une faute de frappe casse la
+   * compilation plutôt que d'écarter silencieusement la recette des propositions.
+   */
+  const parmi = <T extends string>(champ: string, valeurs: readonly T[]): T => {
+    const v = data[champ];
+    if (typeof v === 'string' && (valeurs as readonly string[]).includes(v)) return v as T;
+    throw new Error(
+      `Recette « ${slug} » : « ${champ} » vaut « ${String(v)} », attendu l'un de ${valeurs.join(', ')}.`,
+    );
+  };
+
   return {
     slug,
     titre: texte('titre'),
     description: texte('description'),
     categorie: texte('categorie'),
+    moment: parmi('moment', SLOTS),
+    base: parmi('base', BASES),
     publiee: date('publiee'),
     preparation: nombre('preparation'),
     cuisson: nombre('cuisson'),

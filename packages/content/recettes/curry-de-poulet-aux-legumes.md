@@ -2,6 +2,8 @@
 titre: Curry de poulet aux légumes
 description: Un curry doux au lait de coco, riche en protéines et prêt en une demi-heure. Les légumes tiennent la portion sans alourdir le compte de calories.
 categorie: Plat principal
+moment: plat
+base: volaille
 publiee: 2026-08-11
 preparation: 10
 cuisson: 20

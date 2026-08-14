@@ -378,7 +378,7 @@ ligne de JavaScript. La CI le vérifie sur le fichier produit, pas sur l'intenti
 | `constants.ts` | données de référence et libellés en langage courant |
 | `training.ts` | séances de renforcement, adaptées à l'âge, au sexe, au poids, au métabolisme et à l'objectif |
 | `neat.ts` | mouvement du quotidien (NEAT), tenu à part des séances |
-| `recipes.ts` | catalogue de plats, filtres d'ingrédients et tirage par repas |
+| `recipes.ts` | suggestions par repas : recettes de l'application d'abord, plats extérieurs ensuite |
 | `nutrition.ts` | conseils alimentaires selon l'objectif |
 | `quantites.ts` | mise à l'échelle des quantités d'une recette |
 | `rappels.ts` | rappels anti-sédentarité : créneaux, messages, réglage persisté |

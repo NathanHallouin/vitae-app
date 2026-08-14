@@ -2,6 +2,8 @@
 titre: Dahl de lentilles corail
 description: Un plat végétarien économique, riche en fibres et en protéines végétales. Les lentilles corail cuisent en quinze minutes sans trempage.
 categorie: Plat principal
+moment: plat
+base: legumineuse
 publiee: 2026-08-10
 preparation: 10
 cuisson: 20

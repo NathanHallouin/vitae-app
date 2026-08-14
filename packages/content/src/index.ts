@@ -9,6 +9,7 @@
  * telle quelle, et les pages du site n'ont pas eu à changer de forme.
  */
 
+import { type Ingredient, type Recipe as PlatSuggere, platMaison } from '@vitae/core/recipes';
 import { RECETTES } from './recettes.generated';
 import type { Recipe } from './types';
 
@@ -29,4 +30,31 @@ export function getAllRecipes(): Recipe[] {
 
 export function getRecipeSlugs(): string[] {
   return RECETTES.map((r) => r.slug);
+}
+
+/**
+ * Les recettes de l'application, prêtes à être proposées sur l'écran « Ce que je mange ».
+ *
+ * Sans cela, cet écran ne proposait que des recherches sur des sites extérieurs, alors même que
+ * l'application publie ses propres recettes, rédigées, aux valeurs contrôlées et avec leur écran
+ * de cuisine. Le même plat pouvait s'y trouver deux fois — une fois en lien de recherche, une fois
+ * en recette maison.
+ *
+ * Le moteur les range devant les propositions extérieures, qui ne comblent plus que ce que ce
+ * catalogue ne couvre pas encore.
+ */
+export function platsMaison(): PlatSuggere[] {
+  return RECETTES.map((r) =>
+    platMaison({
+      slug: r.slug,
+      title: r.titre,
+      kcal: r.kcal,
+      prot: r.proteines,
+      slot: r.moment,
+      // Le frontmatter est vérifié à la compilation contre les unions du moteur : la conversion
+      // ici ne peut pas rencontrer de valeur inconnue.
+      base: r.base as PlatSuggere['base'],
+      contient: r.contient as Ingredient[],
+    }),
+  );
 }

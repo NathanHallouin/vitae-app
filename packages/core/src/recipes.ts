@@ -18,21 +18,25 @@ import type { Metrics } from './calc';
 import type { GoalKey } from './constants';
 
 /** Moment de la journée auquel le plat se prête. */
-export type Slot = 'matin' | 'plat';
+export const SLOTS = ['matin', 'plat'] as const;
+export type Slot = (typeof SLOTS)[number];
 
 /**
  * Ingrédient dominant. Sert à ne pas proposer deux fois la même chose dans une journée : sans ça,
  * le classement par densité protéique remonte trois plats de poisson d'affilée.
  */
-export type Base =
-  | 'oeufs'
-  | 'laitier'
-  | 'volaille'
-  | 'poisson'
-  | 'boeuf'
-  | 'porc'
-  | 'legumineuse'
-  | 'cereale';
+export const BASES = [
+  'oeufs',
+  'laitier',
+  'volaille',
+  'poisson',
+  'boeuf',
+  'porc',
+  'legumineuse',
+  'cereale',
+] as const;
+
+export type Base = (typeof BASES)[number];
 
 /** Ce qu'une recette contient, pour les filtres d'exclusion. */
 export type Ingredient = 'viande' | 'poisson' | 'porc' | 'oeufs' | 'laitier';
@@ -55,9 +59,18 @@ const ECARTE: Record<Exclusion, Ingredient[]> = {
   vegetarien: ['viande', 'poisson', 'porc'],
 };
 
-export type Source = 'Marmiton' | 'Femme Actuelle';
+/**
+ * D'où vient une proposition.
+ *
+ * `Nos recettes` désigne le catalogue de l'application lui-même — des recettes rédigées, avec
+ * leurs valeurs contrôlées et leur propre écran. Les deux autres sont des recherches sur un site
+ * extérieur, et n'existent que pour combler ce que le catalogue maison ne couvre pas encore.
+ */
+export type Source = SourceExterne | 'Nos recettes';
 
-const RECHERCHE: Record<Source, (query: string) => string> = {
+export type SourceExterne = 'Marmiton' | 'Femme Actuelle';
+
+const RECHERCHE: Record<SourceExterne, (query: string) => string> = {
   // Les deux URL de recherche répondent et ne sont pas interdites par leur robots.txt (seules
   // les variantes paginées le sont chez Marmiton).
   Marmiton: (q) => `https://www.marmiton.org/recettes/recherche.aspx?aqt=${encodeURIComponent(q)}`,
@@ -66,9 +79,16 @@ const RECHERCHE: Record<Source, (query: string) => string> = {
 
 export interface Recipe {
   title: string;
-  /** site vers lequel pointe la recherche */
+  /** site vers lequel pointe la recherche, ou « Nos recettes » */
   source: Source;
+  /**
+   * Une recherche sur un site extérieur, ou l'adresse interne de la recette.
+   *
+   * `slug` est ce qui départage les deux : renseigné, la proposition ouvre l'écran de recette de
+   * l'application ; absent, elle ouvre le navigateur.
+   */
   url: string;
+  slug?: string;
   /** kcal pour une portion courante */
   kcal: number;
   /** protéines pour une portion courante, en g */
@@ -78,7 +98,10 @@ export interface Recipe {
   contient: Ingredient[];
 }
 
-type Entree = Omit<Recipe, 'url' | 'contient'> & { contient?: Ingredient[] };
+type Entree = Omit<Recipe, 'url' | 'contient' | 'slug' | 'source'> & {
+  source: SourceExterne;
+  contient?: Ingredient[];
+};
 
 /** Les viandes et le poisson découlent de la base : inutile de les répéter à chaque ligne. */
 const IMPLICITE: Partial<Record<Base, Ingredient[]>> = {
@@ -95,6 +118,30 @@ function complet(e: Entree): Recipe {
   return { ...e, contient, url: RECHERCHE[e.source](e.title) };
 }
 
+/** Ce qu'une recette du catalogue maison doit fournir pour entrer dans les suggestions. */
+export interface EntreeMaison {
+  slug: string;
+  title: string;
+  /** kcal et protéines pour une portion */
+  kcal: number;
+  prot: number;
+  slot: Slot;
+  base: Base;
+  contient?: Ingredient[];
+}
+
+/**
+ * Transforme une recette de l'application en candidate.
+ *
+ * Elle rejoint alors le même moteur que les propositions extérieures — même filtres, même
+ * classement, même calcul de portions — mais avec deux différences qui comptent : ses valeurs sont
+ * contrôlées et non estimées, et elle ouvre un écran de l'application au lieu d'un site tiers.
+ */
+export function platMaison(e: EntreeMaison): Recipe {
+  const contient = [...new Set([...(IMPLICITE[e.base] ?? []), ...(e.contient ?? [])])];
+  return { ...e, contient, source: 'Nos recettes', url: `/recettes/${e.slug}` };
+}
+
 const CATALOGUE: Entree[] = [
   // ─── Petit-déjeuner ────────────────────────────────────────────────────────
   {
@@ -105,14 +152,10 @@ const CATALOGUE: Entree[] = [
     slot: 'matin',
     base: 'oeufs',
   },
-  {
-    title: 'Omelette aux champignons',
-    source: 'Marmiton',
-    kcal: 300,
-    prot: 22,
-    slot: 'matin',
-    base: 'oeufs',
-  },
+  // Trois plats ont quitté ce catalogue — omelette aux champignons, curry de poulet aux légumes,
+  // dahl de lentilles corail : ils sont devenus des recettes de l'application, rédigées et aux
+  // valeurs contrôlées. Les garder ici les aurait proposés deux fois, dont une en simple lien de
+  // recherche. Un test le vérifie à chaque nouvelle recette publiée.
   {
     title: 'Œufs cocotte',
     source: 'Femme Actuelle',
@@ -250,14 +293,6 @@ const CATALOGUE: Entree[] = [
     source: 'Marmiton',
     kcal: 380,
     prot: 35,
-    slot: 'plat',
-    base: 'volaille',
-  },
-  {
-    title: 'Curry de poulet aux légumes',
-    source: 'Marmiton',
-    kcal: 400,
-    prot: 34,
     slot: 'plat',
     base: 'volaille',
   },
@@ -606,14 +641,6 @@ const CATALOGUE: Entree[] = [
 
   // ─── Légumineuses et végétarien ────────────────────────────────────────────
   {
-    title: 'Dahl de lentilles corail',
-    source: 'Marmiton',
-    kcal: 380,
-    prot: 18,
-    slot: 'plat',
-    base: 'legumineuse',
-  },
-  {
     title: 'Chili sin carne aux haricots rouges',
     source: 'Marmiton',
     kcal: 400,
@@ -826,6 +853,14 @@ export interface RecipeOptions {
   excluded?: Exclusion[];
   /** nombre de « changer » demandés, par créneau */
   offsets?: Record<string, number>;
+  /**
+   * Les recettes de l'application, passées par l'appelant.
+   *
+   * Elles ne sont pas importées ici : `packages/content` compile les Markdown et dépend déjà de ce
+   * module pour son format. L'inverse fermerait le cycle. Elles passent donc par cette porte, ce
+   * qui a l'avantage de garder le moteur testable sans aucun contenu.
+   */
+  maison?: Recipe[];
 }
 
 /**
@@ -912,6 +947,28 @@ function graine(m: Metrics, goal: GoalKey): number {
   return hash(`${Math.round(m.target)}-${Math.round(m.poids)}-${goal}`);
 }
 
+/** Première proposition d'un repas : les recettes de l'application d'abord. */
+function maisonDAbord(list: Recipe[]): Recipe[] {
+  return [...list.filter((r) => r.slug), ...list.filter((r) => !r.slug)];
+}
+
+/**
+ * Seconde proposition d'un repas : ce qui ne prend la place de personne d'abord.
+ *
+ * Deux choses sont repoussées en queue. Les recettes de l'application, réservées pour la tête du
+ * repas suivant — sans quoi les deux recettes maison de plat se retrouvaient toutes deux au
+ * déjeuner et le dîner n'en avait aucune. Et les plats dont l'ingrédient dominant est celui d'une
+ * recette maison pas encore servie : la règle de variété interdisant deux fois le même ingrédient
+ * dans la journée, un plat de lentilles pris ici condamnait le dahl du dîner.
+ *
+ * C'est un ordre de préférence, pas un filtre : si rien d'autre ne convient, ces plats reviennent.
+ */
+function maisonEnDernier(list: Recipe[], reservees: Set<Base>): Recipe[] {
+  const libres = list.filter((r) => !r.slug && !reservees.has(r.base));
+  const reste = list.filter((r) => !r.slug && reservees.has(r.base));
+  return [...libres, ...reste, ...list.filter((r) => r.slug)];
+}
+
 /** Une recette passe si aucun filtre coché ne touche l'un de ses ingrédients. */
 function autorisee(recipe: Recipe, excluded: Exclusion[]): boolean {
   return !excluded.some((e) => ECARTE[e].some((i) => recipe.contient.includes(i)));
@@ -937,11 +994,31 @@ const VARIETE_MIN = 8;
  * les mieux notés, parce qu'un repas sans proposition serait pire qu'un repas moins dense.
  */
 function tirage(candidats: Recipe[], goal: GoalKey): Recipe[] {
+  const dense = (r: Recipe) => r.prot / r.kcal >= DENSITE_MIN;
+
   if (goal === 'seche' || goal === 'recomp') {
-    const denses = candidats.filter((r) => r.prot / r.kcal >= DENSITE_MIN);
-    return denses.length >= VARIETE_MIN ? denses : candidats.slice(0, VARIETE_MIN);
+    // Le plancher de densité est un garde-fou nutritionnel, pas une préférence de classement : il
+    // s'applique aux recettes de l'application comme aux autres. Les mettre en avant contre lui
+    // reviendrait à conseiller moins bien pour se citer soi-même.
+    const denses = candidats.filter(dense);
+    if (denses.length >= VARIETE_MIN) return denses;
+    return [
+      ...new Set([
+        ...candidats.filter((r) => r.slug && dense(r)),
+        ...candidats.slice(0, VARIETE_MIN),
+      ]),
+    ];
   }
-  return candidats.slice(0, Math.max(VARIETE_MIN, Math.ceil(candidats.length / 2)));
+
+  /**
+   * Hors déficit, la coupe garde la meilleure moitié du classement — les plus caloriques en prise
+   * de masse, les plus proches du budget en maintien. C'est une heuristique de variété, pas un
+   * garde-fou : une recette de l'application de 300 kcal s'y faisait écarter chez qui vise 4 000,
+   * alors que les portions s'ajustent et que ce qui manque est annoncé. Elles entrent donc dans le
+   * tirage quoi qu'il arrive, et c'est `maisonDAbord` qui les place ensuite en tête.
+   */
+  const retenus = candidats.slice(0, Math.max(VARIETE_MIN, Math.ceil(candidats.length / 2)));
+  return [...new Set([...candidats.filter((r) => r.slug), ...retenus])];
 }
 
 /**
@@ -958,6 +1035,7 @@ export function buildRecipeSuggestions(
 ): MealSuggestions[] {
   const excluded = options.excluded ?? [];
   const offsets = options.offsets ?? {};
+  const maison = options.maison ?? [];
   const base = graine(m, goal);
 
   // Les bases sont suivies par moment de la journée, pas globalement : un smoothie au petit
@@ -969,15 +1047,31 @@ export function buildRecipeSuggestions(
     const budget = Math.round(m.target * meal.share);
     const seen = usedBases[meal.slot];
 
-    const candidats = RECIPES.filter((r) => r.slot === meal.slot && autorisee(r, excluded)).sort(
-      (a, b) => score(b, goal, budget) - score(a, goal, budget),
-    );
+    const candidats = [...maison, ...RECIPES]
+      .filter((r) => r.slot === meal.slot && autorisee(r, excluded))
+      .sort((a, b) => score(b, goal, budget) - score(a, goal, budget));
     const pool = tirage(candidats, goal);
 
     const picked: Recipe[] = [];
     for (let i = 0; i < 2; i++) {
       const slotKey = `${meal.name}-${i}`;
-      const ordre = melange(pool.length > 0 ? pool : candidats, base ^ hash(slotKey));
+      // Le tirage reste aléatoire, mais les recettes de l'application passent devant : à qualité
+      // nutritionnelle égale, une recette rédigée, aux valeurs contrôlées et qui s'ouvre dans
+      // l'application vaut mieux qu'une recherche sur un site tiers. Les propositions extérieures
+      // comblent ce que le catalogue maison ne couvre pas encore.
+      const melangee = melange(pool.length > 0 ? pool : candidats, base ^ hash(slotKey));
+      const ordre =
+        i === 0
+          ? maisonDAbord(melangee)
+          : maisonEnDernier(
+              melangee,
+              // Les ingrédients dont une recette maison de ce moment de la journée a encore besoin.
+              new Set(
+                maison
+                  .filter((r) => r.slot === meal.slot && !usedTitles.has(r.title))
+                  .map((r) => r.base),
+              ),
+            );
       let saut = offsets[slotKey] ?? 0;
 
       // Deux passes : d'abord en respectant les ingrédients déjà servis, puis sans, pour ne

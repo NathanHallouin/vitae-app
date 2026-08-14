@@ -2,6 +2,8 @@
 titre: Omelette aux champignons
 description: Trois œufs, des champignons poêlés, dix minutes. Un petit-déjeuner ou un dîner rapide à 22 g de protéines pour 300 kcal.
 categorie: Petit-déjeuner
+moment: matin
+base: oeufs
 publiee: 2026-08-09
 preparation: 5
 cuisson: 8
