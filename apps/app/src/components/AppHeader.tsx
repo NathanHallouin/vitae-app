@@ -1,17 +1,22 @@
 /**
- * L'en-tête, présent au-dessus des onglets.
+ * L'en-tête, présent au-dessus de tous les écrans.
  *
- * Il porte ce que la barre du bas ne porte pas : la marque — qui ramène à l'accueil, comme le
- * logo du site —, l'accès aux recettes, et la bascule de thème. La répartition est celle du site :
- * l'outil en bas, sous le pouce ; le reste en haut.
+ * Il porte la marque — qui ramène à l'accueil, comme le logo du site —, l'accès aux recettes et
+ * la bascule de thème. Sur un écran large, il porte en plus la navigation elle-même : les quatre
+ * onglets de résultats et l'accès au profil, que la barre du bas cesse alors d'afficher.
+ *
+ * La répartition suit celle du site d'origine : sous `NAV_BREAKPOINT`, l'outil est en bas, sous le
+ * pouce, et l'en-tête ne garde que la marque ; au-dessus, tout remonte en haut.
  */
 
 import { LinearGradient } from 'expo-linear-gradient';
-import { useRouter } from 'expo-router';
+import { usePathname, useRouter } from 'expo-router';
 import { Pressable, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useProfile } from '@/components/ProfileProvider';
 import { useColorMode } from '@/theme/ColorMode';
 import { usePalette } from '@/theme/palette';
+import ResultTabs, { useTopNav } from './ResultTabs';
 import Icon from './ui/Icon';
 import { MAX_CONTENT } from './ui/Page';
 
@@ -21,6 +26,12 @@ export default function AppHeader() {
   const { mode, toggle } = useColorMode();
   const insets = useSafeAreaInsets();
   const label = mode === 'dark' ? 'Sombre' : 'Clair';
+
+  const haut = useTopNav();
+  const pathname = usePathname();
+  const { status } = useProfile();
+  // Comme sur le site : pas de lien vers le profil quand on y est déjà, ni avant qu'il existe.
+  const lienProfil = haut && status === 'ready' && pathname !== '/profil';
 
   return (
     <View
@@ -70,6 +81,18 @@ export default function AppHeader() {
           <Text className="text-base font-sans-semibold text-muted">Recettes</Text>
         </Pressable>
 
+        {/* Le profil quitte la barre du bas avec elle : sans ce lien, il deviendrait inatteignable
+            sur un écran large. */}
+        {lienProfil ? (
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => router.navigate('/profil')}
+            className="flex-none rounded-control px-[14px] py-2 active:bg-surface2"
+          >
+            <Text className="text-base font-sans-semibold text-muted">Mon profil</Text>
+          </Pressable>
+        ) : null}
+
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={`Basculer en mode ${mode === 'dark' ? 'clair' : 'sombre'}`}
@@ -80,6 +103,8 @@ export default function AppHeader() {
           <Text className="text-small font-sans-semibold text-muted">{label}</Text>
         </Pressable>
       </View>
+
+      {haut ? <ResultTabs /> : null}
     </View>
   );
 }

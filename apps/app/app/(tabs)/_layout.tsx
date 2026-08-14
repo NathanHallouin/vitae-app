@@ -16,12 +16,14 @@
 
 import { MOBILE_PAGES } from '@vitae/core/nav';
 import { Tabs } from 'expo-router';
+import { useTopNav } from '@/components/ResultTabs';
 import Icon from '@/components/ui/Icon';
 import { MAX_CONTENT } from '@/components/ui/Page';
 import { usePalette } from '@/theme/palette';
 
 export default function TabsLayout() {
   const palette = usePalette();
+  const haut = useTopNav();
 
   return (
     <Tabs
@@ -32,13 +34,17 @@ export default function TabsLayout() {
         tabBarActiveTintColor: palette.primaryInk,
         tabBarInactiveTintColor: palette.muted2,
         tabBarStyle: {
+          // Sur un écran large, la navigation est passée dans l'en-tête : cette barre disparaît.
+          // Le navigateur reste en place — c'est lui qui garde les écrans montés et gelés, donc
+          // instantanés — seule sa barre est masquée. Les onglets du haut naviguent vers les mêmes
+          // routes.
+          display: haut ? 'none' : 'flex',
           backgroundColor: palette.surface,
           borderTopColor: palette.divider,
-          // Sur un écran de bureau, cinq onglets répartis sur 1 440 px se retrouvaient à un
-          // demi-mètre les uns des autres, chacun collé à son coin. La barre est bornée à la
-          // colonne de contenu et centrée : les onglets se retrouvent sous la page qu'ils
-          // commandent. Le conteneur interne de React Navigation n'étant pas exposé, c'est la
-          // barre qu'on centre, pas ses items.
+          // Entre le seuil de la navigation haute et les grandes largeurs, la barre reste bornée
+          // à la colonne de contenu et centrée, plutôt que d'écarter cinq onglets d'un bord à
+          // l'autre. Le conteneur interne de React Navigation n'étant pas exposé, c'est la barre
+          // qu'on centre, pas ses items.
           alignSelf: 'center',
           width: '100%',
           maxWidth: MAX_CONTENT,
