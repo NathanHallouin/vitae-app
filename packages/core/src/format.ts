@@ -38,6 +38,19 @@ export function fmtWeekly(kcalDelta: number): string {
   return `${kcalDelta < 0 ? MINUS : '+'}${dec(kg, 2)} kg / semaine`;
 }
 
+/**
+ * Rythme déjà connu en kilogrammes par semaine : « −0,47 kg / semaine ».
+ *
+ * `fmtWeekly` part d'un écart calorique et fait la conversion ; ici la pente vient d'une
+ * régression sur des pesées réelles, elle est déjà dans la bonne unité. Le signe passe par
+ * U+2212 comme partout ailleurs : un trait d'union à la place d'un moins se voit, surtout en
+ * chasse fixe à côté d'un chiffre.
+ */
+export function fmtKgParSemaine(kg: number): string {
+  if (Math.abs(kg) < 0.01) return 'poids stable';
+  return `${kg < 0 ? MINUS : '+'}${dec(Math.abs(kg), 2)} kg / semaine`;
+}
+
 /** Nombre de portions : 1,5 reste « 1,5 », mais 2 s'écrit « 2 » et non « 2,0 ». */
 export function fmtPortions(n: number): string {
   return Number.isInteger(n) ? String(n) : dec(n);

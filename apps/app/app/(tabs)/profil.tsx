@@ -1,6 +1,7 @@
 import { formFromProfile } from '@vitae/core/state';
 import { Link, useRouter } from 'expo-router';
 import { View } from 'react-native';
+import DonneesCard from '@/components/screens/DonneesCard';
 import ProfilForm from '@/components/screens/ProfilForm';
 import Page from '@/components/ui/Page';
 import { useProfile } from '@/state/ProfileProvider';
@@ -38,6 +39,10 @@ export default function ProfilTab() {
           router.navigate('/');
         }}
       />
+
+      {/* Juste sous le formulaire, et au-dessus du lien de confidentialité : c'est la suite de la
+          même question — ce que deviennent les informations qu'on vient de saisir. */}
+      <DonneesCard />
 
       {/* Les deux magasins exigent que la politique soit atteignable depuis l'application, pas
           seulement depuis leur fiche. Sa place est ici : c'est l'écran où l'on confie ses

@@ -11,6 +11,7 @@
 
 import type { GoalKey, Sexe } from './constants';
 import { EXCLUSIONS, type Exclusion } from './recipes';
+import { ajouterPesee, type Pesee } from './suivi';
 
 // La clé reste inchangée entre les versions : c'est le champ `v` qui porte le format, sinon un
 // profil v1 deviendrait illisible et ne pourrait plus être migré.
@@ -196,5 +197,71 @@ export function ecrireCle(key: string, value: string): void {
     store.setItem(key, value);
   } catch {
     // Stockage indisponible : le réglage vaut pour la session en cours.
+  }
+}
+
+/**
+ * L'historique des pesées, sous sa propre clé versionnée.
+ *
+ * Séparé du profil, et c'est délibéré : ce sont deux durées de vie différentes. Le profil se
+ * remplace à chaque modification, l'historique s'accumule et représente parfois des années. Les
+ * mêler ferait qu'une lecture ratée du profil emporterait les pesées avec elle.
+ *
+ * `PROFILE_KEY` a montré la voie : la clé ne bouge pas, c'est le champ `v` qui porte le format.
+ */
+export const SUIVI_KEY = 'vitae.v1.suivi';
+export const SUIVI_VERSION = 1;
+
+/**
+ * Lecture tolérante, **pesée par pesée**.
+ *
+ * Le profil entier est rejeté au moindre doute parce qu'il se ressaisit en une minute. Un
+ * historique, non : rejeter deux ans de pesées parce que l'une d'elles est corrompue serait la
+ * pire réponse possible. Chaque entrée est donc jugée seule, et les mauvaises sont écartées.
+ */
+export function parseSuivi(raw: string | null): Pesee[] {
+  if (!raw) return [];
+
+  let data: unknown;
+  try {
+    data = JSON.parse(raw);
+  } catch {
+    return [];
+  }
+  if (typeof data !== 'object' || data === null) return [];
+
+  const enveloppe = data as Record<string, unknown>;
+  if (enveloppe.v !== SUIVI_VERSION) return [];
+  if (!Array.isArray(enveloppe.pesees)) return [];
+
+  return lirePesees(enveloppe.pesees);
+}
+
+/** Les entrées valides d'une liste quelconque, triées et dédoublonnées par jour. */
+export function lirePesees(valeurs: unknown[]): Pesee[] {
+  let retenues: Pesee[] = [];
+  for (const entree of valeurs) {
+    if (typeof entree !== 'object' || entree === null) continue;
+    const p = entree as Record<string, unknown>;
+    if (typeof p.date !== 'string' || typeof p.poids !== 'number') continue;
+    // `ajouterPesee` porte déjà les bornes, le tri et le dédoublonnage : on ne les réécrit pas ici.
+    retenues = ajouterPesee(retenues, { date: p.date, poids: p.poids });
+  }
+  return retenues;
+}
+
+export function loadSuivi(): Pesee[] {
+  try {
+    return parseSuivi(store.getItem(SUIVI_KEY));
+  } catch {
+    return [];
+  }
+}
+
+export function saveSuivi(pesees: Pesee[]): void {
+  try {
+    store.setItem(SUIVI_KEY, JSON.stringify({ v: SUIVI_VERSION, pesees }));
+  } catch {
+    // Idem : l'application continue, la session en cours garde ses pesées en mémoire.
   }
 }

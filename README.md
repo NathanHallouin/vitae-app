@@ -341,6 +341,63 @@ Le nom des cinq coupes est écrit à quatre endroits qu'aucun contrôle ne rappr
 chargement natif) et `+html.tsx` (les `@font-face`). Une divergence fait retomber l'interface sur la
 police système, sans erreur.
 
+### Le suivi de poids, et pourquoi il ne se superpose pas à la projection
+
+L'application recommandait déjà de refaire le calcul tous les 4 à 5 kg sans donner de quoi le
+constater. `packages/core/src/suivi.ts` comble ce trou : une pesée par jour, la tendance qu'elles
+dessinent, et la comparaison au rythme que le plan prévoit.
+
+Trois décisions valent d'être connues :
+
+- **La tendance est une régression sur tous les points, pas un écart entre le premier et le
+  dernier.** Le poids d'un jour donné varie d'un ou deux kilos avec l'eau et le sel ; deux points
+  mal choisis annoncent une perte spectaculaire ou une reprise inquiétante, l'une comme l'autre
+  fausses. Un test le vérifie sur une série où le dernier point est aberrant.
+- **La courbe réelle a son propre dessin, sans se superposer à la projection.** C'était l'intention
+  d'origine, et elle ne tient pas : la projection repart du poids d'*aujourd'hui* à chaque
+  recalcul, elle n'a donc aucune origine commune avec un historique qui remonte le temps. Les deux
+  courbes partageraient un cadre en racontant deux échelles de temps différentes. La comparaison se
+  fait donc en toutes lettres — « vous suivez le rythme prévu », « vous avancez moins vite » —, ce
+  qui est de toute façon ce qu'on vient chercher.
+- **L'abscisse suit les jours, pas le rang des pesées.** Se peser trois fois en une semaine puis
+  plus rien pendant un mois donnerait, à pas régulier, une courbe qui ment sur le temps écoulé.
+
+### Sortir ses données, et les faire rentrer
+
+Sans compte ni serveur, trois gestes ordinaires détruisent des mois de pesées : vider les données
+du navigateur, naviguer en privé, changer d'appareil. `sauvegarde.ts` est le seul filet, et il est
+livré **en même temps** que le suivi — créer des données auxquelles on tient sans porte de sortie
+serait leur tendre un piège.
+
+Le geste diffère par plateforme, et c'est la seule différence : sur le web, un vrai fichier dans les
+deux sens ; en natif, la feuille de partage du système pour sortir, un champ à coller pour rentrer.
+Ni `expo-file-system` ni `expo-sharing` : deux modules natifs de plus, donc un `prebuild` et deux
+lignes à justifier dans les fiches des magasins, pour un fichier de quelques kilo-octets.
+
+Le format porte une version et des noms de champs explicites plutôt que la forme interne du
+stockage : la ROADMAP prévoit qu'il devienne un jour un format d'import serveur. Il ne contient ni
+identifiant, ni jeton, ni rien qui désigne un appareil.
+
+Deux points à ne pas défaire : la lecture juge **chaque pesée séparément** — rejeter deux ans
+d'historique parce qu'une entrée est corrompue serait la pire réponse possible — et la restauration
+**remplace** plutôt que de fusionner, parce qu'une fusion trancherait des jours présents des deux
+côtés sans que personne ne voie ce qui a été choisi.
+
+### Le thème a deux moitiés, qui doivent rester d'accord
+
+Les variables CSS de `tokens.generated.css` peignent tout ce qui passe par une classe ; `usePalette`
+sert les mêmes couleurs en JavaScript pour ce que le CSS ne peut pas peindre — dégradés, tracés SVG,
+icônes. Le sélecteur est `.dark:root`, donc **tout dépend d'une classe posée sur `<html>`**.
+
+Tant que la préférence vaut « système », NativeWind ne la pose pas sur le web : `useColorScheme()`
+rendait bien `dark`, la palette JavaScript suivait, et les variables restaient claires. Résultat :
+fonds et textes en clair, accents en ambre, sur tout premier visiteur d'un système en sombre. Deux
+bascules explicites remettaient les choses d'aplomb, ce qui n'est pas une solution.
+
+`src/theme/classeTheme.web.ts` écrit donc le mode **effectif** dans le document à chaque changement.
+Le défaut ne se voyait pas en lisant le code — il s'est révélé en ajoutant une courbe qui sortait en
+ambre sur une page claire.
+
 ### Le site s'installe, et fonctionne hors ligne
 
 C'est le cas type : aucun compte, aucune requête, tout est calculé sur l'appareil et les recettes
@@ -380,8 +437,10 @@ n'y a jamais deux versions du site en mémoire.
 | `nutrition.ts` | conseils alimentaires selon l'objectif |
 | `quantites.ts` | mise à l'échelle des quantités d'une recette |
 | `rappels.ts` | rappels anti-sédentarité : créneaux, messages, réglage persisté |
+| `suivi.ts` | pesées dans le temps : tendance, courbe, comparaison au plan |
+| `sauvegarde.ts` | export et import des données locales, en JSON |
 | `state.ts` | état du formulaire de saisie et validation |
-| `storage.ts` | profil versionné (`vitae.v1.profile`), support de stockage **injecté** |
+| `storage.ts` | profil et pesées versionnés (`vitae.v1.profile`, `vitae.v1.suivi`), support **injecté** |
 | `format.ts` | formats français (espace insécable, virgule décimale, `−` U+2212) |
 | `date.ts` | âge calculé depuis la date de naissance, fraîcheur du poids (7 jours) |
 | `tokens.ts` | palette claire et sombre, échelle typographique, rayons |

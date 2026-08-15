@@ -10,8 +10,9 @@
  */
 
 import { colorScheme, useColorScheme } from 'nativewind';
-import { createContext, type ReactNode, useCallback, useContext, useMemo } from 'react';
+import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo } from 'react';
 import { loadTheme, type StoredTheme, saveTheme } from '@/lib/store';
+import { appliquerClasseTheme } from './classeTheme';
 
 // Appliqué au chargement du module, avant le premier rendu : aucun éclair de thème clair.
 //
@@ -34,6 +35,13 @@ export function useColorMode(): ColorModeValue {
 export default function ColorModeProvider({ children }: { children: ReactNode }) {
   const { colorScheme: current } = useColorScheme();
   const mode = current === 'dark' ? 'dark' : 'light';
+
+  // Le mode **effectif**, et pas seulement celui que l'utilisateur a choisi : tant que la
+  // préférence vaut « système », NativeWind ne pose aucune classe sur le web, et les variables CSS
+  // restent claires pendant que `usePalette` sert déjà la palette sombre. Voir `classeTheme.web.ts`.
+  useEffect(() => {
+    appliquerClasseTheme(mode);
+  }, [mode]);
 
   const toggle = useCallback(() => {
     const next: StoredTheme = mode === 'dark' ? 'light' : 'dark';

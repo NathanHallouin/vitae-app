@@ -2,6 +2,7 @@ import { buildProjection, rateAssessment } from '@vitae/core/calc';
 import { dec, fmtKg, fmtWeekly, kcal, monthIn } from '@vitae/core/format';
 import { Text, View } from 'react-native';
 import ProjectionChart from '@/components/screens/ProjectionChart';
+import SuiviCard from '@/components/screens/SuiviCard';
 import Apparition from '@/components/ui/Apparition';
 import CalculPrompt from '@/components/ui/CalculPrompt';
 import OptionButton from '@/components/ui/OptionButton';
@@ -21,6 +22,10 @@ export default function PoidsScreen() {
   return (
     <View className="gap-6">
       <Apparition depuis={1}>
+        {/* En tête : c'est le geste qu'on vient faire, et la seule raison qu'a l'application
+            d'être rouverte une fois les chiffres connus. */}
+        <SuiviCard cible={projection.selected.w} />
+
         <Card className="p-6">
           <Overline niveau={2} className="mb-1">
             Quel poids viser ?

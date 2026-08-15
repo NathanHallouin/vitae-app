@@ -15,15 +15,25 @@ import { computeMetrics, type Metrics } from '@vitae/core/calc';
 import type { GoalKey } from '@vitae/core/constants';
 import { ageFrom, isWeightStale } from '@vitae/core/date';
 import type { Exclusion } from '@vitae/core/recipes';
+import type { Sauvegarde } from '@vitae/core/sauvegarde';
 import type { StaleWeight } from '@vitae/core/state';
 import {
   clearProfile,
   loadProfile,
+  loadSuivi,
   type ProfileInput,
   type StoredProfile,
   saveProfile,
+  saveSuivi,
   setProfileStore,
 } from '@vitae/core/storage';
+import {
+  ajouterPesee as ajouter,
+  construireSuivi,
+  type Pesee,
+  retirerPesee,
+  type Suivi,
+} from '@vitae/core/suivi';
 import {
   createContext,
   type ReactNode,
@@ -41,15 +51,23 @@ setProfileStore(nativeProfileStore);
 /** `empty` tant qu'aucun profil n'est enregistré ; il n'y a pas d'état intermédiaire. */
 type Status = 'empty' | 'ready';
 
-/** Le profil et la fraîcheur de son poids, lus d'un bloc pour n'ouvrir le stockage qu'une fois. */
-function lire(): { profile: StoredProfile | null; staleWeight: StaleWeight | null } {
+interface Donnees {
+  profile: StoredProfile | null;
+  staleWeight: StaleWeight | null;
+  pesees: Pesee[];
+}
+
+/** Tout ce qui est persisté, lu d'un bloc pour n'ouvrir le stockage qu'une fois. */
+function lire(): Donnees {
   const stored = loadProfile();
-  if (!stored) return { profile: null, staleWeight: null };
+  const pesees = loadSuivi();
+  if (!stored) return { profile: null, staleWeight: null, pesees };
   return {
     profile: stored,
     staleWeight: isWeightStale(stored.updatedAt)
       ? { previous: stored.poids, updatedAt: stored.updatedAt }
       : null,
+    pesees,
   };
 }
 
@@ -68,6 +86,12 @@ interface ProfileValue {
   setGoal: (goal: GoalKey) => void;
   /** filtres d'ingrédients, réglés sur l'écran « Ce que je mange » */
   setExcluded: (excluded: Exclusion[]) => void;
+  /** les pesées et ce qu'elles disent, recalculé à chaque changement */
+  suivi: Suivi;
+  ajouterPesee: (pesee: Pesee) => void;
+  supprimerPesee: (date: string) => void;
+  /** remplace le profil et les pesées par ceux d'un fichier de sauvegarde */
+  restaurer: (sauvegarde: Sauvegarde) => void;
   reset: () => void;
 }
 
@@ -82,20 +106,21 @@ export function useProfile(): ProfileValue {
 export default function ProfileProvider({ children }: { children: ReactNode }) {
   // Le profil et la fraîcheur du poids vont ensemble : un seul état, donc une seule lecture au
   // montage, et pas de rendu intermédiaire où l'un serait à jour et l'autre non.
-  const [{ profile, staleWeight }, setDonnees] = useState(() =>
-    LECTURE_IMMEDIATE ? lire() : { profile: null, staleWeight: null },
+  const [{ profile, staleWeight, pesees }, setDonnees] = useState<Donnees>(() =>
+    LECTURE_IMMEDIATE ? lire() : { profile: null, staleWeight: null, pesees: [] },
   );
   const [targetKey, setTargetKey] = useState<string | null>(null);
 
   const setProfile = useCallback((next: StoredProfile | null) => {
-    setDonnees({ profile: next, staleWeight: null });
+    setDonnees((avant) => ({ ...avant, profile: next, staleWeight: null }));
   }, []);
 
   useEffect(() => {
     // Sur le web seulement : rattrape la lecture qui ne pouvait pas avoir lieu au premier rendu.
     if (LECTURE_IMMEDIATE) return;
     const lu = lire();
-    if (lu.profile) setDonnees(lu);
+    // Les pesées comptent même sans profil : quelqu'un peut avoir tout effacé et gardé sa courbe.
+    if (lu.profile || lu.pesees.length) setDonnees(lu);
   }, []);
 
   const save = useCallback(
@@ -129,11 +154,50 @@ export default function ProfileProvider({ children }: { children: ReactNode }) {
     [profile, setProfile],
   );
 
+  /**
+   * Écrit les pesées, puis relit ce qui a été écrit.
+   *
+   * Relire plutôt que garder ce qu'on vient de poser : c'est le stockage qui fait autorité sur le
+   * tri, le dédoublonnage et les bornes, et l'état de l'écran doit être celui qui survivra au
+   * prochain démarrage — pas une version optimiste de celui-ci.
+   */
+  const enregistrerPesees = useCallback((prochaines: Pesee[]) => {
+    saveSuivi(prochaines);
+    setDonnees((avant) => ({ ...avant, pesees: loadSuivi() }));
+  }, []);
+
+  const ajouterPesee = useCallback(
+    (pesee: Pesee) => enregistrerPesees(ajouter(pesees, pesee)),
+    [pesees, enregistrerPesees],
+  );
+
+  const supprimerPesee = useCallback(
+    (date: string) => enregistrerPesees(retirerPesee(pesees, date)),
+    [pesees, enregistrerPesees],
+  );
+
+  const restaurer = useCallback((sauvegarde: Sauvegarde) => {
+    if (sauvegarde.profil) {
+      const { v: _v, updatedAt: _updatedAt, ...champs } = sauvegarde.profil;
+      saveProfile(champs);
+    }
+    saveSuivi(sauvegarde.pesees);
+    setDonnees(lire());
+    setTargetKey(null);
+  }, []);
+
+  /**
+   * « Tout effacer » efface aussi les pesées.
+   *
+   * C'est ce que le bouton promet, et une donnée de santé oubliée dans un coin après un effacement
+   * demandé serait la pire des surprises. La sauvegarde JSON existe pour qui veut les garder.
+   */
   const reset = useCallback(() => {
     clearProfile();
-    setProfile(null);
+    saveSuivi([]);
+    setDonnees({ profile: null, staleWeight: null, pesees: [] });
     setTargetKey(null);
-  }, [setProfile]);
+  }, []);
 
   const age = profile ? ageFrom(profile.naissance) : null;
 
@@ -150,6 +214,13 @@ export default function ProfileProvider({ children }: { children: ReactNode }) {
     });
   }, [profile, age]);
 
+  // Le poids du profil, et non la dernière pesée : c'est sur lui que le plan en cours a été
+  // calculé, donc lui qui dit si ce plan est encore d'actualité.
+  const suivi = useMemo(
+    () => construireSuivi(pesees, profile ? Number.parseFloat(profile.poids) : null),
+    [pesees, profile],
+  );
+
   const value = useMemo<ProfileValue>(
     () => ({
       status: profile ? 'ready' : 'empty',
@@ -162,9 +233,27 @@ export default function ProfileProvider({ children }: { children: ReactNode }) {
       save,
       setGoal,
       setExcluded,
+      suivi,
+      ajouterPesee,
+      supprimerPesee,
+      restaurer,
       reset,
     }),
-    [profile, metrics, age, staleWeight, targetKey, save, setGoal, setExcluded, reset],
+    [
+      profile,
+      metrics,
+      age,
+      staleWeight,
+      targetKey,
+      save,
+      setGoal,
+      setExcluded,
+      suivi,
+      ajouterPesee,
+      supprimerPesee,
+      restaurer,
+      reset,
+    ],
   );
 
   return <ProfileContext.Provider value={value}>{children}</ProfileContext.Provider>;

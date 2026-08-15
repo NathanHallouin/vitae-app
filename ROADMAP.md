@@ -204,15 +204,21 @@ un poste de travail, et l'écart ne se verrait qu'une fois un lien partagé.
 
 Tout ce qui suit tient dans le navigateur et s'appuie sur le module de stockage du v1.1.
 
-- **Suivi de poids dans le temps** : 3 j
-  Saisies hebdomadaires stockées en local, courbe réelle superposée à la projection théorique, et
-  invitation à réévaluer les besoins tous les 4 à 5 kg, ce que l'app recommande déjà sans
-  l'outiller. `localStorage` suffit largement (une pesée par semaine sur deux ans ≈ 4 ko) ;
-  IndexedDB serait de la sur-ingénierie ici.
-- **Export / import du profil et de l'historique en JSON** : 1 j
-  C'est le substitut assumé à la synchronisation : l'utilisateur récupère un fichier, le range où
-  il veut, le réimporte sur un autre appareil. À faire **en même temps** que le suivi de poids,
-  sinon on crée des données qu'un simple vidage de cache détruit sans recours.
+- **Suivi de poids dans le temps : fait.** Pesées stockées sous `vitae.v1.suivi`, tendance par
+  régression sur quatre semaines, courbe, comparaison au rythme du plan et invitation à recalculer
+  au-delà de 4 kg d'écart. Le métier est dans `packages/core/src/suivi.ts`, couvert par 34 tests.
+
+  **Un écart avec ce qui était prévu ici** : la courbe réelle n'est pas superposée à la projection
+  théorique. La projection repart du poids d'aujourd'hui à chaque recalcul, elle n'a donc pas
+  d'origine commune avec un historique qui remonte le temps ; les deux courbes partageraient un
+  cadre en racontant deux échelles différentes. La comparaison se fait en toutes lettres, ce qui
+  est de toute façon ce qu'on vient chercher. Voir `README.md`.
+- **Export / import du profil et de l'historique en JSON : fait**, et livré dans le même lot,
+  comme cette ligne l'exigeait. Fichier versionné, lecture qui juge chaque pesée séparément,
+  restauration qui remplace plutôt que de fusionner. Sur le web un vrai fichier dans les deux sens ;
+  en natif la feuille de partage pour sortir et un champ à coller pour rentrer — sans ajouter de
+  module natif. Vérifié dans le navigateur : export, « Tout effacer », restauration, profil et cinq
+  pesées retrouvés.
 - **Plusieurs profils en local** : 1 j
   Soi, un proche, ou des clients si l'utilisateur est coach. Sélecteur de profil, chaque profil
   ayant son historique. Sans comptes, la limite à assumer et à afficher : les profils sont liés au
@@ -274,6 +280,14 @@ JSON du v2 doit donc être pensé comme un futur format d'import serveur.
 - Sans backend, le schéma des données locales est un contrat public : une clé versionnée et une
   fonction de migration dès la première écriture évitent de casser les historiques au premier
   changement de format.
+- **Le thème sur le web se jouait en deux moitiés qui divergeaient**, et c'est corrigé. Les
+  variables CSS dépendent d'une classe `dark` sur `<html>` que NativeWind ne posait pas tant que la
+  préférence valait « système » : la palette JavaScript passait en sombre, les variables restaient
+  claires, et tout premier visiteur d'un système en sombre voyait une page mi-claire mi-ambre.
+  `src/theme/classeTheme.web.ts` écrit désormais le mode effectif dans le document. Le défaut ne se
+  voyait pas en lisant le code — il est apparu en ajoutant une courbe qui sortait en ambre sur fond
+  clair. La vérification du jalon v1.1 avait mesuré le fond du `<body>`, posé par `+html.tsx`, et
+  l'avait pris pour le thème.
 - Le pré-rendu du site est fragile par nature : tout composant qui refuse de rendre hors navigateur
   produit une page vide sans faire échouer le build. La CI garde une vérification sur le HTML
   produit ; l'étendre à chaque nouvelle route indexable.
