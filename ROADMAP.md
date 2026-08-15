@@ -277,6 +277,25 @@ JSON du v2 doit donc être pensé comme un futur format d'import serveur.
 - Le pré-rendu du site est fragile par nature : tout composant qui refuse de rendre hors navigateur
   produit une page vide sans faire échouer le build. La CI garde une vérification sur le HTML
   produit ; l'étendre à chaque nouvelle route indexable.
+- **L'hydratation échoue sur toutes les pages du site** (React #418), et ce depuis avant les
+  derniers jalons — vérifié en rebuildant la version de référence. Deux causes indépendantes, et
+  c'est la même : le premier rendu du navigateur s'appuie sur ce que le pré-rendu ne peut pas
+  savoir.
+  - **Le thème.** Le pré-rendu suppose le clair et livre l'icône lune ; sur un système en sombre le
+    navigateur rend l'icône soleil dès le premier rendu.
+  - **La largeur.** `useWindowDimensions()` vaut 0 sous Node : le HTML livré n'a donc pas de
+    `<nav>`, que le navigateur rend au-delà de `NAV_BREAKPOINT`. Même mécanisme pour `useLarge` et
+    `useColumns`.
+
+  Conséquence : React jette l'arbre servi et refait tout côté client. Le référencement n'en souffre
+  pas — les moteurs lisent le HTML livré, la CI le vérifie — mais la peinture pré-rendue est perdue,
+  ce qui est précisément ce que le pré-rendu devait éviter.
+
+  Le remède tient en un point de passage : un `useHydrate()` qui rend `false` au premier rendu web
+  et `true` ensuite (toujours `true` en natif), dont dépendraient le thème et les trois mesures de
+  largeur. **Le prix est visible et se choisit** : sur un écran large, une peinture en mise en page
+  mobile avant bascule. À arbitrer avant de le faire — le mouvement compte autant que la vitesse
+  dans ce projet.
 - `react-native-web` sait rendre un balisage sémantique, mais seulement là où un rôle le demande —
   et il échoue en silence : la page reste identique à l'œil. Un `Pressable` qui appelle le routeur
   sort en `<div>` au lieu de `<a>`, un `accessibilityRole="header"` sans `aria-level` sort en
