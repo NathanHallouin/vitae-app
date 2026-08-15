@@ -80,7 +80,7 @@ const PRECACHE = [
   adresse(style),
   // La liste vient de `build-fonts.ts` : une coupe ajoutée là entre ici toute seule. Sans elles,
   // une page hors ligne s'afficherait en police système — correcte, mais méconnaissable.
-  ...POLICES.map((p) => `/polices/${p.fichier}.ttf`),
+  ...POLICES.map((p) => `/polices/${p.fichier}.woff2`),
 ];
 
 // L'empreinte du paquet suffit à identifier la version : elle change dès qu'une ligne de code

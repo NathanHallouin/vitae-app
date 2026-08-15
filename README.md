@@ -315,25 +315,26 @@ donc passés en dépendances de développement à la racine — plus rien ne les
 `tools/build-fonts.ts` prélève les cinq fichiers utiles vers deux destinations, parce que les deux
 plateformes ne chargent pas une police de la même façon :
 
-| | Où | Comment |
-|---|---|---|
-| Natif | `assets/polices/` | `expo-font`, au démarrage, le splash tenant l'écran pendant ce temps |
-| Web | `public/polices/` | `@font-face` dans le document, plus un préchargement pour la coupe des titres |
+| | Où | Quoi | Comment |
+|---|---|---|---|
+| Natif | `assets/polices/` | le TTF entier, 1,4 Mo — React Native ne lit pas le woff2 | `expo-font`, au démarrage, le splash tenant l'écran |
+| Web | `public/polices/` | un woff2 réduit aux caractères employés, 126 Ko | `@font-face` dans le document, et deux préchargements |
 
 La différence est loin d'être cosmétique. Chargées par `expo-font` comme en natif, les polices
 n'étaient demandées qu'une fois les 2,7 Mo de JavaScript téléchargés **et exécutés**. Déclarées dans
 le document, elles partent avec l'analyse du HTML : mesuré dans le navigateur, la Fraunces des
 titres est arrivée en 2 ms, complète avant même la fin du téléchargement du paquet.
 
-Une seule coupe est préchargée, celle des titres — 71 Ko, et c'est le plus grand texte de l'écran.
-Précharger une coupe qui ne s'affiche pas la ferait télécharger pour rien, et les Inter pèsent
-335 Ko chacune.
+Deux coupes sont préchargées : celle des titres et celle du corps de texte. Les trois autres ne
+portent que des libellés et se chargent à la découverte du texte qui les emploie.
 
-**À savoir avant de toucher aux polices** : le texte courant de l'application ne porte aucune classe
-`font-*`, il retombe donc sur la pile système du navigateur. Seules les coupes nommées
-explicitement — medium, semibold, bold, et la Fraunces — s'affichent vraiment. `Inter_400Regular`
-est déclarée mais n'est employée nulle part. Ce n'est pas une décision écrite quelque part, c'est un
-oubli que la vérification en navigateur a mis au jour.
+**Le sous-ensemble ne se devine pas.** Un caractère absent ne provoque aucune erreur : il s'affiche
+en rectangle vide. Le sous-ensemble « latin » de Google Fonts, référence naturelle, ne contient ni
+`≈`, ni `⅓`, ni `⅔` — que cette application affiche pourtant. Le jeu de caractères est donc **relevé
+dans les sources** (`packages/core`, `packages/content`, les composants), augmenté de l'ASCII
+imprimable et du supplément Latin-1 pour couvrir la saisie et les formats français. Ce qui reste à
+surveiller : un caractère fabriqué à l'exécution et absent des sources sortirait en rectangle sur le
+site, mais correctement en natif, qui garde la police entière.
 
 Le nom des cinq coupes est écrit à quatre endroits qu'aucun contrôle ne rapproche : `tools/polices.ts`
 (les scripts), `apps/app/tailwind.config.js` (une famille par graisse), `src/lib/polices.ts` (le

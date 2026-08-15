@@ -88,26 +88,25 @@ passés en dépendances de développement et `tools/build-fonts.ts` prélève ce
 
 | | avant | après |
 |---|---|---|
-| Polices dans l'export | 36 fichiers, 7,7 Mo | 5 fichiers, 1,4 Mo |
-| Export complet | 17 Mo | 11 Mo |
-| Paquet JavaScript | 2 739 Ko | 2 697 Ko |
+| Polices livrées au site | 36 fichiers, 7,7 Mo | 5 fichiers, **126 Ko** |
+| Export complet | 17 Mo | 9,7 Mo |
+| Paquet JavaScript | 2 739 Ko | 2 698 Ko |
 | Départ du téléchargement des polices | après exécution du paquet | avec l'analyse du HTML |
 
 Mesuré dans le navigateur : la Fraunces des titres part en même temps que le paquet et arrive en
 2 ms, soit complète avant la fin du téléchargement du paquet. Les trois Inter suivent à la
 découverte du texte qui les emploie.
 
-**Trouvé en vérifiant, et laissé en l'état parce que c'est une décision de conception** : le texte
-courant ne porte aucune classe `font-*` et retombe sur la pile système du navigateur. Les
-paragraphes de l'application ne sont donc pas en Inter, contrairement aux libellés. Deux issues, au
-choix : donner sa famille au corps de texte — ce qui change l'aspect de tous les écrans sur les
-trois plateformes — ou assumer la pile système et retirer `Inter_400Regular`, qui n'est aujourd'hui
-ni téléchargée ni affichée.
+**Trouvé en vérifiant** : le texte courant ne portait aucune classe `font-*` et retombait sur la
+pile système. Les deux tiers des textes de l'application n'étaient donc pas en Inter, contrairement
+aux libellés — alors que `Chiffre` documente son unité comme étant « en Inter ». Corrigé dans un
+commit séparé, révocable d'un `git revert` si l'effet ne convient pas.
 
-Reste possible, et non fait : **passer les polices en woff2 sous-ensemble latin**. Une Inter tombe
-alors de 335 Ko à une trentaine, contre 158 Ko en TTF gzippé. Le coût n'est pas technique mais
-structurel : la conversion demande `fontTools`, donc soit une étape Python dans une chaîne qui n'en
-a aucune, soit des binaires versionnés dans le dépôt. À trancher avant de le faire.
+Le woff2 est fait, sans la dépendance Python redoutée : `subset-font` embarque harfbuzz en wasm et
+s'installe par `bun install`, donc la CI le construit comme le reste. Le sous-ensemble est **relevé
+dans les sources** et non deviné — le découpage « latin » de Google Fonts ne contient ni `≈`, ni
+`⅓`, ni `⅔`, que l'application affiche. Vérifié dans le navigateur : dix-huit glyphes rares
+mesurés, aucun perdu.
 
 ## v1.1 : Finitions avant de montrer l'app — fait
 

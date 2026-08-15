@@ -147,10 +147,13 @@ jobs:
           [ "$embarquees" = "0" ] \
             || { echo "$embarquees polices embarquées par Metro : un écran importe-t-il @expo-google-fonts ?"; exit 1; }
 
-          livrees=$(find apps/app/dist/polices -name "*.ttf" | wc -l)
-          [ "$livrees" = "5" ] || { echo "$livrees polices dans dist/polices, 5 attendues"; exit 1; }
+          livrees=$(find apps/app/dist/polices -name "*.woff2" | wc -l)
+          [ "$livrees" = "5" ] || { echo "$livrees woff2 dans dist/polices, 5 attendus"; exit 1; }
+          # Le TTF entier n'a rien à faire sur le site : il ne sert qu'au natif.
+          [ "$(find apps/app/dist/polices -name "*.ttf" | wc -l)" = "0" ] \
+            || { echo "des TTF entiers sont livrés au site"; exit 1; }
 
-          grep -q 'rel="preload"[^>]*Fraunces_600SemiBold' apps/app/dist/index.html \
+          grep -q 'rel="preload"[^>]*Fraunces_600SemiBold.woff2' apps/app/dist/index.html \
             || { echo "la police des titres n'est pas préchargée"; exit 1; }
           grep -q "@font-face" apps/app/dist/index.html \
             || { echo "les @font-face ne sont pas dans le document"; exit 1; }

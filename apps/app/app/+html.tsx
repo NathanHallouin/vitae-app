@@ -45,24 +45,23 @@ export default function Root({ children }: { children: ReactNode }) {
             parallèle du paquet JavaScript, et non après son exécution. Mesuré : la Fraunces est
             prête avant même que le paquet ait fini d'arriver.
 
-            Ces deux-là seulement. Les trois autres Inter ne servent qu'aux libellés et aux
-            chiffres ; elles se chargent à la découverte du texte qui les emploie, ce qui est le
-            bon moment pour 335 Ko chacune.
+            Ces deux-là seulement. Les trois autres ne servent qu'aux libellés et aux chiffres :
+            elles se chargent à la découverte du texte qui les emploie, ce qui est le bon moment.
 
             `crossOrigin` est exigé même pour une police du même domaine — elles sont toujours
             demandées en mode CORS, et sans lui le navigateur les téléchargerait deux fois. */}
         <link
           rel="preload"
           as="font"
-          type="font/ttf"
-          href="/polices/Fraunces_600SemiBold.ttf"
+          type="font/woff2"
+          href="/polices/Fraunces_600SemiBold.woff2"
           crossOrigin="anonymous"
         />
         <link
           rel="preload"
           as="font"
-          type="font/ttf"
-          href="/polices/Inter_400Regular.ttf"
+          type="font/woff2"
+          href="/polices/Inter_400Regular.woff2"
           crossOrigin="anonymous"
         />
 
@@ -80,8 +79,9 @@ export default function Root({ children }: { children: ReactNode }) {
  *
  * C'est la contrepartie web de `src/lib/polices.ts` : en natif `expo-font` les charge au démarrage,
  * ici le navigateur les demande en analysant le HTML — donc en parallèle du paquet, et non après
- * lui. Les fichiers sont recopiés dans `public/polices/` par `tools/build-fonts.ts` ; ajouter une
- * coupe suppose de la déclarer aux trois endroits, celui-ci compris.
+ * lui. Les fichiers sont réduits aux caractères employés et convertis en woff2 par
+ * `tools/build-fonts.ts` — 334 Ko de TTF deviennent 27 Ko. Ajouter une coupe suppose de la
+ * déclarer aux trois endroits, celui-ci compris.
  *
  * Une famille par graisse, et `font-weight: 400` partout : c'est la règle de `tailwind.config.js`,
  * et elle vaut ici aussi. Déclarer une graisse que le style ne demande jamais inviterait le
@@ -108,7 +108,7 @@ const POLICES = [
     (coupe) => `
 @font-face {
   font-family: '${coupe}';
-  src: url('/polices/${coupe}.ttf') format('truetype');
+  src: url('/polices/${coupe}.woff2') format('woff2');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
