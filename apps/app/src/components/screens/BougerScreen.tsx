@@ -40,7 +40,9 @@ export default function BougerScreen() {
           <Overline niveau={2} className="mb-[10px]">
             {plan.title}
           </Overline>
-          <Text className={`text-base leading-[22px] text-muted ${plan.hasSplit ? 'mb-5' : ''}`}>
+          <Text
+            className={`font-sans text-base leading-[22px] text-muted ${plan.hasSplit ? 'mb-5' : ''}`}
+          >
             {plan.note}
           </Text>
 
@@ -69,7 +71,7 @@ export default function BougerScreen() {
           <Overline niveau={2} className="mb-1">
             D’où vient le mouvement, chez vous
           </Overline>
-          <Text className="mb-4 text-base leading-[22px] text-muted">
+          <Text className="font-sans mb-4 text-base leading-[22px] text-muted">
             Sur les {kcal(metrics.tdee - metrics.bmr)} kcal que vous dépensez chaque jour en plus de
             votre métabolisme de base, voici ce qui revient à vos journées et ce qui revient à vos
             séances, une fois celles-ci lissées sur la semaine.

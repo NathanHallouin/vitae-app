@@ -40,22 +40,29 @@ export default function Root({ children }: { children: ReactNode }) {
             react-native-web défilent à l'intérieur d'une page qui ne défile pas. */}
         <ScrollViewStyleReset />
 
-        {/* La coupe qui porte le titre de chaque page, donc la première chose que l'œil lit et,
-            le plus souvent, le plus grand élément de l'écran. Préchargée, elle part dès l'analyse
-            du HTML — en parallèle du paquet JavaScript, et non après son exécution. Mesuré : elle
-            est prête avant même que le paquet ait fini d'arriver.
+        {/* Les deux coupes qui portent la première image de la page : le titre, et le corps de
+            texte qui en occupe l'essentiel. Préchargées, elles partent dès l'analyse du HTML — en
+            parallèle du paquet JavaScript, et non après son exécution. Mesuré : la Fraunces est
+            prête avant même que le paquet ait fini d'arriver.
 
-            Elle seule. Précharger une coupe qui ne s'affiche pas la fait télécharger pour rien, et
-            les Inter pèsent chacune 335 Ko contre 71 ici. Elles se chargent à la découverte du
-            texte qui les emploie, ce qui est le bon moment.
+            Ces deux-là seulement. Les trois autres Inter ne servent qu'aux libellés et aux
+            chiffres ; elles se chargent à la découverte du texte qui les emploie, ce qui est le
+            bon moment pour 335 Ko chacune.
 
             `crossOrigin` est exigé même pour une police du même domaine — elles sont toujours
-            demandées en mode CORS, et sans lui le navigateur la téléchargerait deux fois. */}
+            demandées en mode CORS, et sans lui le navigateur les téléchargerait deux fois. */}
         <link
           rel="preload"
           as="font"
           type="font/ttf"
           href="/polices/Fraunces_600SemiBold.ttf"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
+          as="font"
+          type="font/ttf"
+          href="/polices/Inter_400Regular.ttf"
           crossOrigin="anonymous"
         />
 
@@ -84,13 +91,11 @@ export default function Root({ children }: { children: ReactNode }) {
  * l'arrivée. L'alternative — un texte invisible pendant le chargement — est bien pire sur une
  * page dont tout l'intérêt est d'être lue.
  *
- * **`Inter_400Regular` est déclarée mais n'est employée nulle part**, et ce n'est pas voulu : le
- * texte courant n'a aucune classe `font-*`, il retombe donc sur la pile système du navigateur
- * (`-apple-system, Segoe UI, Roboto…`). Seules les coupes nommées explicitement s'affichent —
- * medium, semibold, bold et la Fraunces. Vérifié dans le navigateur : tous les paragraphes longs
- * sortent en `-apple-system`. La déclaration reste ici parce qu'elle ne coûte rien tant que rien
- * ne l'emploie — un `@font-face` inutilisé ne déclenche aucun téléchargement — et qu'elle sera
- * juste le jour où le corps de texte recevra sa famille.
+ * Toutes les cinq servent, et cela n'a pas toujours été vrai : le texte courant ne portait aucune
+ * classe `font-*` et retombait sur la pile système du navigateur, si bien que les deux tiers des
+ * textes de l'application sortaient en Segoe UI ou en Roboto pendant que les libellés étaient en
+ * Inter. Le défaut ne se voyait pas au premier coup d'œil et rien ne pouvait le signaler — d'où la
+ * vérification en navigateur, qui reste le seul moyen de l'attraper.
  */
 const POLICES = [
   'Fraunces_600SemiBold',

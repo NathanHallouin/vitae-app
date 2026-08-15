@@ -43,7 +43,10 @@ export default function Hero({
       <View className="mt-3 mb-2">
         <Chiffre valeur={valeur} unite={unite} taille="hero" ton="hero" anime={anime} />
       </View>
-      <Text style={{ color: palette.heroText }} className="text-body leading-[26px] opacity-90">
+      <Text
+        style={{ color: palette.heroText }}
+        className="font-sans text-body leading-[26px] opacity-90"
+      >
         {children}
       </Text>
     </LinearGradient>

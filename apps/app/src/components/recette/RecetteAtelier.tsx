@@ -105,7 +105,7 @@ function Portions({
           <Text className="text-option font-sans-medium text-ink">Pour combien de personnes ?</Text>
           <Text
             style={{ fontVariant: ['tabular-nums'] }}
-            className="mt-[2px] text-small text-muted"
+            className="font-sans mt-[2px] text-small text-muted"
           >
             Au total : {Math.round(kcal * valeur)} kcal · {Math.round(proteines * valeur)} g de
             protéines
@@ -136,7 +136,7 @@ function Portions({
       </View>
 
       {valeur !== base ? (
-        <Text className="mt-3 text-caption text-muted2">
+        <Text className="font-sans mt-3 text-caption text-muted2">
           Quantités ajustées depuis la recette d’origine, prévue pour {base} portions.
         </Text>
       ) : null}
@@ -168,7 +168,7 @@ function BoutonPortion({
         disabled && 'opacity-40',
       )}
     >
-      <Text className="text-h3 text-primary-ink">{signe}</Text>
+      <Text className="font-sans text-h3 text-primary-ink">{signe}</Text>
     </Pressable>
   );
 }
@@ -204,12 +204,15 @@ function Section({
             </Text>
           </Pressable>
         ) : (
-          <Text style={{ fontVariant: ['tabular-nums'] }} className="text-caption text-muted2">
+          <Text
+            style={{ fontVariant: ['tabular-nums'] }}
+            className="font-sans text-caption text-muted2"
+          >
             {total}
           </Text>
         )}
       </View>
-      <Text className="mb-2 text-small text-muted">{consigne}</Text>
+      <Text className="font-sans mb-2 text-small text-muted">{consigne}</Text>
       <View>{children}</View>
     </Card>
   );
@@ -255,7 +258,7 @@ function Cochable({
       </View>
       <Text
         className={cx(
-          'flex-1 text-body leading-[24px]',
+          'font-sans flex-1 text-body leading-[24px]',
           fait ? 'text-faint line-through' : 'text-ink',
         )}
       >

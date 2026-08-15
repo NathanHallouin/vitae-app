@@ -24,7 +24,7 @@ export default function ProfileBar() {
 
   return (
     <View className="mb-6 flex-row items-center justify-between gap-2">
-      <Text className="min-w-0 flex-1 text-small text-muted2">Calculé pour {court}</Text>
+      <Text className="font-sans min-w-0 flex-1 text-small text-muted2">Calculé pour {court}</Text>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="Modifier mon profil"

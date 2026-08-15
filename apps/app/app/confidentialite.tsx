@@ -28,7 +28,9 @@ export default function ConfidentialitePage() {
         <Titre niveau={1} className="mb-3 font-display text-h1 leading-[44px] text-ink">
           Confidentialité
         </Titre>
-        <Text className="mb-8 text-body leading-[26px] text-muted">{CONFIDENTIALITE_RESUME}</Text>
+        <Text className="font-sans mb-8 text-body leading-[26px] text-muted">
+          {CONFIDENTIALITE_RESUME}
+        </Text>
 
         <View className="gap-6">
           {CONFIDENTIALITE.map((section) => (
@@ -38,7 +40,7 @@ export default function ConfidentialitePage() {
               </Titre>
               <View className="gap-3">
                 {section.paragraphes.map((p) => (
-                  <Text key={p} className="text-base leading-[22px] text-muted">
+                  <Text key={p} className="font-sans text-base leading-[22px] text-muted">
                     {p}
                   </Text>
                 ))}
@@ -47,7 +49,7 @@ export default function ConfidentialitePage() {
           ))}
         </View>
 
-        <Text className="mt-8 text-caption text-faint">
+        <Text className="font-sans mt-8 text-caption text-faint">
           Dernière révision : {formatLongDate(CONFIDENTIALITE_MAJ)}
         </Text>
       </Page>

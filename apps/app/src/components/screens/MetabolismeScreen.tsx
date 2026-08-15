@@ -39,7 +39,7 @@ export default function MetabolismeScreen() {
           <Overline niveau={2} className="mb-1">
             D’où vient cette dépense
           </Overline>
-          <Text className="mb-4 text-base leading-[22px] text-muted">
+          <Text className="font-sans mb-4 text-base leading-[22px] text-muted">
             Contrairement à ce qu’on imagine, le sport n’est pas le principal poste de dépense : le
             simple fait d’être en vie représente {energie.bmrPct} % de votre total, soit{' '}
             {kcal(energie.bmr)} kcal par jour.
@@ -77,7 +77,7 @@ export default function MetabolismeScreen() {
           <Overline niveau={2}>Votre corpulence (IMC)</Overline>
           <View className="mt-[10px] mb-4">
             <Chiffre valeur={dec(metrics.bmi)} unite={metrics.band.label} taille="moyen" />
-            <Text className="mt-1 text-small text-muted">
+            <Text className="font-sans mt-1 text-small text-muted">
               Poids santé pour votre taille : {metrics.healthyMin} – {metrics.healthyMax} kg
             </Text>
           </View>
@@ -109,7 +109,7 @@ export default function MetabolismeScreen() {
           </View>
           <View className="mt-[6px] flex-row justify-between">
             {BMI_GAUGE_LABELS.map((label) => (
-              <Text key={label} className="text-micro text-muted2">
+              <Text key={label} className="font-sans text-micro text-muted2">
                 {label}
               </Text>
             ))}

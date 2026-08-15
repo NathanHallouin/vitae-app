@@ -67,7 +67,13 @@ export default function Chiffre({
         {affiche}
       </Text>
       {unite ? (
-        <Text className={cx(t.unite, ton === 'hero' ? 'text-hero-text opacity-85' : 'text-muted')}>
+        <Text
+          className={cx(
+            'font-sans',
+            t.unite,
+            ton === 'hero' ? 'text-hero-text opacity-85' : 'text-muted',
+          )}
+        >
           {unite}
         </Text>
       ) : null}

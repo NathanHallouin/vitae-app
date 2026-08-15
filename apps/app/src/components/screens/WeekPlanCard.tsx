@@ -31,18 +31,20 @@ export default function WeekPlanCard({ week }: { week: WeekPlan }) {
             ton="primary"
           />
         </View>
-        <Text className="text-base leading-[22px] text-muted">{week.note}</Text>
-        <Text className="mt-[10px] text-small text-muted2">
+        <Text className="font-sans text-base leading-[22px] text-muted">{week.note}</Text>
+        <Text className="font-sans mt-[10px] text-small text-muted2">
           Répartition conseillée : {week.schedule}
         </Text>
-        <Text className="mt-[6px] text-small text-muted2">Échauffement : {week.warmup}</Text>
+        <Text className="font-sans mt-[6px] text-small text-muted2">
+          Échauffement : {week.warmup}
+        </Text>
       </Card>
 
       <Repliable
         titre="Pourquoi ce programme-là"
         resume={`${week.adaptations.length} ajustements, et la raison de chacun`}
       >
-        <Text className="mb-1 text-small text-muted">
+        <Text className="font-sans mb-1 text-small text-muted">
           Ce que votre profil a changé par rapport au programme de base.
         </Text>
         <View>
@@ -51,7 +53,7 @@ export default function WeekPlanCard({ week }: { week: WeekPlan }) {
               <Text className="mb-[2px] text-option font-sans-medium text-primary-ink">
                 {a.label}
               </Text>
-              <Text className="text-small leading-[20px] text-muted">{a.reason}</Text>
+              <Text className="font-sans text-small leading-[20px] text-muted">{a.reason}</Text>
             </View>
           ))}
         </View>
@@ -77,12 +79,12 @@ export default function WeekPlanCard({ week }: { week: WeekPlan }) {
                   {ex.volume} · repos {ex.rest}
                 </Text>
               </View>
-              <Text className="mt-1 text-small leading-[20px] text-muted">{ex.cue}</Text>
+              <Text className="font-sans mt-1 text-small leading-[20px] text-muted">{ex.cue}</Text>
               <View className="mt-2 gap-1">
-                <Text className="text-caption text-muted2">
+                <Text className="font-sans text-caption text-muted2">
                   <Text className="font-sans-medium">Trop dur :</Text> {ex.easier}
                 </Text>
-                <Text className="text-caption text-muted2">
+                <Text className="font-sans text-caption text-muted2">
                   <Text className="font-sans-medium">Trop facile :</Text> {ex.harder}
                 </Text>
               </View>
@@ -101,7 +103,7 @@ export default function WeekPlanCard({ week }: { week: WeekPlan }) {
               <View className="size-[22px] flex-none items-center justify-center rounded-full bg-primary-tint">
                 <Text className="text-caption font-sans-bold text-primary-ink">{i + 1}</Text>
               </View>
-              <Text className="flex-1 text-base leading-[22px] text-ink">{step}</Text>
+              <Text className="font-sans flex-1 text-base leading-[22px] text-ink">{step}</Text>
             </View>
           ))}
         </View>

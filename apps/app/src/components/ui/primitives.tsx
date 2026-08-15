@@ -218,7 +218,7 @@ export function NumberField({
       <Text
         // Décoratif : le libellé du champ porte déjà l'unité.
         aria-hidden
-        className="pr-[14px] text-small text-muted2"
+        className="font-sans pr-[14px] text-small text-muted2"
       >
         {unit}
       </Text>
@@ -265,7 +265,7 @@ export function Bullet({ children }: { children: ReactNode }) {
   return (
     <View className="flex-row items-start gap-3 rounded-xl bg-surface2 p-[14px]">
       <View className="mt-[7px] size-[6px] flex-none rounded-full bg-primary-ink" />
-      <Text className="flex-1 text-base leading-[22px] text-ink">{children}</Text>
+      <Text className="font-sans flex-1 text-base leading-[22px] text-ink">{children}</Text>
     </View>
   );
 }

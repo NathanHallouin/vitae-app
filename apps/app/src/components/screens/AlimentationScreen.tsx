@@ -57,7 +57,7 @@ export default function AlimentationScreen() {
           titre="Mon objectif"
           resume={`${metrics.goal.label} · changez-le quand vous voulez`}
         >
-          <Text className="mb-[14px] text-small text-muted">
+          <Text className="font-sans mb-[14px] text-small text-muted">
             Tous les chiffres de l’application se recalculent aussitôt.
           </Text>
           <View accessibilityRole="radiogroup" className="gap-[10px]">
@@ -77,8 +77,8 @@ export default function AlimentationScreen() {
                 >
                   {g.label}
                 </Text>
-                <Text className="mt-[2px] text-small text-muted">{g.desc}</Text>
-                <Text className="text-caption text-muted">{g.detail}</Text>
+                <Text className="font-sans mt-[2px] text-small text-muted">{g.desc}</Text>
+                <Text className="font-sans text-caption text-muted">{g.detail}</Text>
               </OptionButton>
             ))}
           </View>
@@ -95,13 +95,13 @@ export default function AlimentationScreen() {
               anime
             />
           </View>
-          <Text className="text-base leading-[22px] text-muted">{metrics.goal.note}</Text>
+          <Text className="font-sans text-base leading-[22px] text-muted">{metrics.goal.note}</Text>
 
           <View className="mt-5 border-t border-divider pt-[18px]">
             <Overline niveau={3} className="mb-1">
               {rangeCaption(metrics.goal.key)}
             </Overline>
-            <Text className="mb-4 text-small text-muted">
+            <Text className="font-sans mb-4 text-small text-muted">
               Inutile de viser juste : tant que vous restez dans cette fourchette, ça marche.
             </Text>
 
@@ -118,8 +118,8 @@ export default function AlimentationScreen() {
               />
             </View>
             <View className="mb-[18px] flex-row justify-between">
-              <Text className="text-micro text-muted2">Ce que vous brûlez au repos</Text>
-              <Text className="text-micro text-muted2">Ce que vous brûlez en tout</Text>
+              <Text className="font-sans text-micro text-muted2">Ce que vous brûlez au repos</Text>
+              <Text className="font-sans text-micro text-muted2">Ce que vous brûlez en tout</Text>
             </View>
 
             <TileRow>
@@ -137,7 +137,7 @@ export default function AlimentationScreen() {
 
             {warning ? (
               <View className="mt-3 rounded-xl bg-warn-bg px-[14px] py-3">
-                <Text className="text-small leading-[20px] text-warn-ink">{warning}</Text>
+                <Text className="font-sans text-small leading-[20px] text-warn-ink">{warning}</Text>
               </View>
             ) : null}
           </View>
@@ -147,7 +147,7 @@ export default function AlimentationScreen() {
           titre="Comment répartir ces calories"
           resume={macros.map((m) => `${m.grams} g de ${m.label.toLowerCase()}`).join(' · ')}
         >
-          <Text className="mb-[18px] text-small text-muted">
+          <Text className="font-sans mb-[18px] text-small text-muted">
             Des repères, pas des règles. Le plus important reste le total de la journée.{' '}
             {proteinBasisNote(metrics)}
           </Text>
@@ -158,13 +158,16 @@ export default function AlimentationScreen() {
                   <View className="min-w-0 flex-1 flex-row items-center gap-2">
                     <Icon name={m.icon} size={19} color={m.color} />
                     <Text className="text-base font-sans-medium text-ink">{m.label}</Text>
-                    <Text numberOfLines={1} className="min-w-0 flex-1 text-small text-muted">
+                    <Text
+                      numberOfLines={1}
+                      className="font-sans min-w-0 flex-1 text-small text-muted"
+                    >
                       {m.hint}
                     </Text>
                   </View>
                   <Text
                     style={{ fontVariant: ['tabular-nums'] }}
-                    className="flex-none text-base text-muted"
+                    className="font-sans flex-none text-base text-muted"
                   >
                     {m.grams} g · {m.kcal} kcal
                   </Text>

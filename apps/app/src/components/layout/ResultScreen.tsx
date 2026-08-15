@@ -28,7 +28,7 @@ export default function ResultScreen({ children }: { children: ReactNode }) {
       <ProfileBar />
       <Apparition>{children}</Apparition>
       <View className="mt-8">
-        <Text className="text-caption leading-[19px] text-faint">
+        <Text className="font-sans text-caption leading-[19px] text-faint">
           Ces chiffres sont une estimation, pas un avis médical. La dépense réelle varie d’environ
           10 % d’une personne à l’autre. En cas de doute, parlez-en à un médecin ou à un
           diététicien.

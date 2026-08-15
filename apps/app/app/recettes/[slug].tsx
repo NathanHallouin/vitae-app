@@ -90,18 +90,20 @@ export default function RecettePage() {
           <Link href="/recettes" className="text-small text-primary-ink">
             Recettes
           </Link>
-          <Text className="text-small text-muted2"> · {recette.categorie}</Text>
+          <Text className="font-sans text-small text-muted2"> · {recette.categorie}</Text>
         </View>
 
         <Titre niveau={1} className="mb-3 font-display text-h1 leading-[44px] text-ink">
           {recette.titre}
         </Titre>
-        <Text className="mb-6 text-body leading-[26px] text-muted">{recette.description}</Text>
+        <Text className="font-sans mb-6 text-body leading-[26px] text-muted">
+          {recette.description}
+        </Text>
 
         <View className="mb-5 gap-2">
           {reperes.map((item) => (
             <View key={item.t} className="flex-row items-baseline gap-[6px]">
-              <Text className="text-small text-muted2">{item.t}</Text>
+              <Text className="font-sans text-small text-muted2">{item.t}</Text>
               <Text
                 style={{ fontVariant: ['tabular-nums'] }}
                 className="text-small font-sans-medium text-ink"
@@ -141,7 +143,7 @@ function Prose({ blocks, className }: { blocks: Block[]; className?: string }) {
             {bloc.text}
           </Titre>
         ) : (
-          <Text key={bloc.text} className="mb-3 text-body leading-[26px] text-muted">
+          <Text key={bloc.text} className="font-sans mb-3 text-body leading-[26px] text-muted">
             {bloc.text}
           </Text>
         ),

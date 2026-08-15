@@ -102,7 +102,7 @@ export default function RappelsCard() {
           <Overline niveau={2} className="mb-1">
             Me rappeler de bouger
           </Overline>
-          <Text className="text-base leading-[22px] text-muted">
+          <Text className="font-sans text-base leading-[22px] text-muted">
             Une invitation discrète à vous lever, à intervalle régulier. C’est le geste le plus
             rentable de cette page : il ne demande aucune récupération et se cumule tous les jours.
           </Text>
@@ -149,7 +149,7 @@ export default function RappelsCard() {
         </View>
       ) : null}
 
-      <Text accessibilityLiveRegion="polite" className="mt-4 text-caption text-muted2">
+      <Text accessibilityLiveRegion="polite" className="font-sans mt-4 text-caption text-muted2">
         {refuse
           ? 'Les notifications sont refusées pour cette application. Autorisez-les dans les réglages de votre téléphone, puis revenez ici.'
           : `${resumeRappels(config)} Tout se passe sur votre téléphone : rien n’est envoyé nulle part.`}
@@ -272,7 +272,7 @@ function Pas({
         disabled && 'opacity-40',
       )}
     >
-      <Text className="text-h3 text-primary-ink">{signe}</Text>
+      <Text className="font-sans text-h3 text-primary-ink">{signe}</Text>
     </Pressable>
   );
 }

@@ -42,7 +42,7 @@ export default function Explainer({ data }: { data: ExplainerData }) {
       <Titre niveau={2} className="mb-2 font-display text-h3 text-ink">
         {data.title}
       </Titre>
-      <Text className="mb-5 text-base leading-[22px] text-muted">{data.fil}</Text>
+      <Text className="font-sans mb-5 text-base leading-[22px] text-muted">{data.fil}</Text>
 
       <View className="border-t border-divider">
         {data.items.map((item, i) => {
@@ -91,7 +91,9 @@ export default function Explainer({ data }: { data: ExplainerData }) {
               <View style={{ display: actif ? 'flex' : 'none' }}>
                 {/* Aligné sous le titre, pas sous la puce : le retrait rattache visuellement la
                     réponse à sa question. */}
-                <Text className="mb-4 pl-9 text-base leading-[22px] text-muted">{item.texte}</Text>
+                <Text className="font-sans mb-4 pl-9 text-base leading-[22px] text-muted">
+                  {item.texte}
+                </Text>
               </View>
             </View>
           );

@@ -64,12 +64,12 @@ export default function AccueilScreen() {
             <Titre niveau={1} className="mb-4 font-display text-h1 leading-[44px] text-ink">
               Combien votre corps brûle-t-il de calories ?
             </Titre>
-            <Text className="mb-2 text-body leading-[26px] text-muted">
+            <Text className="font-sans mb-2 text-body leading-[26px] text-muted">
               Même au repos, votre corps consomme de l’énergie pour respirer, faire battre votre
               cœur et vous garder au chaud. Savoir combien, c’est le point de départ pour perdre du
               gras, prendre du muscle ou simplement rester stable.
             </Text>
-            <Text className="mb-8 text-base leading-[22px] text-muted2">
+            <Text className="font-sans mb-8 text-base leading-[22px] text-muted2">
               Quatre questions, une minute. Rien n’est envoyé sur internet : vos réponses restent
               sur cet appareil. Vous pouvez aussi parcourir directement les recettes.
             </Text>
@@ -84,7 +84,7 @@ export default function AccueilScreen() {
                     Modifier mes infos
                   </Button>
                 </View>
-                <Text className="text-small text-muted2">
+                <Text className="font-sans text-small text-muted2">
                   Dernier calcul : {kcal(metrics.tdee)} kcal dépensées par jour,{' '}
                   {kcal(metrics.target)} kcal à manger pour votre objectif.
                 </Text>
@@ -124,7 +124,7 @@ export default function AccueilScreen() {
                 </View>
                 <View className="min-w-0 flex-1">
                   <Text className="mb-[2px] text-option font-sans-medium text-ink">{b.title}</Text>
-                  <Text className="text-small leading-[19px] text-muted">{b.desc}</Text>
+                  <Text className="font-sans text-small leading-[19px] text-muted">{b.desc}</Text>
                 </View>
               </View>
             ))}

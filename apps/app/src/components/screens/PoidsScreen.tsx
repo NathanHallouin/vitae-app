@@ -25,7 +25,7 @@ export default function PoidsScreen() {
           <Overline niveau={2} className="mb-1">
             Quel poids viser ?
           </Overline>
-          <Text className="mb-[14px] text-small text-muted">
+          <Text className="font-sans mb-[14px] text-small text-muted">
             Trois repères calculés pour votre taille. Choisissez celui qui vous parle, rien n’est
             définitif.
           </Text>
@@ -48,8 +48,8 @@ export default function PoidsScreen() {
                   >
                     {dec(o.w)} kg
                   </Text>
-                  <Text className="mt-[2px] text-small text-muted">{o.label}</Text>
-                  <Text className="text-caption text-muted">{o.sub}</Text>
+                  <Text className="font-sans mt-[2px] text-small text-muted">{o.label}</Text>
+                  <Text className="font-sans text-caption text-muted">{o.sub}</Text>
                 </OptionButton>
               );
             })}
@@ -63,7 +63,7 @@ export default function PoidsScreen() {
 
           {projection.coherent ? (
             <>
-              <Text className="mb-[18px] text-body leading-[26px] text-ink">
+              <Text className="font-sans mb-[18px] text-body leading-[26px] text-ink">
                 En mangeant {kcal(metrics.target)} kcal par jour, vous atteindriez{' '}
                 <Text className="font-sans-semibold">{cible}</Text> en environ{' '}
                 <Text className="font-sans-semibold">
@@ -87,17 +87,20 @@ export default function PoidsScreen() {
               </View>
 
               <View className="mb-1 flex-row items-baseline justify-between gap-2">
-                <Text className="min-w-0 flex-1 text-caption text-muted2">
+                <Text className="font-sans min-w-0 flex-1 text-caption text-muted2">
                   Poids projeté, de {projection.hiLabel} à {projection.loLabel}
                 </Text>
-                <Text className="flex-none text-caption text-muted2">Cible {cible}</Text>
+                <Text className="font-sans flex-none text-caption text-muted2">Cible {cible}</Text>
               </View>
               <ProjectionChart projection={projection} targetLabel={cible} />
             </>
           ) : null}
 
           <Text
-            className={cx('text-base leading-[22px] text-muted', projection.coherent && 'mt-4')}
+            className={cx(
+              'font-sans text-base leading-[22px] text-muted',
+              projection.coherent && 'mt-4',
+            )}
           >
             {projection.note}
           </Text>
@@ -111,7 +114,7 @@ export default function PoidsScreen() {
             >
               <Text
                 className={cx(
-                  'text-small leading-[20px]',
+                  'font-sans text-small leading-[20px]',
                   rythme.level === 'bon' ? 'text-ink' : 'text-warn-ink',
                 )}
               >
@@ -128,9 +131,9 @@ export default function PoidsScreen() {
 function Stat({ label, value, note }: { label: string; value: string; note?: string }) {
   return (
     <View className="min-w-[140px] flex-1">
-      <Text className="text-caption text-muted2">{label}</Text>
+      <Text className="font-sans text-caption text-muted2">{label}</Text>
       <Text className="text-stat3 font-sans-medium text-ink">{value}</Text>
-      {note ? <Text className="text-small text-muted">{note}</Text> : null}
+      {note ? <Text className="font-sans text-small text-muted">{note}</Text> : null}
     </View>
   );
 }

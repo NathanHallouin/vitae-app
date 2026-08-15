@@ -66,7 +66,7 @@ export default function Repliable({
       >
         <View className="min-w-0 flex-1">
           <Text className="font-display text-stat3 leading-[24px] text-ink">{titre}</Text>
-          <Text className="mt-[2px] text-small text-muted2">{resume}</Text>
+          <Text className="font-sans mt-[2px] text-small text-muted2">{resume}</Text>
         </View>
         {/* Une seule flèche qui pivote, plutôt que deux qui se remplacent : le demi-tour dit le
             sens du geste, l'échange ne dit rien. */}

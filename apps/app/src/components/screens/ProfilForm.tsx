@@ -144,7 +144,7 @@ export default function ProfilForm({
                 </OptionButton>
               ))}
             </View>
-            <Text className="mt-2 text-caption text-muted2">
+            <Text className="font-sans mt-2 text-caption text-muted2">
               Le calcul diffère : à poids et taille égaux, un corps féminin et un corps masculin ne
               consomment pas la même énergie au repos.
             </Text>
@@ -156,7 +156,7 @@ export default function ProfilForm({
             accessibilityLiveRegion="polite"
             className="mb-5 rounded-xl bg-warn-bg px-[14px] py-3"
           >
-            <Text className="text-small leading-[20px] text-warn-ink">
+            <Text className="font-sans text-small leading-[20px] text-warn-ink">
               Votre dernier poids date du {formatLongDate(form.staleWeight.updatedAt)} (
               {form.staleWeight.previous} kg). Repesez-vous et indiquez votre poids d’aujourd’hui :
               tout le reste en dépend.
@@ -174,7 +174,7 @@ export default function ProfilForm({
                 label="Date de naissance"
                 onChange={(value) => dispatch({ type: 'setField', field: 'naissance', value })}
               />
-              <Text className="mt-[6px] text-caption text-muted2">
+              <Text className="font-sans mt-[6px] text-caption text-muted2">
                 {age === null
                   ? 'Votre âge est calculé tout seul.'
                   : form.naissanceLocked
@@ -239,7 +239,7 @@ export default function ProfilForm({
             <Text
               accessibilityLiveRegion="polite"
               style={{ fontVariant: ['tabular-nums'] }}
-              className="mt-3 text-small text-muted"
+              className="font-sans mt-3 text-small text-muted"
             >
               Facteur d’activité retenu : ×{fmtFactor(activityFactor(form.daily, form.sessions))}
             </Text>
@@ -275,8 +275,8 @@ export default function ProfilForm({
                     >
                       {g.label}
                     </Text>
-                    <Text className="mt-[2px] text-small text-muted">{g.desc}</Text>
-                    <Text className="text-caption text-muted">{g.detail}</Text>
+                    <Text className="font-sans mt-[2px] text-small text-muted">{g.desc}</Text>
+                    <Text className="font-sans text-caption text-muted">{g.detail}</Text>
                   </OptionButton>
                 );
               })}
@@ -289,7 +289,7 @@ export default function ProfilForm({
             accessibilityLiveRegion="assertive"
             className="mb-5 rounded-xl bg-error-bg px-4 py-3"
           >
-            <Text className="text-base text-error-ink">{form.error}</Text>
+            <Text className="font-sans text-base text-error-ink">{form.error}</Text>
           </View>
         ) : null}
 
@@ -376,9 +376,12 @@ function ChoiceRow({
       <Icon name={icon} size={22} color={selected ? palette.primaryInk : palette.muted2} />
       <View className="min-w-0 flex-1">
         <Text className="text-option font-sans-medium text-ink">{label}</Text>
-        <Text className="mt-[2px] text-small text-muted">{desc}</Text>
+        <Text className="font-sans mt-[2px] text-small text-muted">{desc}</Text>
       </View>
-      <Text style={{ fontVariant: ['tabular-nums'] }} className="flex-none text-small text-muted2">
+      <Text
+        style={{ fontVariant: ['tabular-nums'] }}
+        className="font-sans flex-none text-small text-muted2"
+      >
         {value}
       </Text>
     </OptionButton>

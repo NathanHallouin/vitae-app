@@ -14,7 +14,7 @@ export default function CalculPrompt({ quoi }: { quoi: string }) {
   return (
     <Card className="p-6">
       <Text className="mb-2 font-display text-h3 text-ink">Vos chiffres, en une minute</Text>
-      <Text className="mb-5 text-base leading-[22px] text-muted">
+      <Text className="font-sans mb-5 text-base leading-[22px] text-muted">
         {quoi} Quatre questions suffisent : votre sexe, votre date de naissance, vos mesures et
         votre objectif. Rien n’est envoyé sur internet, vos réponses restent sur cet appareil.
       </Text>

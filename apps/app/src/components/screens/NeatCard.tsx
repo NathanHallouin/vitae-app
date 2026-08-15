@@ -26,7 +26,7 @@ export default function NeatCard({ neat }: { neat: NeatPlan }) {
         <Overline niveau={2} className="mb-[10px]">
           Ce que votre quotidien dépense déjà
         </Overline>
-        <Text className="mb-5 text-base leading-[22px] text-muted">{neat.lead}</Text>
+        <Text className="font-sans mb-5 text-base leading-[22px] text-muted">{neat.lead}</Text>
 
         <TileRow>
           <StatTile
@@ -44,14 +44,16 @@ export default function NeatCard({ neat }: { neat: NeatPlan }) {
           ) : null}
         </TileRow>
 
-        <Text className="mt-[14px] text-small leading-[22px] text-muted">{neat.note}</Text>
+        <Text className="font-sans mt-[14px] text-small leading-[22px] text-muted">
+          {neat.note}
+        </Text>
       </Card>
 
       <Repliable
         titre="Où aller la chercher"
         resume={`${neat.actions.length} gestes à répéter tous les jours, chiffrés pour votre poids`}
       >
-        <Text className="mb-1 text-small text-muted">
+        <Text className="font-sans mb-1 text-small text-muted">
           À répéter tous les jours, y compris les jours de séance.
         </Text>
         <View>
@@ -64,7 +66,9 @@ export default function NeatCard({ neat }: { neat: NeatPlan }) {
                 <Text className="mb-[2px] text-option font-sans-medium text-ink">
                   {action.label}
                 </Text>
-                <Text className="text-small leading-[19px] text-muted">{action.detail}</Text>
+                <Text className="font-sans text-small leading-[19px] text-muted">
+                  {action.detail}
+                </Text>
               </View>
               <Text
                 style={{ fontVariant: ['tabular-nums'] }}
@@ -75,7 +79,7 @@ export default function NeatCard({ neat }: { neat: NeatPlan }) {
             </View>
           ))}
         </View>
-        <Text className="mt-3 text-caption leading-[19px] text-muted2">
+        <Text className="font-sans mt-3 text-caption leading-[19px] text-muted2">
           Ces gestes ne demandent aucune récupération : contrairement à une séance, vous pouvez les
           cumuler tous les jours sans jamais avoir à lever le pied.
         </Text>

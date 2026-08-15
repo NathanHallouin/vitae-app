@@ -28,7 +28,7 @@ export default function SectionHeading({
         </Text>
       </View>
       <Text className="mb-[6px] font-display text-h3 leading-[26px] text-ink">{title}</Text>
-      <Text className="text-base leading-[22px] text-muted">{lead}</Text>
+      <Text className="font-sans text-base leading-[22px] text-muted">{lead}</Text>
     </View>
   );
 }

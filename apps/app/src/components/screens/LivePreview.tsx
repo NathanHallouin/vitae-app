@@ -62,7 +62,7 @@ export default function LivePreview({ form, age }: { form: FormState; age: numbe
             key={row.label}
             className="flex-row items-baseline justify-between gap-3 border-t border-divider py-[11px]"
           >
-            <Text className="min-w-0 flex-1 text-small text-muted">{row.label}</Text>
+            <Text className="font-sans min-w-0 flex-1 text-small text-muted">{row.label}</Text>
             <Text
               style={{ fontVariant: ['tabular-nums'] }}
               className={cx(
@@ -75,7 +75,7 @@ export default function LivePreview({ form, age }: { form: FormState; age: numbe
           </View>
         ))}
       </View>
-      <Text className="mt-[14px] text-caption leading-[19px] text-muted2">{hint}</Text>
+      <Text className="font-sans mt-[14px] text-caption leading-[19px] text-muted2">{hint}</Text>
     </Card>
   );
 }

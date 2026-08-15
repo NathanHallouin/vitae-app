@@ -110,7 +110,7 @@ export default function FiltresRecettes({
             />
           </Pressable>
 
-          <Text accessibilityLiveRegion="polite" className="text-small text-muted2">
+          <Text accessibilityLiveRegion="polite" className="font-sans text-small text-muted2">
             {resultats === total ? `${total} recettes` : `${resultats} sur ${total}`}
           </Text>
         </View>
@@ -163,7 +163,7 @@ export default function FiltresRecettes({
       </View>
 
       {large ? (
-        <Text accessibilityLiveRegion="polite" className="text-small text-muted2">
+        <Text accessibilityLiveRegion="polite" className="font-sans text-small text-muted2">
           {resultats === total
             ? `${total} recettes`
             : `${resultats} recette${resultats > 1 ? 's' : ''} sur ${total}`}

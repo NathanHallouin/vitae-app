@@ -55,7 +55,7 @@ export default function DateField({
       <View className="rounded-control border border-line bg-surface2 px-[14px] py-[14px]">
         <Text
           accessibilityLabel={`${label} enregistrée : ${formatBirthDate(value)}`}
-          className="text-input text-muted"
+          className="font-sans text-input text-muted"
         >
           {formatBirthDate(value)}
         </Text>
@@ -72,7 +72,7 @@ export default function DateField({
         onPress={() => setOuvert(true)}
         className="rounded-control border border-line bg-surface2 px-[14px] py-[14px] active:border-line-strong"
       >
-        <Text className={cx('text-input', value ? 'text-ink' : 'text-faint')}>
+        <Text className={cx('font-sans text-input', value ? 'text-ink' : 'text-faint')}>
           {value ? formatBirthDate(value) : 'Choisir une date'}
         </Text>
       </Pressable>

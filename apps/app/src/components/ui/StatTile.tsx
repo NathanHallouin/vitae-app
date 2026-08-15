@@ -20,9 +20,9 @@ export default function StatTile({
 }) {
   return (
     <View className={cx('rounded-xl bg-surface2 p-4', className)}>
-      <Text className="mb-1 text-caption text-muted2">{label}</Text>
+      <Text className="font-sans mb-1 text-caption text-muted2">{label}</Text>
       <Chiffre valeur={value} taille="petit" ton={accent ? 'primary' : 'ink'} />
-      {note ? <Text className="mt-1 text-caption text-muted">{note}</Text> : null}
+      {note ? <Text className="font-sans mt-1 text-caption text-muted">{note}</Text> : null}
     </View>
   );
 }

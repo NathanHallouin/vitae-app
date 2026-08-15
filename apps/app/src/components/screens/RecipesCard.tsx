@@ -64,7 +64,7 @@ export default function RecipesCard({ metrics, goal }: { metrics: Metrics; goal:
       <Overline niveau={2} className="mb-1">
         Des recettes pour ces repères
       </Overline>
-      <Text className="mb-5 text-base leading-[22px] text-muted">
+      <Text className="font-sans mb-5 text-base leading-[22px] text-muted">
         Nos recettes, choisies pour tomber près de vos {kcal(metrics.target)} kcal et de vos besoins
         en protéines, sans jamais servir deux fois le même ingrédient dans la journée. Touchez-en
         une pour l’ouvrir, ou « changer » pour une autre proposition. Si vos filtres réduisent trop
@@ -104,7 +104,10 @@ export default function RecipesCard({ metrics, goal }: { metrics: Metrics; goal:
           <View key={meal.name}>
             <View className="mb-[10px] flex-row items-baseline justify-between gap-2">
               <Text className="text-option font-sans-medium text-ink">{meal.name}</Text>
-              <Text style={{ fontVariant: ['tabular-nums'] }} className="text-small text-muted2">
+              <Text
+                style={{ fontVariant: ['tabular-nums'] }}
+                className="font-sans text-small text-muted2"
+              >
                 environ {kcal(meal.budget)} kcal
               </Text>
             </View>
@@ -122,7 +125,7 @@ export default function RecipesCard({ metrics, goal }: { metrics: Metrics; goal:
         ))}
       </View>
 
-      <Text className="mt-5 text-small leading-[22px] text-muted">
+      <Text className="font-sans mt-5 text-small leading-[22px] text-muted">
         Ces trois repas couvrent environ 90 % de votre journée. Il reste {kcal(collation)} kcal pour
         une collation : un fruit, un yaourt, une poignée d’amandes. Rien à calculer.
       </Text>
@@ -185,23 +188,23 @@ function RecipeLink({ recipe, onChange }: { recipe: Suggestion; onChange: () => 
         </View>
       </View>
 
-      <Text className={cx('text-caption', maison ? 'text-primary-ink' : 'text-muted2')}>
+      <Text className={cx('font-sans text-caption', maison ? 'text-primary-ink' : 'text-muted2')}>
         {maison ? 'Recette de l’application' : recipe.source}
       </Text>
 
-      <Text style={{ fontVariant: ['tabular-nums'] }} className="text-small text-muted">
+      <Text style={{ fontVariant: ['tabular-nums'] }} className="font-sans text-small text-muted">
         environ {kcal(recipe.kcal)} kcal · {recipe.prot} g de protéines par portion
       </Text>
 
       {recipe.portions !== 1 ? (
-        <Text className="text-caption text-muted2">
+        <Text className="font-sans text-caption text-muted2">
           Comptez {portions} pour ce repas, soit {kcal(recipe.totalKcal)} kcal et {recipe.totalProt}{' '}
           g de protéines.
         </Text>
       ) : null}
 
       {recipe.missingKcal > 0 ? (
-        <Text className="text-caption text-muted2">
+        <Text className="font-sans text-caption text-muted2">
           Il manquera {kcal(recipe.missingKcal)} kcal pour le repère de ce repas : ajoutez du pain,
           du riz ou un laitage plutôt qu’une portion de plus.
         </Text>

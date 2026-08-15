@@ -30,7 +30,7 @@ export default function PageIntro({
         <Titre niveau={1} className="mb-[6px] font-display text-h2 leading-[34px] text-ink">
           {title}
         </Titre>
-        <Text className="text-body leading-[26px] text-muted">{lead}</Text>
+        <Text className="font-sans text-body leading-[26px] text-muted">{lead}</Text>
       </View>
 
       {illustration && large ? (
