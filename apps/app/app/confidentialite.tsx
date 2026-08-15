@@ -4,7 +4,8 @@ import { SITE_URL } from '@vitae/core/site';
 
 import { Text, View } from 'react-native';
 import Seo from '@/components/layout/Seo';
-import Page from '@/components/ui/Page';
+import IllustrationConfidentialite from '@/components/ui/illustrations/IllustrationConfidentialite';
+import Page, { useLarge } from '@/components/ui/Page';
 import Titre from '@/components/ui/Titre';
 
 /**
@@ -16,6 +17,8 @@ import Titre from '@/components/ui/Titre';
  * vérité, quelle que soit la porte d'entrée.
  */
 export default function ConfidentialitePage() {
+  const large = useLarge();
+
   return (
     <>
       <Seo
@@ -25,12 +28,23 @@ export default function ConfidentialitePage() {
       />
 
       <Page>
-        <Titre niveau={1} className="mb-3 font-display text-h1 leading-[44px] text-ink">
-          Confidentialité
-        </Titre>
-        <Text className="font-sans mb-8 text-body leading-[26px] text-muted">
-          {CONFIDENTIALITE_RESUME}
-        </Text>
+        {/* L'image ne montre ni cadenas ni bouclier : rien ne part, il n'y a donc rien à
+            défendre. La raison est écrite dans le composant. */}
+        <View className={large ? 'mb-8 flex-row items-center gap-12' : 'mb-8'}>
+          <View className="min-w-0 flex-1">
+            <Titre niveau={1} className="mb-3 font-display text-h1 leading-[44px] text-ink">
+              Confidentialité
+            </Titre>
+            <Text className="font-sans text-body leading-[26px] text-muted">
+              {CONFIDENTIALITE_RESUME}
+            </Text>
+          </View>
+          {large ? (
+            <View className="w-[260px] flex-none">
+              <IllustrationConfidentialite />
+            </View>
+          ) : null}
+        </View>
 
         <View className="gap-6">
           {CONFIDENTIALITE.map((section) => (

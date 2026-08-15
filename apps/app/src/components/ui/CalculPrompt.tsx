@@ -1,5 +1,6 @@
 import { useRouter } from 'expo-router';
-import { Text } from 'react-native';
+import { Text, View } from 'react-native';
+import IllustrationCalcul from './illustrations/IllustrationCalcul';
 import { Button, Card } from './primitives';
 
 /**
@@ -21,6 +22,12 @@ export default function CalculPrompt({ quoi }: { quoi: string }) {
       <Button variant="contained" size="large" onPress={() => router.navigate('/profil')}>
         Calculer mes chiffres
       </Button>
+
+      {/* Sous le bouton et non à côté : la carte s'affiche sur les quatre écrans de résultats, y
+          compris sur un téléphone où la largeur appartient au texte. */}
+      <View className="mt-6 items-center">
+        <IllustrationCalcul />
+      </View>
     </Card>
   );
 }

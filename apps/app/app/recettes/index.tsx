@@ -11,7 +11,9 @@ import { useMemo, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import Seo from '@/components/layout/Seo';
 import FiltresRecettes from '@/components/recette/FiltresRecettes';
-import Page, { useColumns } from '@/components/ui/Page';
+import IllustrationAucuneRecette from '@/components/ui/illustrations/IllustrationAucuneRecette';
+import IllustrationRecettes from '@/components/ui/illustrations/IllustrationRecettes';
+import Page, { useColumns, useLarge } from '@/components/ui/Page';
 import { Button, Card } from '@/components/ui/primitives';
 import Titre from '@/components/ui/Titre';
 
@@ -33,6 +35,7 @@ import Titre from '@/components/ui/Titre';
 export default function RecettesIndex() {
   const toutes = getAllRecipes();
   const colonnes = useColumns(3);
+  const large = useLarge();
   const [criteres, setCriteres] = useState<Criteres>({});
 
   const recettes = useMemo(() => chercherRecettes(toutes, criteres), [toutes, criteres]);
@@ -46,18 +49,29 @@ export default function RecettesIndex() {
       />
 
       <Page>
-        <Titre niveau={1} className="mb-[6px] font-display text-h1 leading-[44px] text-ink">
-          Recettes
-        </Titre>
-        {/* Mesure bornée en points et non en `ch` : l'unité typographique n'existe pas en
-            natif, où la borne serait silencieusement ignorée. */}
-        <Text
-          className="font-sans mb-8 text-body leading-[26px] text-muted"
-          style={{ maxWidth: 680 }}
-        >
-          Des recettes simples, avec leurs calories et leurs protéines par portion, pour remplir les
-          repères de votre journée sans avoir à peser chaque aliment.
-        </Text>
+        {/* Deux colonnes dès qu'il y a la place, comme l'accueil : l'illustration disparaît sous
+            le seuil plutôt que de rétrécir, la largeur revenant alors au texte. */}
+        <View className={large ? 'mb-8 flex-row items-center gap-12' : 'mb-8'}>
+          <View className="min-w-0 flex-1">
+            <Titre niveau={1} className="mb-[6px] font-display text-h1 leading-[44px] text-ink">
+              Recettes
+            </Titre>
+            {/* Mesure bornée en points et non en `ch` : l'unité typographique n'existe pas en
+                natif, où la borne serait silencieusement ignorée. */}
+            <Text
+              className="font-sans text-body leading-[26px] text-muted"
+              style={{ maxWidth: 680 }}
+            >
+              Des recettes simples, avec leurs calories et leurs protéines par portion, pour remplir
+              les repères de votre journée sans avoir à peser chaque aliment.
+            </Text>
+          </View>
+          {large ? (
+            <View className="w-[280px] flex-none">
+              <IllustrationRecettes />
+            </View>
+          ) : null}
+        </View>
 
         <FiltresRecettes
           criteres={criteres}
@@ -68,6 +82,9 @@ export default function RecettesIndex() {
 
         {recettes.length === 0 ? (
           <Card className="items-start gap-4 p-6">
+            <View className="w-full items-center">
+              <IllustrationAucuneRecette />
+            </View>
             <Text className="font-sans text-base leading-[22px] text-muted">
               Aucune recette ne répond à ces critères. Retirez-en un : le filtre « Végétarien »
               écarte aussi le poisson, et les durées comptent la préparation en plus de la cuisson.

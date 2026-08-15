@@ -10,6 +10,7 @@ import {
 import { useState } from 'react';
 import { Text, View } from 'react-native';
 import CourbePoids from '@/components/screens/CourbePoids';
+import IllustrationPesee from '@/components/ui/illustrations/IllustrationPesee';
 import Overline from '@/components/ui/Overline';
 import { Button, Card, NumberField } from '@/components/ui/primitives';
 import { useProfile } from '@/state/ProfileProvider';
@@ -83,6 +84,14 @@ export default function SuiviCard({ cible }: { cible?: number }) {
           <Text className="font-sans text-small leading-[20px] text-warn-ink">{suivi.message}</Text>
         </View>
       ) : null}
+
+      {/* Tant qu'une seule pesée ne fait pas une courbe, l'image tient la place et dit ce qui
+          manque : la répétition, pas la balance. */}
+      {courbe ? null : (
+        <View className="items-center">
+          <IllustrationPesee />
+        </View>
+      )}
 
       {courbe ? (
         <>

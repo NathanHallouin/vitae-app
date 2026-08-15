@@ -4,7 +4,8 @@ import { Link, useLocalSearchParams } from 'expo-router';
 import { Text, View } from 'react-native';
 import Seo from '@/components/layout/Seo';
 import RecetteAtelier, { GarderEcranAllume } from '@/components/recette/RecetteAtelier';
-import Page from '@/components/ui/Page';
+import IllustrationRecette from '@/components/ui/illustrations/IllustrationRecette';
+import Page, { useLarge } from '@/components/ui/Page';
 import Titre from '@/components/ui/Titre';
 
 /**
@@ -18,6 +19,7 @@ export function generateStaticParams(): Array<{ slug: string }> {
 export default function RecettePage() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
   const recette = getRecipe(slug ?? '');
+  const large = useLarge();
 
   if (!recette) {
     return (
@@ -93,25 +95,38 @@ export default function RecettePage() {
           <Text className="font-sans text-small text-muted2"> · {recette.categorie}</Text>
         </View>
 
-        <Titre niveau={1} className="mb-3 font-display text-h1 leading-[44px] text-ink">
-          {recette.titre}
-        </Titre>
-        <Text className="font-sans mb-6 text-body leading-[26px] text-muted">
-          {recette.description}
-        </Text>
+        {/* Titre, description et repères d'un côté ; l'illustration de l'autre, sur grand écran
+            seulement. Elle suit la catégorie de la recette : un soleil levant le matin, une
+            assiette pour un plat. Une seule image pour les soixante-deux fiches ne dirait rien. */}
+        <View className={large ? 'flex-row items-start gap-10' : ''}>
+          <View className="min-w-0 flex-1">
+            <Titre niveau={1} className="mb-3 font-display text-h1 leading-[44px] text-ink">
+              {recette.titre}
+            </Titre>
+            <Text className="font-sans mb-6 text-body leading-[26px] text-muted">
+              {recette.description}
+            </Text>
 
-        <View className="mb-5 gap-2">
-          {reperes.map((item) => (
-            <View key={item.t} className="flex-row items-baseline gap-[6px]">
-              <Text className="font-sans text-small text-muted2">{item.t}</Text>
-              <Text
-                style={{ fontVariant: ['tabular-nums'] }}
-                className="text-small font-sans-medium text-ink"
-              >
-                {item.v}
-              </Text>
+            <View className="mb-5 gap-2">
+              {reperes.map((item) => (
+                <View key={item.t} className="flex-row items-baseline gap-[6px]">
+                  <Text className="font-sans text-small text-muted2">{item.t}</Text>
+                  <Text
+                    style={{ fontVariant: ['tabular-nums'] }}
+                    className="text-small font-sans-medium text-ink"
+                  >
+                    {item.v}
+                  </Text>
+                </View>
+              ))}
             </View>
-          ))}
+          </View>
+
+          {large ? (
+            <View className="w-[220px] flex-none pt-2">
+              <IllustrationRecette categorie={recette.categorie} />
+            </View>
+          ) : null}
         </View>
 
         <Prose blocks={recette.introBlocks} className="mb-5" />

@@ -536,6 +536,32 @@ Ce n'est pas un réglage mais une conséquence, et chaque point compte :
    l'écran pendant ce temps : pas d'écran blanc, et pas de saut de police — un défaut que l'œil lit
    comme de la lenteur alors que tout est déjà là.
 
+### Deux familles d'images, et quand employer laquelle
+
+| | Ce que c'est | Ce que ça coûte | Où |
+|---|---|---|---|
+| `ui/doodles/` | personnages **Open Doodles** (Pablo Stanley, CC0), recolorés avec les jetons | ~25 Ko de tracés par fichier | les quatre écrans de résultats |
+| `ui/illustrations/` | dessins **géométriques**, composés de primitives et des glyphes du jeu d'icônes | quelques centaines d'octets | états vides, catalogue, fiches, profil, confidentialité, 404 |
+
+Les secondes empruntent leurs motifs au jeu d'icônes par `Glyphe`, plutôt que de recopier les
+tracés : une copie de plus est une divergence de plus le jour où les icônes sont redessinées. Le
+`strokeWidth` y est divisé par l'échelle, sans quoi une icône agrandie trois fois sortirait avec un
+trait trois fois plus épais que celui de la barre d'onglets.
+
+Trois règles tiennent la famille, et les trois viennent d'erreurs faites en la dessinant :
+
+- **Un seul sujet.** L'assiette du catalogue a d'abord été entourée des trois macronutriments ;
+  ils flottaient sans s'y rattacher et le blé minuscule passait pour une plante égarée.
+- **Pas de cercle derrière un motif qui a deux points et une courbe.** Le glyphe de l'assiette
+  agrandi dans un disque se lit comme un **visage** — les volutes de vapeur en guise d'yeux, le
+  bord en guise de bouche. Un motif qui marche à vingt pixels dans une barre d'onglets ne marche
+  pas forcément à cent.
+- **Les mêmes jetons pour les mêmes rôles** : `divider` pour ce qui est inerte ou en retrait,
+  `primary` pour ce qui est acquis, `primaryInk` pour le trait qui porte le sens, `surface2` pour
+  le fond doux. C'est ce qui fait qu'une illustration ajoutée demain ressemblera aux autres.
+
+Aucune ne porte de texte : rien à traduire, rien qui grossisse mal, rien qui double le titre voisin.
+
 ### Le système visuel
 
 Ce qui rend un écran de cette application reconnaissable tient en quatre éléments, et ce sont des

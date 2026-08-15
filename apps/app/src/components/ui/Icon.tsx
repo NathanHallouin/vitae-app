@@ -12,7 +12,7 @@
 
 import type { IconName } from '@vitae/core/icons';
 import type { ReactNode } from 'react';
-import { Circle, Path, Rect, Svg } from 'react-native-svg';
+import { Circle, G, Path, Rect, Svg } from 'react-native-svg';
 
 const PATHS: Record<IconName, ReactNode> = {
   // Navigation et résultats
@@ -174,6 +174,50 @@ const PATHS: Record<IconName, ReactNode> = {
 };
 
 export type { IconName };
+
+/**
+ * Le tracé d'une icône, posé **dans un dessin plus grand** plutôt que dans son propre carré.
+ *
+ * Les illustrations géométriques de `illustrations/` composent des motifs de l'application avec
+ * des arcs et des disques. Elles pourraient recopier les tracés — c'est ce que faisait
+ * `HomeIllustration` avec la flamme —, mais une copie de plus est une divergence de plus le jour
+ * où le jeu d'icônes est redessiné. Elles empruntent donc le tracé ici, à la source.
+ *
+ * `strokeWidth` est divisé par l'échelle : sans cela, une icône agrandie trois fois sortirait avec
+ * un trait trois fois plus épais que celui de la barre d'onglets, et la parenté se perdrait
+ * justement là où elle doit se voir.
+ */
+export function Glyphe({
+  nom,
+  x,
+  y,
+  taille,
+  couleur,
+  epaisseur = 1.6,
+}: {
+  nom: IconName;
+  /** coin supérieur gauche, dans le repère du dessin qui accueille le glyphe */
+  x: number;
+  y: number;
+  taille: number;
+  couleur: string;
+  /** épaisseur voulue à l'écran, avant mise à l'échelle */
+  epaisseur?: number;
+}) {
+  const echelle = taille / 24;
+  return (
+    <G
+      transform={`translate(${x} ${y}) scale(${echelle})`}
+      fill="none"
+      stroke={couleur}
+      strokeWidth={epaisseur / echelle}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      {PATHS[nom]}
+    </G>
+  );
+}
 
 export default function Icon({
   name,
