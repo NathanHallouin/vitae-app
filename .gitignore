@@ -17,6 +17,7 @@ apps/app/public/robots.txt
 apps/app/public/manifest.json
 apps/app/public/og.png
 apps/app/public/og/
+apps/app/public/photos/
 apps/app/public/icone-*.png
 apps/app/public/apple-touch-icon.png
 apps/app/public/polices/

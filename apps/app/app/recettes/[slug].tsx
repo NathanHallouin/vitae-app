@@ -1,10 +1,18 @@
-import { type Block, dureeISO, dureeTotale, getRecipe, getRecipeSlugs } from '@vitae/content';
+import {
+  adressePhoto,
+  type Block,
+  dureeISO,
+  dureeTotale,
+  getRecipe,
+  getRecipeSlugs,
+  photoDe,
+} from '@vitae/content';
 import { SITE_NAME, SITE_URL } from '@vitae/core/site';
 import { Link, useLocalSearchParams } from 'expo-router';
 import { Text, View } from 'react-native';
 import Seo from '@/components/layout/Seo';
 import RecetteAtelier, { GarderEcranAllume } from '@/components/recette/RecetteAtelier';
-import IllustrationRecette from '@/components/ui/illustrations/IllustrationRecette';
+import VisuelRecette from '@/components/recette/VisuelRecette';
 import Page, { useLarge } from '@/components/ui/Page';
 import Titre from '@/components/ui/Titre';
 
@@ -34,6 +42,7 @@ export default function RecettePage() {
 
   const total = dureeTotale(recette);
   const url = `${SITE_URL}/recettes/${recette.slug}`;
+  const photo = photoDe(recette.slug);
 
   /**
    * Données structurées schema.org `Recipe`.
@@ -49,6 +58,9 @@ export default function RecettePage() {
     description: recette.description,
     datePublished: recette.publiee,
     author: { '@type': 'Organization', name: SITE_NAME },
+    // Google en fait un critère de résultat enrichi : sans image, la fiche ne peut pas prétendre
+    // à la vignette. On n'annonce que ce qui existe — une adresse en 404 vaut moins que rien.
+    ...(photo ? { image: [`${SITE_URL}${adressePhoto(photo.slug, 1600, 'webp')}`] } : {}),
     recipeCategory: recette.categorie,
     recipeCuisine: 'Française',
     prepTime: dureeISO(recette.preparation),
@@ -98,7 +110,24 @@ export default function RecettePage() {
         {/* Titre, description et repères d'un côté ; l'illustration de l'autre, sur grand écran
             seulement. Elle suit la catégorie de la recette : un soleil levant le matin, une
             assiette pour un plat. Une seule image pour les soixante-deux fiches ne dirait rien. */}
-        <View className={large ? 'flex-row items-start gap-10' : ''}>
+        <View className={large ? 'flex-row-reverse items-start gap-10' : ''}>
+          {/* Le visuel vient **avant** le titre dans le document, et passe à droite sur grand
+              écran par `flex-row-reverse`. Deux raisons de ne pas le mettre après : sur téléphone
+              une photo de plat se regarde en premier, et surtout il était jusqu'ici enfermé dans
+              un `large ?` — donc absent du HTML livré, où `useWindowDimensions()` vaut zéro. Le
+              JSON-LD annonçait une image que la page ne montrait pas. */}
+          <View className={large ? 'w-[260px] flex-none pt-2' : 'mb-6'}>
+            <VisuelRecette
+              slug={recette.slug}
+              titre={recette.titre}
+              categorie={recette.categorie}
+              // Une largeur réelle par palier, et non une valeur d'exécution : le HTML livré doit
+              // rester juste quelle que soit la fenêtre qui le reçoit.
+              sizes="(max-width: 768px) 92vw, 260px"
+              prioritaire
+            />
+          </View>
+
           <View className="min-w-0 flex-1">
             <Titre niveau={1} className="mb-3 font-display text-h1 leading-[44px] text-ink">
               {recette.titre}
@@ -121,12 +150,6 @@ export default function RecettePage() {
               ))}
             </View>
           </View>
-
-          {large ? (
-            <View className="w-[220px] flex-none pt-2">
-              <IllustrationRecette categorie={recette.categorie} />
-            </View>
-          ) : null}
         </View>
 
         <Prose blocks={recette.introBlocks} className="mb-5" />

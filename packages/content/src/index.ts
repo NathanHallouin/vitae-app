@@ -14,6 +14,15 @@ import { RECETTES } from './recettes.generated';
 import type { Recipe } from './types';
 
 export {
+  adressePhoto,
+  LARGEURS_PHOTO,
+  nombreDePhotos,
+  type PhotoRecette,
+  photoDe,
+  RAPPORT_PHOTO,
+  srcset,
+} from './photos';
+export {
   aDesCriteres,
   aplatir,
   type Criteres,

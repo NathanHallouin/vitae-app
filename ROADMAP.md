@@ -240,8 +240,11 @@ Tout ce qui suit tient dans le navigateur et s'appuie sur le module de stockage 
     publication n'est pas du luxe.
   - **Le catalogue extérieur de 76 plats** ne sert plus qu'aux combinaisons de filtres non testées.
     Le retirer un jour supprimerait toute dépendance à un site tiers ; le garder coûte peu.
-  - **Photographier les recettes** : les fiches n'ont aucune image, et le JSON-LD `Recipe` accepte
-    un champ `image` qui pèse lourd dans les résultats enrichis.
+  - **Photographier les recettes** : la chaîne est prête et n'attend que les fichiers. Déposer
+    `photos/<slug>.jpg` et lancer `bun run generate` suffit — trois largeurs en AVIF et WebP, un
+    aperçu flou, le champ `image` du JSON-LD, et le catalogue qui bascule en grille photo une fois
+    les soixante-deux réunies. `photos/CHOIX.md` dit ce que chaque photo doit montrer, et
+    `photos/README.md` ce que la licence doit permettre. Reste à les prendre ou à les acquérir.
   - **Porter les critères de recherche dans l'adresse**, si un jour on veut partager « les recettes
     végétariennes de moins de 30 minutes ». Aujourd'hui ils vivent dans l'état de l'écran, pour que
     la page livrée aux moteurs contienne bien les soixante-deux recettes.

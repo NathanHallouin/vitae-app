@@ -4,6 +4,7 @@ import {
   chercherRecettes,
   dureeTotale,
   getAllRecipes,
+  nombreDePhotos,
 } from '@vitae/content';
 import { SITE_URL } from '@vitae/core/site';
 import { Link } from 'expo-router';
@@ -11,6 +12,7 @@ import { useMemo, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import Seo from '@/components/layout/Seo';
 import FiltresRecettes from '@/components/recette/FiltresRecettes';
+import VisuelRecette from '@/components/recette/VisuelRecette';
 import IllustrationAucuneRecette from '@/components/ui/illustrations/IllustrationAucuneRecette';
 import IllustrationRecettes from '@/components/ui/illustrations/IllustrationRecettes';
 import Page, { useColumns, useLarge } from '@/components/ui/Page';
@@ -36,6 +38,19 @@ export default function RecettesIndex() {
   const toutes = getAllRecipes();
   const colonnes = useColumns(3);
   const large = useLarge();
+
+  /**
+   * Le catalogue montre des photos quand elles y sont **toutes**, et pas avant.
+   *
+   * Une rangée où deux cartes portent une photo et la troisième non ne se lit pas comme un
+   * catalogue en cours de constitution : elle se lit comme une carte cassée. Les hauteurs
+   * divergent, le texte de l'une commence là où l'autre a son image, et l'œil cherche ce qui
+   * manque. Reculer le seuil à « toutes » est le seul état qui n'ait jamais l'air d'un accident.
+   *
+   * La fiche, elle, n'attend pas : une photo ajoutée aujourd'hui s'y voit aujourd'hui. Ajouter les
+   * photos par sept reste donc payant tout de suite, sans que le catalogue en pâtisse.
+   */
+  const photosCompletes = nombreDePhotos() >= toutes.length;
   const [criteres, setCriteres] = useState<Criteres>({});
 
   const recettes = useMemo(() => chercherRecettes(toutes, criteres), [toutes, criteres]);
@@ -111,25 +126,39 @@ export default function RecettesIndex() {
               >
                 <Link href={`/recettes/${r.slug}`} asChild>
                   <Pressable accessibilityRole="link" className="h-full">
-                    <Card className="h-full p-5">
-                      {/* Le titre de la carte est celui de la recette : un niveau 2 sous le
+                    <Card className="h-full overflow-hidden">
+                      {/* `sizes` suit la grille : une colonne sous 680 points, deux jusqu'à
+                          1000, trois au-delà — la carte fait donc environ un tiers de la colonne
+                          de contenu, bornée à 1120. */}
+                      {photosCompletes ? (
+                        <VisuelRecette
+                          slug={r.slug}
+                          titre={r.titre}
+                          categorie={r.categorie}
+                          sizes="(max-width: 680px) 92vw, (max-width: 1000px) 46vw, 350px"
+                          repli={false}
+                        />
+                      ) : null}
+                      <View className="p-5">
+                        {/* Le titre de la carte est celui de la recette : un niveau 2 sous le
                           « Recettes » de la page, ce qui donne un sommaire parcourable. */}
-                      <Titre
-                        niveau={2}
-                        className="mb-1 text-option font-sans-medium text-primary-ink"
-                      >
-                        {r.titre}
-                      </Titre>
-                      <Text className="font-sans mb-3 flex-1 text-small leading-[19px] text-muted">
-                        {r.description}
-                      </Text>
-                      <Text
-                        style={{ fontVariant: ['tabular-nums'] }}
-                        className="font-sans text-caption text-muted2"
-                      >
-                        {dureeTotale(r)} min · {r.kcal} kcal · {r.proteines} g de protéines par
-                        portion
-                      </Text>
+                        <Titre
+                          niveau={2}
+                          className="mb-1 text-option font-sans-medium text-primary-ink"
+                        >
+                          {r.titre}
+                        </Titre>
+                        <Text className="font-sans mb-3 flex-1 text-small leading-[19px] text-muted">
+                          {r.description}
+                        </Text>
+                        <Text
+                          style={{ fontVariant: ['tabular-nums'] }}
+                          className="font-sans text-caption text-muted2"
+                        >
+                          {dureeTotale(r)} min · {r.kcal} kcal · {r.proteines} g de protéines par
+                          portion
+                        </Text>
+                      </View>
                     </Card>
                   </Pressable>
                 </Link>

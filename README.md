@@ -536,6 +536,37 @@ Ce n'est pas un réglage mais une conséquence, et chaque point compte :
    l'écran pendant ce temps : pas d'écran blanc, et pas de saut de police — un défaut que l'œil lit
    comme de la lenteur alors que tout est déjà là.
 
+### Les photos de recettes
+
+L'application n'avait jamais affiché une seule image bitmap : icônes et images de partage sont
+engendrées, tout le reste est vectoriel. La chaîne est donc neuve, et elle attend des fichiers —
+`photos/<slug>.jpg`, un par recette, le lien se faisant par le nom. Aucune recette n'a eu à
+changer, et `photos/CHOIX.md` dit ce que chacune doit montrer.
+
+`tools/build-photos.ts` produit trois largeurs en AVIF et en WebP, plus un **aperçu flou de seize
+pixels** embarqué en base64 dans le paquet. Sans lui, la place n'est pas tenue et le texte saute
+quand la photo arrive.
+
+**Un vrai `<img>`, pas l'`Image` de react-native-web.** C'est le point technique de toute
+l'affaire : `Image` rend un `<div>` avec une image de fond, donc ni `srcset`, ni `sizes`, ni
+chargement différé, ni format alternatif — le navigateur téléchargerait la même image pour une
+vignette de 300 px et pour un écran dense. `Photo.web.tsx` emploie donc les balises du document
+directement, comme `+html.tsx` le fait déjà. Mesuré : pour un emplacement de 260 points, le
+navigateur choisit l'AVIF de 400 px et ne télécharge que celui-là.
+
+Trois décisions qui se paient si on les défait :
+
+- **Le catalogue montre les photos quand elles y sont toutes.** Une rangée où deux cartes en ont
+  une et la troisième non ne se lit pas comme un catalogue en cours de constitution, mais comme une
+  carte cassée. La fiche, elle, n'attend pas : une photo ajoutée aujourd'hui s'y voit aujourd'hui.
+- **Le visuel de la fiche est hors du `large ?`.** Il y était, donc absent du HTML livré, où
+  `useWindowDimensions()` vaut zéro — et le JSON-LD annonçait une image que la page ne montrait
+  pas.
+- **Rien en natif, et c'est assumé.** Sans serveur, une photo doit être embarquée dans le paquet ;
+  soixante-deux, même réduites, alourdissent le téléchargement de l'application pour des fiches qui
+  se lisent très bien sans. `src/lib/photos.ts` porte la décision et dit ce qu'il faudrait faire
+  pour l'ouvrir.
+
 ### Deux familles d'images, et quand employer laquelle
 
 | | Ce que c'est | Ce que ça coûte | Où |
