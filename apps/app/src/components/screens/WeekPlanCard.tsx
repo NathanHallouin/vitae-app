@@ -20,7 +20,9 @@ export default function WeekPlanCard({ week }: { week: WeekPlan }) {
   return (
     <View className="gap-4">
       <Card className="p-6">
-        <Overline className="mb-1">Votre semaine type</Overline>
+        <Overline niveau={2} className="mb-1">
+          Votre semaine type
+        </Overline>
         <View className="my-2">
           <Chiffre
             valeur={week.strengthPerWeek}

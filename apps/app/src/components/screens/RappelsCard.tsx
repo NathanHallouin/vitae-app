@@ -99,7 +99,9 @@ export default function RappelsCard() {
     <Card className="p-6">
       <View className="flex-row items-start justify-between gap-4">
         <View className="min-w-0 flex-1">
-          <Overline className="mb-1">Me rappeler de bouger</Overline>
+          <Overline niveau={2} className="mb-1">
+            Me rappeler de bouger
+          </Overline>
           <Text className="text-base leading-[22px] text-muted">
             Une invitation discrète à vous lever, à intervalle régulier. C’est le geste le plus
             rentable de cette page : il ne demande aucune récupération et se cumule tous les jours.

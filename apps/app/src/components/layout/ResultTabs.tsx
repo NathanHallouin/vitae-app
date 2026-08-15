@@ -31,7 +31,9 @@ export default function ResultTabs() {
   const palette = usePalette();
 
   return (
-    <View className="border-b border-divider bg-surface">
+    // `navigation` sort un `<nav>` : c'est la navigation principale du site sur écran large, et
+    // c'est le repère qu'un lecteur d'écran cherche en premier sur une page inconnue.
+    <View role="navigation" aria-label="Résultats" className="border-b border-divider bg-surface">
       <View
         className="w-full flex-row gap-1 self-center px-4"
         style={{ maxWidth: MAX_CONTENT }}

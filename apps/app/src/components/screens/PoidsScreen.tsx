@@ -22,7 +22,9 @@ export default function PoidsScreen() {
     <View className="gap-6">
       <Apparition depuis={1}>
         <Card className="p-6">
-          <Overline className="mb-1">Quel poids viser ?</Overline>
+          <Overline niveau={2} className="mb-1">
+            Quel poids viser ?
+          </Overline>
           <Text className="mb-[14px] text-small text-muted">
             Trois repères calculés pour votre taille. Choisissez celui qui vous parle, rien n’est
             définitif.
@@ -55,7 +57,9 @@ export default function PoidsScreen() {
         </Card>
 
         <Card className="p-6">
-          <Overline className="mb-[14px]">Combien de temps ?</Overline>
+          <Overline niveau={2} className="mb-[14px]">
+            Combien de temps ?
+          </Overline>
 
           {projection.coherent ? (
             <>

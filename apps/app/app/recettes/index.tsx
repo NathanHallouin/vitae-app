@@ -13,6 +13,7 @@ import Seo from '@/components/layout/Seo';
 import FiltresRecettes from '@/components/recette/FiltresRecettes';
 import Page, { useColumns } from '@/components/ui/Page';
 import { Button, Card } from '@/components/ui/primitives';
+import Titre from '@/components/ui/Titre';
 
 /**
  * Index des recettes, avec recherche et filtres.
@@ -45,12 +46,9 @@ export default function RecettesIndex() {
       />
 
       <Page>
-        <Text
-          accessibilityRole="header"
-          className="mb-[6px] font-display text-h1 leading-[44px] text-ink"
-        >
+        <Titre niveau={1} className="mb-[6px] font-display text-h1 leading-[44px] text-ink">
           Recettes
-        </Text>
+        </Titre>
         {/* Mesure bornée en points et non en `ch` : l'unité typographique n'existe pas en
             natif, où la borne serait silencieusement ignorée. */}
         <Text className="mb-8 text-body leading-[26px] text-muted" style={{ maxWidth: 680 }}>
@@ -78,19 +76,30 @@ export default function RecettesIndex() {
         ) : (
           /* Grille plutôt que pile : en pleine largeur, chaque recette occupait un bandeau de
              1 400 px pour trois lignes de texte. Le rembourrage remplace `gap`, seul moyen de
-             composer avec des largeurs en pourcentage sans recourir à `calc()`, absent en natif. */
-          <View className="flex-row flex-wrap" style={{ marginHorizontal: -8 }}>
+             composer avec des largeurs en pourcentage sans recourir à `calc()`, absent en natif.
+
+             `list` et `listitem` : soixante-deux recettes sont une liste, et le dire donne au
+             lecteur d'écran son « 12 sur 62 » et au document un `<ul>` plutôt qu'un tas de
+             `<div>`. Le style ne bouge pas — `react-native-web` neutralise déjà les puces et les
+             retraits que le navigateur poserait. */
+          <View role="list" className="flex-row flex-wrap" style={{ marginHorizontal: -8 }}>
             {recettes.map((r) => (
               <View
                 key={r.slug}
+                role="listitem"
                 style={{ width: `${100 / colonnes}%`, paddingHorizontal: 8, paddingBottom: 16 }}
               >
                 <Link href={`/recettes/${r.slug}`} asChild>
                   <Pressable accessibilityRole="link" className="h-full">
                     <Card className="h-full p-5">
-                      <Text className="mb-1 text-option font-sans-medium text-primary-ink">
+                      {/* Le titre de la carte est celui de la recette : un niveau 2 sous le
+                          « Recettes » de la page, ce qui donne un sommaire parcourable. */}
+                      <Titre
+                        niveau={2}
+                        className="mb-1 text-option font-sans-medium text-primary-ink"
+                      >
                         {r.titre}
-                      </Text>
+                      </Titre>
                       <Text className="mb-3 flex-1 text-small leading-[19px] text-muted">
                         {r.description}
                       </Text>

@@ -85,7 +85,7 @@ export default function AlimentationScreen() {
         </Repliable>
 
         <Card className="p-6">
-          <Overline>Votre repère quotidien</Overline>
+          <Overline niveau={2}>Votre repère quotidien</Overline>
           <View className="mt-[10px] mb-2">
             <Chiffre
               valeur={metrics.target}
@@ -98,7 +98,9 @@ export default function AlimentationScreen() {
           <Text className="text-base leading-[22px] text-muted">{metrics.goal.note}</Text>
 
           <View className="mt-5 border-t border-divider pt-[18px]">
-            <Overline className="mb-1">{rangeCaption(metrics.goal.key)}</Overline>
+            <Overline niveau={3} className="mb-1">
+              {rangeCaption(metrics.goal.key)}
+            </Overline>
             <Text className="mb-4 text-small text-muted">
               Inutile de viser juste : tant que vous restez dans cette fourchette, ça marche.
             </Text>

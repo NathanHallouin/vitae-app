@@ -25,6 +25,7 @@ import Icon, { type IconName } from '@/components/ui/Icon';
 import OptionButton from '@/components/ui/OptionButton';
 import Overline from '@/components/ui/Overline';
 import { Button, Card, cx, NumberField, ProgressBar } from '@/components/ui/primitives';
+import Titre from '@/components/ui/Titre';
 import { useGroupeRadio } from '@/components/ui/useGroupeRadio';
 import { usePalette } from '@/theme/palette';
 
@@ -99,7 +100,11 @@ export default function ProfilForm({
       <View className="mb-5 flex-row items-end justify-between gap-4">
         <View className="min-w-0 flex-1">
           <Overline className="mb-1">{kicker}</Overline>
-          <Text className="font-display text-h2 leading-[34px] text-ink">{title}</Text>
+          {/* Le seul niveau 1 de l'écran du profil, qui n'a pas de `PageIntro` : sans lui, la
+              page sortait sans aucun titre de document. */}
+          <Titre niveau={1} className="font-display text-h2 leading-[34px] text-ink">
+            {title}
+          </Titre>
         </View>
         <Button size="small" onPress={() => dispatch({ type: 'toggleMode' })}>
           {isWizard ? 'Tout d’un coup' : 'Une à la fois'}

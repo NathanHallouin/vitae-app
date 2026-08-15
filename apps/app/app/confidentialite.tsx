@@ -5,6 +5,7 @@ import { SITE_URL } from '@vitae/core/site';
 import { Text, View } from 'react-native';
 import Seo from '@/components/layout/Seo';
 import Page from '@/components/ui/Page';
+import Titre from '@/components/ui/Titre';
 
 /**
  * La politique de confidentialité.
@@ -24,23 +25,17 @@ export default function ConfidentialitePage() {
       />
 
       <Page>
-        <Text
-          accessibilityRole="header"
-          className="mb-3 font-display text-h1 leading-[44px] text-ink"
-        >
+        <Titre niveau={1} className="mb-3 font-display text-h1 leading-[44px] text-ink">
           Confidentialité
-        </Text>
+        </Titre>
         <Text className="mb-8 text-body leading-[26px] text-muted">{CONFIDENTIALITE_RESUME}</Text>
 
         <View className="gap-6">
           {CONFIDENTIALITE.map((section) => (
             <View key={section.titre}>
-              <Text
-                accessibilityRole="header"
-                className="mb-2 font-display text-h3 leading-[26px] text-ink"
-              >
+              <Titre niveau={2} className="mb-2 font-display text-h3 leading-[26px] text-ink">
                 {section.titre}
-              </Text>
+              </Titre>
               <View className="gap-3">
                 {section.paragraphes.map((p) => (
                   <Text key={p} className="text-base leading-[22px] text-muted">

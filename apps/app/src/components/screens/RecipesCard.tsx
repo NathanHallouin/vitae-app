@@ -61,7 +61,9 @@ export default function RecipesCard({ metrics, goal }: { metrics: Metrics; goal:
 
   return (
     <Card className="p-6">
-      <Overline className="mb-1">Des recettes pour ces repères</Overline>
+      <Overline niveau={2} className="mb-1">
+        Des recettes pour ces repères
+      </Overline>
       <Text className="mb-5 text-base leading-[22px] text-muted">
         Nos recettes, choisies pour tomber près de vos {kcal(metrics.target)} kcal et de vos besoins
         en protéines, sans jamais servir deux fois le même ingrédient dans la journée. Touchez-en

@@ -5,6 +5,7 @@ import { Pressable, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useDerivedValue, withTiming } from 'react-native-reanimated';
 import Icon from '@/components/ui/Icon';
 import { Card, cx } from '@/components/ui/primitives';
+import Titre from '@/components/ui/Titre';
 import { versRoute } from '@/lib/route';
 import { MOTION, useMotionReduite } from '@/theme/motion';
 import { usePalette } from '@/theme/palette';
@@ -38,9 +39,9 @@ export default function Explainer({ data }: { data: ExplainerData }) {
 
   return (
     <Card taille className="mt-6 p-6">
-      <Text accessibilityRole="header" className="mb-2 font-display text-h3 text-ink">
+      <Titre niveau={2} className="mb-2 font-display text-h3 text-ink">
         {data.title}
-      </Text>
+      </Titre>
       <Text className="mb-5 text-base leading-[22px] text-muted">{data.fil}</Text>
 
       <View className="border-t border-divider">

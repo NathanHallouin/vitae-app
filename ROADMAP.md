@@ -47,6 +47,68 @@ froid, le sélecteur de date natif sur les deux plateformes, l'écran maintenu a
 recette, le rendu des polices sur Android, le comportement des marges de sécurité sur un iPhone à
 encoche et sur un Android à barre gestuelle.
 
+### 6. Le site est installable et fonctionne hors ligne : fait
+
+`manifest.json` et ses icônes sont engendrés depuis `app.config.ts`, qui déclarait déjà le nom, le
+nom court, la couleur de thème et la description sans que rien ne s'en serve. Le document les lie,
+`apple-touch-icon` comprise — iOS ignore le manifeste et pose sinon une capture de la page.
+
+Le manifeste seul ne suffisait pas, et c'est mesuré : Chrome ne proposait pas l'installation.
+Il exige un service worker, et une application installée qui s'ouvre hors ligne montrerait de
+toute façon la page d'erreur du navigateur — absurde pour une application dont tout est calculé
+sur l'appareil. `tools/build-sw.ts` l'engendre **après** l'export, parce qu'il doit nommer le
+paquet et la feuille de style, dont l'empreinte n'existe qu'à ce moment-là.
+
+Trois choix à connaître avant d'y toucher :
+
+- **Les pages passent par le réseau d'abord.** L'inverse est le piège classique du service worker :
+  une version fautive reste servie indéfiniment, sans recours pour l'utilisateur.
+- **Le précache est tolérant.** `cache.addAll()` est tout ou rien, et une seule adresse en échec
+  vidait l'installation entière sans le moindre bruit — c'est arrivé au premier essai, sur un
+  serveur qui ne savait pas rendre `/metabolisme` pour `metabolisme.html`.
+- **Le cache est versionné sur l'empreinte du paquet**, et les autres sont supprimés à
+  l'activation : jamais deux versions du site en mémoire.
+
+Vérifié dans le navigateur, serveur éteint : `/poids` s'affiche complètement, polices comprises,
+sur une route qui n'avait jamais été visitée. La CI garde `sw.js`, sa validité syntaxique, son
+enregistrement dans le document, et le fait qu'il précache bien le paquet du build courant.
+
+Ce que cela change au chemin critique : l'application est distribuable **avant** l'ouverture des
+comptes développeur. Un lien suffit, et le site s'ajoute à l'écran d'accueil en plein écran.
+
+Ce qui reste : les soixante-deux recettes ne sont pas précachées — deux mégaoctets de HTML pour un
+catalogue qu'on ne parcourt pas forcément — elles se mettent en cache à la visite. Et les polices
+suivent la même règle, ce qui suffit puisqu'elles sont chargées dès la première page.
+
+### 7. Le poids des polices : fait
+
+L'export embarquait **trente-six** fichiers de police, 7,7 Mo, pour cinq coupes affichées :
+`@expo-google-fonts` enregistre la famille entière dès qu'on en importe une. Les paquets sont
+passés en dépendances de développement et `tools/build-fonts.ts` prélève ce qui sert.
+
+| | avant | après |
+|---|---|---|
+| Polices dans l'export | 36 fichiers, 7,7 Mo | 5 fichiers, 1,4 Mo |
+| Export complet | 17 Mo | 11 Mo |
+| Paquet JavaScript | 2 739 Ko | 2 697 Ko |
+| Départ du téléchargement des polices | après exécution du paquet | avec l'analyse du HTML |
+
+Mesuré dans le navigateur : la Fraunces des titres part en même temps que le paquet et arrive en
+2 ms, soit complète avant la fin du téléchargement du paquet. Les trois Inter suivent à la
+découverte du texte qui les emploie.
+
+**Trouvé en vérifiant, et laissé en l'état parce que c'est une décision de conception** : le texte
+courant ne porte aucune classe `font-*` et retombe sur la pile système du navigateur. Les
+paragraphes de l'application ne sont donc pas en Inter, contrairement aux libellés. Deux issues, au
+choix : donner sa famille au corps de texte — ce qui change l'aspect de tous les écrans sur les
+trois plateformes — ou assumer la pile système et retirer `Inter_400Regular`, qui n'est aujourd'hui
+ni téléchargée ni affichée.
+
+Reste possible, et non fait : **passer les polices en woff2 sous-ensemble latin**. Une Inter tombe
+alors de 335 Ko à une trentaine, contre 158 Ko en TTF gzippé. Le coût n'est pas technique mais
+structurel : la conversion demande `fontTools`, donc soit une étape Python dans une chaîne qui n'en
+a aucune, soit des binaires versionnés dans le dépôt. À trancher avant de le faire.
+
 ## v1.1 : Finitions avant de montrer l'app — fait
 
 Les cinq points sont livrés. Ce qui reste avant publication est administratif, et se trouve
@@ -216,9 +278,11 @@ JSON du v2 doit donc être pensé comme un futur format d'import serveur.
 - Le pré-rendu du site est fragile par nature : tout composant qui refuse de rendre hors navigateur
   produit une page vide sans faire échouer le build. La CI garde une vérification sur le HTML
   produit ; l'étendre à chaque nouvelle route indexable.
-- `react-native-web` rend des `<div>`, pas un balisage sémantique. Les rôles d'accessibilité
-  (`accessibilityRole="header"`, `"link"`, `"radio"`) sont ce qui tient lieu de structure : les
-  omettre dégrade le référencement autant que les lecteurs d'écran.
+- `react-native-web` sait rendre un balisage sémantique, mais seulement là où un rôle le demande —
+  et il échoue en silence : la page reste identique à l'œil. Un `Pressable` qui appelle le routeur
+  sort en `<div>` au lieu de `<a>`, un `accessibilityRole="header"` sans `aria-level` sort en
+  `<h1>` quel que soit son rang. Voir « Le balisage n'est pas donné, il se demande » dans
+  `README.md` ; la CI garde la structure du fichier produit.
 - Contenu santé : ajouter une exclusion explicite pour la grossesse et les moins de 15 ans. La
   validation bloque déjà l'âge, mais rien ne l'explique à l'utilisateur.
 - Mesure d'audience : **aucune, et c'est un choix qui a un prix**. L'ajouter rendrait fausses la

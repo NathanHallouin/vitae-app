@@ -12,9 +12,11 @@
  *   est de toute façon plus étroite que la mesure qu'elles cherchaient à borner.
  */
 
+import { Link } from 'expo-router';
 import { type ReactNode, useState } from 'react';
 import { Pressable, Text, TextInput, View, type ViewProps } from 'react-native';
 import { LinearTransition } from 'react-native-reanimated';
+import { versRoute } from '@/lib/route';
 import { MOTION, useMotionReduite } from '@/theme/motion';
 import { usePalette } from '@/theme/palette';
 import { VueAnimee } from './VueAnimee';
@@ -52,9 +54,22 @@ const BUTTON_LABEL_SIZES = {
   small: 'text-small',
 } as const;
 
+/**
+ * `href` plutôt que `onPress` quand le bouton mène ailleurs.
+ *
+ * Ce n'est pas une commodité d'écriture : un `onPress` qui appelle le routeur rend un `<div>` sur
+ * le web. Rien ne s'ouvre au clic milieu, rien ne se copie au clic droit, l'adresse n'apparaît pas
+ * dans la barre d'état — et surtout, un moteur de recherche n'a aucun lien à suivre. L'accueil du
+ * site sortait ainsi avec zéro `<a>` : la page la plus visitée ne menait nulle part.
+ *
+ * `Link asChild` clone le `Pressable` qu'il reçoit et lui passe l'adresse ; c'est le `Pressable`
+ * qui doit être son enfant direct, d'où l'enveloppe posée ici et non par l'appelant. La navigation
+ * native, elle, ne change pas.
+ */
 export function Button({
   variant = 'text',
   size = 'medium',
+  href,
   onPress,
   disabled,
   className,
@@ -63,15 +78,17 @@ export function Button({
 }: {
   variant?: ButtonVariant;
   size?: keyof typeof BUTTON_SIZES;
+  /** destination ; exclusif avec `onPress` */
+  href?: string;
   onPress?: () => void;
   disabled?: boolean;
   className?: string;
   children: ReactNode;
   accessibilityLabel?: string;
 }) {
-  return (
+  const bouton = (
     <Pressable
-      accessibilityRole="button"
+      accessibilityRole={href ? 'link' : 'button'}
       accessibilityLabel={accessibilityLabel}
       accessibilityState={{ disabled: Boolean(disabled) }}
       onPress={onPress}
@@ -91,6 +108,14 @@ export function Button({
         {children}
       </Text>
     </Pressable>
+  );
+
+  if (!href) return bouton;
+
+  return (
+    <Link href={versRoute(href)} asChild>
+      {bouton}
+    </Link>
   );
 }
 

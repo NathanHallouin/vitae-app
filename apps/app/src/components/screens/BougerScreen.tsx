@@ -37,14 +37,18 @@ export default function BougerScreen() {
     <View className="gap-6">
       <Apparition depuis={1}>
         <Card className="p-6">
-          <Overline className="mb-[10px]">{plan.title}</Overline>
+          <Overline niveau={2} className="mb-[10px]">
+            {plan.title}
+          </Overline>
           <Text className={`text-base leading-[22px] text-muted ${plan.hasSplit ? 'mb-5' : ''}`}>
             {plan.note}
           </Text>
 
           {plan.hasSplit ? (
             <>
-              <Overline className="mb-3">{plan.splitLabel}</Overline>
+              <Overline niveau={3} className="mb-3">
+                {plan.splitLabel}
+              </Overline>
               <SplitBar pct={plan.movePct} />
               <TileRow>
                 <StatTile
@@ -62,7 +66,9 @@ export default function BougerScreen() {
         </Card>
 
         <Card className="p-6">
-          <Overline className="mb-1">D’où vient le mouvement, chez vous</Overline>
+          <Overline niveau={2} className="mb-1">
+            D’où vient le mouvement, chez vous
+          </Overline>
           <Text className="mb-4 text-base leading-[22px] text-muted">
             Sur les {kcal(metrics.tdee - metrics.bmr)} kcal que vous dépensez chaque jour en plus de
             votre métabolisme de base, voici ce qui revient à vos journées et ce qui revient à vos

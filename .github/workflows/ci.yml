@@ -52,6 +52,11 @@ jobs:
       - name: Export du site
         run: bun run --cwd apps/app export:web
 
+      - name: Service worker
+        # Après l'export, jamais avant : il nomme le paquet et la feuille de style, dont
+        # l'empreinte n'existe qu'une fois l'export fait.
+        run: bun run sw
+
       - name: Le HTML livré contient bien le contenu
         # Une page vide passerait toutes les étapes précédentes : c'est exactement ce qui est arrivé
         # au premier export, quand la racine attendait des polices qui ne se chargent jamais dans
@@ -78,6 +83,77 @@ jobs:
           recette=apps/app/dist/recettes/omelette-aux-champignons.html
           verifie recettes/omelette-aux-champignons.html 'Omelette aux champignons'
           grep -q 'application/ld+json' "$recette" || { echo "JSON-LD absent de $recette"; exit 1; }
+
+      - name: Le HTML livré a une structure
+        # Trois défauts qui ne se voient pas à l'écran et que rien d'autre n'attrape.
+        #
+        # Un `Pressable` qui appelle le routeur rend un `<div>` : l'accueil est sorti sans un seul
+        # `<a>`, donc sans aucun chemin qu'un moteur puisse suivre vers le reste du site.
+        # `accessibilityRole="header"` sans `aria-level` rend un `<h1>`, toujours : une page de
+        # recette en portait deux et pas un seul `<h2>`. Et une page sans `<main>` n'a pas de
+        # contenu principal à atteindre, ni pour un lien d'évitement ni pour un lecteur d'écran.
+        run: |
+          structure() {
+            page="apps/app/dist/$1"
+            n=$(grep -o '<h1[ >]' "$page" | wc -l)
+            [ "$n" = "1" ] || { echo "$page : $n <h1>, il en faut exactement un"; exit 1; }
+            grep -q '<main[ >]' "$page" || { echo "$page : pas de <main>"; exit 1; }
+          }
+          for page in index.html metabolisme.html alimentation.html poids.html bouger.html \
+                      profil.html confidentialite.html recettes/index.html \
+                      recettes/omelette-aux-champignons.html; do
+            structure "$page"
+          done
+
+          # L'accueil doit mener quelque part : le catalogue de recettes est la porte que
+          # l'acquisition emprunte.
+          grep -q '<a [^>]*href="/recettes"' apps/app/dist/index.html \
+            || { echo "l'accueil n'a aucun lien vers /recettes"; exit 1; }
+
+          # Le catalogue est une liste, et chaque recette y est un lien suivi d'un titre de
+          # niveau 2 : c'est ce qui en fait un sommaire plutôt qu'un tas de cartes.
+          grep -q '<ul[ >]' apps/app/dist/recettes/index.html \
+            || { echo "le catalogue n'est pas une liste"; exit 1; }
+          h2=$(grep -o '<h2[ >]' apps/app/dist/recettes/index.html | wc -l)
+          [ "$h2" -ge 60 ] || { echo "catalogue : $h2 titres de recette, attendu 60 au moins"; exit 1; }
+
+          # Le site est installable : sans manifeste joignable, le navigateur ne le propose pas.
+          test -f apps/app/dist/manifest.json || { echo "manifest.json absent de l'export"; exit 1; }
+          grep -q 'rel="manifest"' apps/app/dist/index.html \
+            || { echo "le manifeste n'est pas lié depuis le document"; exit 1; }
+          for icone in icone-192.png icone-512.png icone-maskable-512.png apple-touch-icon.png; do
+            test -f "apps/app/dist/$icone" || { echo "$icone absente de l'export"; exit 1; }
+          done
+
+          # Sans service worker, Chrome ne propose pas l'installation — et une application
+          # installée ouverte hors ligne montrerait la page d'erreur du navigateur.
+          test -f apps/app/dist/sw.js || { echo "sw.js absent de l'export"; exit 1; }
+          node --check apps/app/dist/sw.js || { echo "sw.js n'est pas du JavaScript valide"; exit 1; }
+          grep -q "serviceWorker.register" apps/app/dist/index.html \
+            || { echo "le service worker n'est pas enregistré depuis le document"; exit 1; }
+          # Le paquet doit être précaché sous le nom qu'il porte vraiment : c'est l'erreur que
+          # produirait un `sw.js` engendré avant l'export.
+          paquet=$(basename apps/app/dist/_expo/static/js/web/*.js)
+          grep -q "$paquet" apps/app/dist/sw.js \
+            || { echo "sw.js ne précache pas le paquet $paquet"; exit 1; }
+
+      - name: Seules les polices utilisées sont livrées
+        # Importer une coupe de `@expo-google-fonts` enregistre la famille entière : trente-six
+        # fichiers et 7,7 Mo partaient dans l'export pour cinq coupes affichées. Le jour où un
+        # écran réimporte le paquet au lieu de passer par `src/lib/polices.ts`, tout revient — et
+        # rien ne le signalerait, l'application ayant exactement le même aspect.
+        run: |
+          embarquees=$(find apps/app/dist/assets -name "*.ttf" | wc -l)
+          [ "$embarquees" = "0" ] \
+            || { echo "$embarquees polices embarquées par Metro : un écran importe-t-il @expo-google-fonts ?"; exit 1; }
+
+          livrees=$(find apps/app/dist/polices -name "*.ttf" | wc -l)
+          [ "$livrees" = "5" ] || { echo "$livrees polices dans dist/polices, 5 attendues"; exit 1; }
+
+          grep -q 'rel="preload"[^>]*Fraunces_600SemiBold' apps/app/dist/index.html \
+            || { echo "la police des titres n'est pas préchargée"; exit 1; }
+          grep -q "@font-face" apps/app/dist/index.html \
+            || { echo "les @font-face ne sont pas dans le document"; exit 1; }
 
       - name: Les fichiers engendrés sont à jour
         run: |

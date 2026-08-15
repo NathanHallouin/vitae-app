@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Text, useWindowDimensions, View } from 'react-native';
+import Titre from './Titre';
 
 /**
  * Titre d'écran et phrase d'accroche : de quoi parle cet écran, en une ligne.
@@ -24,12 +25,11 @@ export default function PageIntro({
   return (
     <View className="mb-6 flex-row items-center gap-8">
       <View className="min-w-0 flex-1">
-        <Text
-          accessibilityRole="header"
-          className="mb-[6px] font-display text-h2 leading-[34px] text-ink"
-        >
+        {/* Le titre de l'écran, et donc son unique niveau 1 : les cartes qui suivent sont des
+            niveaux 2. */}
+        <Titre niveau={1} className="mb-[6px] font-display text-h2 leading-[34px] text-ink">
           {title}
-        </Text>
+        </Titre>
         <Text className="text-body leading-[26px] text-muted">{lead}</Text>
       </View>
 

@@ -47,7 +47,14 @@ export default function Page({
       contentContainerClassName={cx('px-4 pt-6 pb-16', contentClassName)}
       {...rest}
     >
-      <View className="w-full self-center" style={{ maxWidth: MAX_CONTENT }}>
+      {/* `main` sort un `<main>` : le contenu de l'écran, par opposition à l'en-tête et aux barres
+          de navigation qui l'encadrent. C'est ce que vise le lien d'évitement d'un navigateur, et
+          ce qu'un lecteur d'écran atteint d'un geste.
+
+          Un seul par document, et c'est bien le cas : l'export web écrit un fichier par route, et
+          dans le navigateur les écrans hors champ sont masqués en `display: none` par
+          `react-native-screens`, donc absents de l'arbre d'accessibilité. */}
+      <View role="main" className="w-full self-center" style={{ maxWidth: MAX_CONTENT }}>
         {children}
       </View>
     </ScrollView>

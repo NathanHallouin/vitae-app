@@ -36,7 +36,9 @@ export default function MetabolismeScreen() {
         </Hero>
 
         <Card className="p-6">
-          <Overline className="mb-1">D’où vient cette dépense</Overline>
+          <Overline niveau={2} className="mb-1">
+            D’où vient cette dépense
+          </Overline>
           <Text className="mb-4 text-base leading-[22px] text-muted">
             Contrairement à ce qu’on imagine, le sport n’est pas le principal poste de dépense : le
             simple fait d’être en vie représente {energie.bmrPct} % de votre total, soit{' '}
@@ -72,7 +74,7 @@ export default function MetabolismeScreen() {
         </Card>
 
         <Card className="p-6">
-          <Overline>Votre corpulence (IMC)</Overline>
+          <Overline niveau={2}>Votre corpulence (IMC)</Overline>
           <View className="mt-[10px] mb-4">
             <Chiffre valeur={dec(metrics.bmi)} unite={metrics.band.label} taille="moyen" />
             <Text className="mt-1 text-small text-muted">

@@ -23,7 +23,9 @@ export default function NeatCard({ neat }: { neat: NeatPlan }) {
   return (
     <View className="gap-4">
       <Card className="p-6">
-        <Overline className="mb-[10px]">Ce que votre quotidien dépense déjà</Overline>
+        <Overline niveau={2} className="mb-[10px]">
+          Ce que votre quotidien dépense déjà
+        </Overline>
         <Text className="mb-5 text-base leading-[22px] text-muted">{neat.lead}</Text>
 
         <TileRow>

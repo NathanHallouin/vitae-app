@@ -10,7 +10,7 @@
  */
 
 import { LinearGradient } from 'expo-linear-gradient';
-import { usePathname, useRouter } from 'expo-router';
+import { Link, usePathname } from 'expo-router';
 import { Pressable, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ResultTabs, { useTopNav } from '@/components/layout/ResultTabs';
@@ -21,7 +21,6 @@ import { useColorMode } from '@/theme/ColorMode';
 import { usePalette } from '@/theme/palette';
 
 export default function AppHeader() {
-  const router = useRouter();
   const palette = usePalette();
   const { mode, toggle } = useColorMode();
   const insets = useSafeAreaInsets();
@@ -35,6 +34,9 @@ export default function AppHeader() {
 
   return (
     <View
+      // `banner` sort un `<header>` sur le web : le lecteur d'écran peut sauter l'en-tête d'un
+      // geste, et le document cesse d'être une pile de `<div>` indifférenciés.
+      role="banner"
       className="border-b border-divider bg-surface"
       // L'encoche est dégagée ici plutôt que par une `SafeAreaView` : l'en-tête doit garder son
       // fond plein jusqu'au bord haut de l'écran, pas commencer sous la barre d'état.
@@ -47,50 +49,57 @@ export default function AppHeader() {
         className="h-14 w-full flex-row items-center gap-3 self-center px-4"
         style={{ maxWidth: MAX_CONTENT }}
       >
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Accueil"
-          onPress={() => router.navigate('/')}
-          className="min-w-0 flex-1 flex-row items-center gap-3"
-        >
-          <LinearGradient
-            colors={[palette.heroFrom, palette.heroTo]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={{ width: 30, height: 30, borderRadius: 9, justifyContent: 'center' }}
+        {/* La marque est un lien, comme le logo de n'importe quel site : sur un `Pressable` seul,
+            le web n'a ni clic milieu, ni adresse à copier, ni lien à faire suivre à un moteur de
+            recherche. La navigation native est la même. */}
+        <Link href="/" asChild>
+          <Pressable
+            accessibilityRole="link"
+            accessibilityLabel="Accueil"
+            className="min-w-0 flex-1 flex-row items-center gap-3"
           >
-            <Text
-              className="text-center text-caption font-sans-bold tracking-[0.3px]"
-              style={{ color: palette.heroText }}
+            <LinearGradient
+              colors={[palette.heroFrom, palette.heroTo]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={{ width: 30, height: 30, borderRadius: 9, justifyContent: 'center' }}
             >
-              MB
+              <Text
+                className="text-center text-caption font-sans-bold tracking-[0.3px]"
+                style={{ color: palette.heroText }}
+              >
+                MB
+              </Text>
+            </LinearGradient>
+            <Text numberOfLines={1} className="min-w-0 flex-1 font-display text-option text-ink">
+              Métabolisme de base
             </Text>
-          </LinearGradient>
-          <Text numberOfLines={1} className="min-w-0 flex-1 font-display text-option text-ink">
-            Métabolisme de base
-          </Text>
-        </Pressable>
+          </Pressable>
+        </Link>
 
         {/* Les recettes sont la partie publique du site : accessibles sans profil, et toujours
-            visibles, la barre du bas ne portant que l'outil. */}
-        <Pressable
-          accessibilityRole="button"
-          onPress={() => router.navigate('/recettes')}
-          className="flex-none rounded-control px-2 py-2 active:bg-surface2"
-        >
-          <Text className="text-base font-sans-semibold text-muted">Recettes</Text>
-        </Pressable>
+            visibles, la barre du bas ne portant que l'outil. C'est aussi, sur l'accueil, le seul
+            chemin qu'un moteur de recherche a vers le catalogue. */}
+        <Link href="/recettes" asChild>
+          <Pressable
+            accessibilityRole="link"
+            className="flex-none rounded-control px-2 py-2 active:bg-surface2"
+          >
+            <Text className="text-base font-sans-semibold text-muted">Recettes</Text>
+          </Pressable>
+        </Link>
 
         {/* Le profil quitte la barre du bas avec elle : sans ce lien, il deviendrait inatteignable
             sur un écran large. */}
         {lienProfil ? (
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => router.navigate('/profil')}
-            className="flex-none rounded-control px-[14px] py-2 active:bg-surface2"
-          >
-            <Text className="text-base font-sans-semibold text-muted">Mon profil</Text>
-          </Pressable>
+          <Link href="/profil" asChild>
+            <Pressable
+              accessibilityRole="link"
+              className="flex-none rounded-control px-[14px] py-2 active:bg-surface2"
+            >
+              <Text className="text-base font-sans-semibold text-muted">Mon profil</Text>
+            </Pressable>
+          </Link>
         ) : null}
 
         <Pressable

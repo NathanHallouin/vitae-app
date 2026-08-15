@@ -53,7 +53,9 @@ export default function LivePreview({ form, age }: { form: FormState; age: numbe
 
   return (
     <Card accessibilityLiveRegion="polite" className="mt-6 p-5">
-      <Overline className="mb-[14px]">Vos chiffres en direct</Overline>
+      <Overline niveau={2} className="mb-[14px]">
+        Vos chiffres en direct
+      </Overline>
       <View>
         {rows.map((row) => (
           <View

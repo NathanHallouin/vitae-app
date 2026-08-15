@@ -266,7 +266,7 @@ Un dépôt, quatre paquets, deux cibles de livraison.
 apps/app/            application Expo — iOS, Android, et le site par export statique
 packages/core/       métier pur : calculs, plan, entraînement, recettes, persistance, textes
 packages/content/    62 recettes en Markdown, compilées en module TypeScript, et leur recherche
-tools/               scripts de génération (jetons, icônes, sitemap)
+tools/               scripts de génération (jetons, icônes, polices, sitemap, manifeste, service worker)
 store/               fiches App Store et Play Store, conformité
 ```
 
@@ -277,15 +277,95 @@ c'est deux fois la charge de maintenance et une divergence garantie à moyen ter
 rendre les mêmes écrans en natif et les exporter en HTML statique : le site est désormais un mode
 de livraison de l'application, pas un projet parallèle.
 
-Ce que le changement coûte, et qu'il faut assumer : le HTML produit est celui de
-`react-native-web`, donc une pile de `<div>` plutôt qu'un balisage sémantique riche, et le paquet
-JavaScript est plus lourd qu'un rendu serveur React. Ce que le changement rapporte : un seul écran
-à écrire, un seul jeu de textes, un seul thème.
+Ce que le changement coûte, et qu'il faut assumer : le paquet JavaScript est plus lourd qu'un
+rendu serveur React. Ce qu'il rapporte : un seul écran à écrire, un seul jeu de textes, un seul
+thème.
 
 Ce qui a été préservé de l'ancien site, parce que l'acquisition en dépend : chaque route est
 **pré-rendue en HTML** à la compilation, une page par recette comprise. Titres, descriptions,
 canoniques et données structurées `Recipe` sont dans le fichier livré, lisibles sans exécuter une
 ligne de JavaScript. La CI le vérifie sur le fichier produit, pas sur l'intention.
+
+### Le balisage n'est pas donné, il se demande
+
+`react-native-web` rend bien un balisage sémantique — `<main>`, `<nav>`, `<header>`, `<ul>`, `<a>`,
+`<h1>` à `<h6>` — mais seulement quand un rôle le lui demande. Par défaut il rend des `<div>`, et
+c'est un défaut silencieux : rien n'échoue, la page est identique à l'œil, et le HTML livré n'a
+plus de structure. Trois pièges se sont refermés avant d'être vus.
+
+- **Un `Pressable` qui appelle le routeur est un `<div>`.** L'accueil du site est sorti sans un
+  seul `<a>` : ni clic milieu, ni adresse à copier, ni chemin qu'un moteur puisse suivre vers le
+  reste du site. La navigation passe donc par `<Link asChild>` autour d'un `Pressable`
+  `accessibilityRole="link"`, ou par la propriété `href` de `Button`, qui pose l'enveloppe
+  elle-même.
+- **`accessibilityRole="header"` rend un `<h1>`, toujours.** Sans `aria-level`, une page de recette
+  sortait avec deux niveaux 1 et aucun niveau 2. Les titres passent par `Titre`, qui exige son
+  rang, et par `Overline niveau={2}` pour les cartes dont le surtitre est bien le titre.
+- **Le contenu principal doit se déclarer.** `Page` porte `role="main"`, l'en-tête `role="banner"`,
+  les onglets du haut `role="navigation"`, le catalogue `role="list"`.
+
+La CI vérifie tout cela sur le fichier produit — un `<h1>` et un seul par page, un `<main>`, un
+lien sortant sur l'accueil, une liste dans le catalogue.
+
+### Les polices, et pourquoi elles ne se chargent pas de la même façon
+
+`@expo-google-fonts` enregistre la famille **entière** dès qu'on importe une seule coupe : trente-six
+fichiers et 7,7 Mo partaient dans l'export du site pour les cinq coupes affichées. Les paquets sont
+donc passés en dépendances de développement à la racine — plus rien ne les importe — et
+`tools/build-fonts.ts` prélève les cinq fichiers utiles vers deux destinations, parce que les deux
+plateformes ne chargent pas une police de la même façon :
+
+| | Où | Comment |
+|---|---|---|
+| Natif | `assets/polices/` | `expo-font`, au démarrage, le splash tenant l'écran pendant ce temps |
+| Web | `public/polices/` | `@font-face` dans le document, plus un préchargement pour la coupe des titres |
+
+La différence est loin d'être cosmétique. Chargées par `expo-font` comme en natif, les polices
+n'étaient demandées qu'une fois les 2,7 Mo de JavaScript téléchargés **et exécutés**. Déclarées dans
+le document, elles partent avec l'analyse du HTML : mesuré dans le navigateur, la Fraunces des
+titres est arrivée en 2 ms, complète avant même la fin du téléchargement du paquet.
+
+Une seule coupe est préchargée, celle des titres — 71 Ko, et c'est le plus grand texte de l'écran.
+Précharger une coupe qui ne s'affiche pas la ferait télécharger pour rien, et les Inter pèsent
+335 Ko chacune.
+
+**À savoir avant de toucher aux polices** : le texte courant de l'application ne porte aucune classe
+`font-*`, il retombe donc sur la pile système du navigateur. Seules les coupes nommées
+explicitement — medium, semibold, bold, et la Fraunces — s'affichent vraiment. `Inter_400Regular`
+est déclarée mais n'est employée nulle part. Ce n'est pas une décision écrite quelque part, c'est un
+oubli que la vérification en navigateur a mis au jour.
+
+Le nom des cinq coupes est écrit à quatre endroits qu'aucun contrôle ne rapproche : `tools/polices.ts`
+(les scripts), `apps/app/tailwind.config.js` (une famille par graisse), `src/lib/polices.ts` (le
+chargement natif) et `+html.tsx` (les `@font-face`). Une divergence fait retomber l'interface sur la
+police système, sans erreur.
+
+### Le site s'installe, et fonctionne hors ligne
+
+C'est le cas type : aucun compte, aucune requête, tout est calculé sur l'appareil et les recettes
+sont dans le paquet. Une application qui n'a rien à charger n'a aucune raison de rester un onglet,
+ni de montrer une page d'erreur quand le réseau manque.
+
+Deux fichiers engendrés y suffisent, et aucun ne s'écrit à la main :
+
+- **`manifest.json`** (`tools/build-seo.ts`) reprend le nom, le nom court, la couleur de thème et
+  la description d'`app.config.ts`, qui les déclarait déjà pour le natif. Ses icônes viennent de
+  `tools/build-icons.ts`, dont une *maskable* dessinée plus petite dans son carré — Android rogne
+  jusqu'à la forme du thème du téléphone, et la flamme en sortait amputée.
+- **`sw.js`** (`tools/build-sw.ts`) est écrit **après** l'export, seul moment où le nom empreinté du
+  paquet et de la feuille de style est connu. Le manifeste seul ne suffisait pas : Chrome ne
+  proposait pas l'installation tant qu'il n'y avait pas de service worker.
+
+Trois règles, et se tromper sur l'une se paie cher :
+
+| | Pourquoi |
+|---|---|
+| Les pages : **réseau d'abord**, cache en secours | Le cache d'abord est le piège du service worker : une version fautive reste servie indéfiniment, sans recours |
+| Les ressources empreintées : **cache d'abord** | Leur nom change à chaque build ; une réponse en cache ne peut pas être périmée, seulement absente |
+| Le précache est **tolérant** | `cache.addAll()` est tout ou rien : une seule adresse en échec vidait l'installation entière, en silence |
+
+Le cache est versionné sur l'empreinte du paquet et les autres sont supprimés à l'activation : il
+n'y a jamais deux versions du site en mémoire.
 
 ### Métier partagé (`packages/core`)
 
@@ -349,6 +429,7 @@ src/
     store.ts            MMKV — et `store.web.ts`, que Metro choisit sur le web
     rappels.ts          notifications locales — et `rappels.web.ts`, qui ne fait rien
     route.ts            le seul endroit où une adresse du métier devient une route typée
+    polices.ts          `expo-font` — et `polices.web.ts`, les `@font-face` faisant le travail
 ```
 
 `lib/` ne contient que ce qui dépend de la plateforme, et c'est une règle : quand un fichier y
@@ -405,7 +486,8 @@ composants plutôt que des conventions — une convention se perd au troisième 
 | `Hero` | la réponse de l'écran : dégradé plein, surtitre, grand chiffre. **Une par écran, jamais deux** — c'est elle qui dit ce qui est la réponse et ce qui est le détail |
 | `Chiffre` | le grand nombre. Fraunces, chasse fixe, unité en Inter plus petite. Quatre tailles, de la réponse principale à la tuile |
 | `Card` | bordure fine, fond plein, **jamais d'ombre**. C'est ce qui donne l'air de papier plutôt que d'interface |
-| `Overline` | le surtitre 11 px en majuscules espacées, en tête de chaque carte |
+| `Overline` | le surtitre 11 px en majuscules espacées, en tête de chaque carte. `niveau` en fait un vrai titre de document |
+| `Titre` | un titre et son rang. Le rang est obligatoire : sans lui, le web rendrait un `<h1>` de plus |
 
 Le grand chiffre est l'élément signature, et ce n'est pas arbitraire : c'est une application de
 chiffres. Le traitement était réécrit dans huit fichiers avec des tailles et des interlignes qui
@@ -473,8 +555,8 @@ bun install
 bun run dev             # Expo, choix de la plateforme au lancement
 bun run dev:web         # directement dans le navigateur
 
-bun run generate        # jetons, icônes, recettes, sitemap — à lancer avant tout build
-bun run build:web       # export statique du site → apps/app/dist
+bun run generate        # jetons, icônes, recettes, sitemap, manifeste — avant tout build
+bun run build:web       # export statique du site → apps/app/dist, service worker compris
 bun run prebuild        # projets natifs ios/ et android/
 
 bun test packages/core  # 93 tests du métier

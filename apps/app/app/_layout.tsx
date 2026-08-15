@@ -13,14 +13,6 @@
  *    posé dans un écran se démonterait à chaque navigation, et le profil serait relu à chaque fois.
  */
 
-import { Fraunces_600SemiBold, useFonts as useFraunces } from '@expo-google-fonts/fraunces';
-import {
-  Inter_400Regular,
-  Inter_500Medium,
-  Inter_600SemiBold,
-  Inter_700Bold,
-  useFonts as useInter,
-} from '@expo-google-fonts/inter';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
@@ -30,6 +22,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { enableFreeze } from 'react-native-screens';
 import AppHeader from '@/components/layout/AppHeader';
+import { usePolices } from '@/lib/polices';
 import ProfileProvider from '@/state/ProfileProvider';
 import ColorModeProvider, { useColorMode } from '@/theme/ColorMode';
 import { MOTION, useMotionReduite } from '@/theme/motion';
@@ -94,14 +87,6 @@ function Navigation() {
 }
 
 export default function RootLayout() {
-  const [fraunces] = useFraunces({ Fraunces_600SemiBold });
-  const [inter] = useInter({
-    Inter_400Regular,
-    Inter_500Medium,
-    Inter_600SemiBold,
-    Inter_700Bold,
-  });
-
   /**
    * En natif seulement, l'arbre attend les polices.
    *
@@ -109,12 +94,12 @@ export default function RootLayout() {
    * saut de police quand la Fraunces arrive après coup — un défaut que l'œil lit comme de la
    * lenteur alors que tout est déjà là.
    *
-   * Sur le web, attendre serait une faute : les pages sont pré-rendues par Node, où aucune police
-   * ne se charge jamais. L'arbre ne rendrait rien, et le fichier HTML livré au moteur de recherche
-   * serait vide. Le navigateur, lui, affiche le texte en police système puis le remplace — c'est
-   * le comportement normal du web, et `font-display: swap` faisait déjà exactement cela.
+   * Sur le web, `usePolices` rend `true` sans rien charger : les coupes sont déclarées en
+   * `@font-face` dans le document, donc demandées par le navigateur pendant l'analyse du HTML.
+   * Attendre y serait de toute façon une faute — les pages sont pré-rendues par Node, où aucune
+   * police ne se charge jamais, et l'arbre livrerait un fichier HTML vide.
    */
-  const ready = Platform.OS === 'web' || (fraunces && inter);
+  const ready = usePolices();
 
   useEffect(() => {
     if (NATIF && ready) SplashScreen.hideAsync();

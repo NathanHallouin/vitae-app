@@ -10,7 +10,7 @@ contient et pourquoi, et la moitié des pièges de ce dépôt y sont déjà écr
 
 ```sh
 bun install
-bun run generate     # jetons, icônes, recettes, sitemap — indispensable après un clone
+bun run generate     # jetons, icônes, recettes, sitemap, manifeste — indispensable après un clone
 bun run dev:web      # navigateur, rechargement à chaud
 bun run dev          # Expo, choix de la plateforme au lancement
 
@@ -18,7 +18,7 @@ bun test packages    # le métier et le contenu
 bun run typecheck
 bun run check        # Biome : format, règles, imports
 bun run check:fix
-bun run build:web    # export statique du site → apps/app/dist
+bun run build:web    # export statique du site → apps/app/dist, service worker compris
 ```
 
 ## Ce qu'il faut savoir avant de toucher au code

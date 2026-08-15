@@ -10,6 +10,7 @@ import Icon from '@/components/ui/Icon';
 import Overline from '@/components/ui/Overline';
 import Page, { useColumns, useLarge } from '@/components/ui/Page';
 import { Button, Card } from '@/components/ui/primitives';
+import Titre from '@/components/ui/Titre';
 import { useProfile } from '@/state/ProfileProvider';
 import { usePalette } from '@/theme/palette';
 
@@ -60,12 +61,9 @@ export default function AccueilScreen() {
             et repoussaient « Ce que vous obtenez » sous la ligne de flottaison. */}
         <View className={large ? 'flex-row items-center gap-12' : ''}>
           <View className="min-w-0 flex-1">
-            <Text
-              accessibilityRole="header"
-              className="mb-4 font-display text-h1 leading-[44px] text-ink"
-            >
+            <Titre niveau={1} className="mb-4 font-display text-h1 leading-[44px] text-ink">
               Combien votre corps brûle-t-il de calories ?
-            </Text>
+            </Titre>
             <Text className="mb-2 text-body leading-[26px] text-muted">
               Même au repos, votre corps consomme de l’énergie pour respirer, faire battre votre
               cœur et vous garder au chaud. Savoir combien, c’est le point de départ pour perdre du
@@ -79,18 +77,10 @@ export default function AccueilScreen() {
             {known && metrics ? (
               <View className="gap-3">
                 <View className="flex-row flex-wrap gap-3">
-                  <Button
-                    variant="contained"
-                    size="large"
-                    onPress={() => router.navigate('/metabolisme')}
-                  >
+                  <Button variant="contained" size="large" href="/metabolisme">
                     Voir mes résultats
                   </Button>
-                  <Button
-                    variant="outlined"
-                    size="large"
-                    onPress={() => router.navigate('/profil')}
-                  >
+                  <Button variant="outlined" size="large" href="/profil">
                     Modifier mes infos
                   </Button>
                 </View>
@@ -101,14 +91,10 @@ export default function AccueilScreen() {
               </View>
             ) : (
               <View className="flex-row flex-wrap gap-3">
-                <Button variant="contained" size="large" onPress={() => router.navigate('/profil')}>
+                <Button variant="contained" size="large" href="/profil">
                   Commencer
                 </Button>
-                <Button
-                  variant="outlined"
-                  size="large"
-                  onPress={() => router.navigate('/recettes')}
-                >
+                <Button variant="outlined" size="large" href="/recettes">
                   Voir les recettes
                 </Button>
               </View>
@@ -121,7 +107,9 @@ export default function AccueilScreen() {
         </View>
 
         <Card className="mt-10 p-6">
-          <Overline className="mb-5">Ce que vous obtenez</Overline>
+          <Overline niveau={2} className="mb-5">
+            Ce que vous obtenez
+          </Overline>
           {/* Deux colonnes dès qu'il y a la place : quatre lignes pleine largeur pour une phrase
               de six mots laissaient les trois quarts de la carte vides. */}
           <View className="flex-row flex-wrap" style={{ marginHorizontal: -12 }}>

@@ -5,6 +5,7 @@ import { Text, View } from 'react-native';
 import Seo from '@/components/layout/Seo';
 import RecetteAtelier, { GarderEcranAllume } from '@/components/recette/RecetteAtelier';
 import Page from '@/components/ui/Page';
+import Titre from '@/components/ui/Titre';
 
 /**
  * Toutes les recettes sont connues à la compilation : l'export web produit un fichier HTML par
@@ -92,12 +93,9 @@ export default function RecettePage() {
           <Text className="text-small text-muted2"> · {recette.categorie}</Text>
         </View>
 
-        <Text
-          accessibilityRole="header"
-          className="mb-3 font-display text-h1 leading-[44px] text-ink"
-        >
+        <Titre niveau={1} className="mb-3 font-display text-h1 leading-[44px] text-ink">
           {recette.titre}
-        </Text>
+        </Titre>
         <Text className="mb-6 text-body leading-[26px] text-muted">{recette.description}</Text>
 
         <View className="mb-5 gap-2">
@@ -137,13 +135,11 @@ function Prose({ blocks, className }: { blocks: Block[]; className?: string }) {
     <View className={className}>
       {blocks.map((bloc) =>
         bloc.type === 'h2' ? (
-          <Text
-            key={bloc.text}
-            accessibilityRole="header"
-            className="mt-4 mb-2 font-display text-h3 text-ink"
-          >
+          // Le Markdown dit `##`, le document doit dire `h2` : le titre de la recette est le seul
+          // niveau 1 de la page.
+          <Titre key={bloc.text} niveau={2} className="mt-4 mb-2 font-display text-h3 text-ink">
             {bloc.text}
-          </Text>
+          </Titre>
         ) : (
           <Text key={bloc.text} className="mb-3 text-body leading-[26px] text-muted">
             {bloc.text}

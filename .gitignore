@@ -14,8 +14,13 @@ apps/app/android/
 # Fichiers écrits par `bun run generate`
 apps/app/public/sitemap.xml
 apps/app/public/robots.txt
+apps/app/public/manifest.json
 apps/app/public/og.png
 apps/app/public/og/
+apps/app/public/icone-*.png
+apps/app/public/apple-touch-icon.png
+apps/app/public/polices/
+apps/app/assets/polices/
 apps/app/assets/*.png
 
 # Signature d'applications : ne doit jamais entrer dans le dépôt
