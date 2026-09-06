@@ -6,6 +6,23 @@ pas de projet web séparé — le site est un mode de livraison de l'application
 Avant de coder, lire la section « Architecture » de `README.md`. Elle explique ce que chaque paquet
 contient et pourquoi, et la moitié des pièges de ce dépôt y sont déjà écrits.
 
+## Avant le premier commit
+
+```sh
+git config core.hooksPath .githooks
+```
+
+Le crochet lance format, types et tests avant chaque commit — sept secondes — et refuse un commit
+qui touche à `.github/workflows/` sans un `VITAE_CI=1` explicite. La raison : la CI est ce qui
+vérifie le travail, et un agent qui peut la modifier au fil d'un commit ordinaire peut désarmer son
+propre contrôle sans que personne ne le voie.
+
+Ce que l'allowlist de `.claude/settings.local.json` **ne protège pas**, et qu'il vaut mieux savoir
+que croire : `python3 -` y figure, donc l'exécution de code arbitraire est ouverte. C'est délibéré
+— les modifications de fichiers passent par là dans cet environnement — mais cela veut dire que
+l'allowlist est une commodité, pas une frontière. La frontière est ailleurs : pas de secret dans le
+dépôt, pas de serveur, pas de base, et le crochet ci-dessus.
+
 ## Commandes
 
 ```sh
@@ -47,5 +64,15 @@ distingue iOS d'Android, ce qu'aucun fichier `.web` ne saurait exprimer.
 `packages/core` (`constants.ts`, `explainers.ts`, `legal.ts`, `nutrition.ts`, `training.ts`), pas
 dans les composants — c'est ce qui les rend traduisibles un jour, et corrigeables à un seul endroit.
 
+**Un seul objet signature par écran, et un seul encart.** Le cadran dit toujours une part d'un
+tout — jamais un ornement ; `Hero` rend `part` obligatoire pour cela. L'encart pédagogique a une
+forme unique quel que soit son déclencheur, et il n'y en a jamais deux : c'est `encartDeLEcran`
+(`packages/core/src/cours.ts`) qui tranche, dans le métier, pour que la règle se teste sans écran.
+
+**La navigation a quatre sections et deux niveaux.** Barre du bas : mes chiffres, recettes,
+comprendre, profil. Les quatre écrans de résultats n'en font qu'un — `ResultTabs` est leur second
+niveau. L'en-tête ne porte que la marque : le haut de l'écran est hors de portée du pouce.
+
 **Les commentaires expliquent pourquoi, pas quoi.** Ce dépôt en compte beaucoup, et ils portent des
-décisions et des pièges rencontrés. Les garder à jour fait partie du changement.
+décisions et des pièges rencontrés. Les garder à jour fait partie du changement — un commentaire
+qui affirme n'est vérifié par personne, et il survit à ce qu'il décrit. C'est arrivé.

@@ -860,7 +860,7 @@ function score(recipe: Recipe, goal: GoalKey, budget: number): number {
  */
 export const MAX_PORTIONS = 2;
 
-export function portionsFor(kcal: number, budget: number): number {
+function portionsFor(kcal: number, budget: number): number {
   const raw = Math.round((budget / kcal) * 2) / 2;
   return Math.min(MAX_PORTIONS, Math.max(0.5, raw));
 }

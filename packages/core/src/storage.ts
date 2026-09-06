@@ -15,7 +15,7 @@ import { ajouterPesee, type Pesee, POIDS_MAX, POIDS_MIN } from './suivi';
 
 // La clé reste inchangée entre les versions : c'est le champ `v` qui porte le format, sinon un
 // profil v1 deviendrait illisible et ne pourrait plus être migré.
-export const PROFILE_KEY = 'vitae.v1.profile';
+const PROFILE_KEY = 'vitae.v1.profile';
 export const PROFILE_VERSION = 3;
 
 export interface StoredProfile {
@@ -177,8 +177,19 @@ export function loadProfile(): StoredProfile | null {
   }
 }
 
-/** Écrit le profil et horodate la modification. Les échecs (quota, mode privé) sont silencieux. */
-export function saveProfile(profile: ProfileInput, now: Date = new Date()): void {
+/**
+ * Écrit le profil et horodate la modification.
+ *
+ * **Rend si l'écriture a abouti**, et c'est le changement qui compte. L'échec restait auparavant
+ * entre ces accolades : en navigation privée verrouillée ou sur un quota plein, l'application
+ * continuait de fonctionner en mémoire, ce qui est le bon comportement — mais personne ne pouvait
+ * le dire à l'utilisateur, qui croyait avoir enregistré. Continuer sans le dire n'est pas de la
+ * robustesse, c'est une perte de données silencieuse.
+ *
+ * Les appelants restent libres de l'ignorer, et la plupart le font : ce qui compte est que
+ * l'information existe là où quelqu'un vient de créer une donnée qu'il ne pourra pas retrouver.
+ */
+export function saveProfile(profile: ProfileInput, now: Date = new Date()): boolean {
   const payload: StoredProfile = {
     v: PROFILE_VERSION,
     ...profile,
@@ -186,16 +197,18 @@ export function saveProfile(profile: ProfileInput, now: Date = new Date()): void
   };
   try {
     store.setItem(PROFILE_KEY, JSON.stringify(payload));
+    return true;
   } catch {
-    // Stockage indisponible : l'app continue de fonctionner en mémoire.
+    return false;
   }
 }
 
-export function clearProfile(): void {
+export function clearProfile(): boolean {
   try {
     store.removeItem(PROFILE_KEY);
+    return true;
   } catch {
-    // idem
+    return false;
   }
 }
 
@@ -216,11 +229,13 @@ export function lireCle(key: string): string | null {
   }
 }
 
-export function ecrireCle(key: string, value: string): void {
+/** Rend si l'écriture a abouti ; sinon le réglage ne vaut que pour la session en cours. */
+export function ecrireCle(key: string, value: string): boolean {
   try {
     store.setItem(key, value);
+    return true;
   } catch {
-    // Stockage indisponible : le réglage vaut pour la session en cours.
+    return false;
   }
 }
 
@@ -233,8 +248,8 @@ export function ecrireCle(key: string, value: string): void {
  *
  * `PROFILE_KEY` a montré la voie : la clé ne bouge pas, c'est le champ `v` qui porte le format.
  */
-export const SUIVI_KEY = 'vitae.v1.suivi';
-export const SUIVI_VERSION = 1;
+const SUIVI_KEY = 'vitae.v1.suivi';
+const SUIVI_VERSION = 1;
 
 /**
  * Lecture tolérante, **pesée par pesée**.
@@ -243,7 +258,7 @@ export const SUIVI_VERSION = 1;
  * historique, non : rejeter deux ans de pesées parce que l'une d'elles est corrompue serait la
  * pire réponse possible. Chaque entrée est donc jugée seule, et les mauvaises sont écartées.
  */
-export function parseSuivi(raw: string | null): Pesee[] {
+function parseSuivi(raw: string | null): Pesee[] {
   if (!raw) return [];
 
   let data: unknown;
@@ -282,11 +297,19 @@ export function loadSuivi(): Pesee[] {
   }
 }
 
-export function saveSuivi(pesees: Pesee[]): void {
+/**
+ * Écrit l'historique des pesées, et rend si l'écriture a abouti.
+ *
+ * C'est ici que le silence coûtait le plus cher : une pesée est une donnée que l'utilisateur vient
+ * de produire et qu'il ne peut pas reconstituer. L'écran de suivi lit désormais ce retour et le
+ * dit — voir `SuiviCard`.
+ */
+export function saveSuivi(pesees: Pesee[]): boolean {
   try {
     store.setItem(SUIVI_KEY, JSON.stringify({ v: SUIVI_VERSION, pesees }));
+    return true;
   } catch {
-    // Idem : l'application continue, la session en cours garde ses pesées en mémoire.
+    return false;
   }
 }
 
@@ -306,7 +329,7 @@ export function saveSuivi(pesees: Pesee[]): void {
  * Absente, elle vaut « jamais ouverte » : la première ouverture après l'installation compte donc
  * comme une modification, et c'est juste — le profil vient d'être rempli.
  */
-export const OUVERTURE_KEY = 'vitae.v1.ouverture';
+const OUVERTURE_KEY = 'vitae.v1.ouverture';
 
 /** `null` si l'application n'a encore jamais été ouverte sur cet appareil. */
 export function lireDerniereOuverture(): string | null {
@@ -335,7 +358,7 @@ export function marquerOuverture(now: Date = new Date()): void {
  * puis remise garderait ainsi sa marque, et c'est `nombreDeLues` — dans `cours.ts` — qui ignore
  * ce qu'il ne connaît pas au moment de compter.
  */
-export const LU_KEY = 'vitae.v1.lu';
+const LU_KEY = 'vitae.v1.lu';
 
 export function parseLu(raw: string | null): string[] {
   if (!raw) return [];

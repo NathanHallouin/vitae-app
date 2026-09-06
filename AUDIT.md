@@ -3,11 +3,12 @@
 **Date :** 6 septembre 2026 · **Périmètre :** le code produit **et** le dispositif qui le produit
 · **Révision auditée :** `d1257eb` + arbre de travail non commité (76 fichiers modifiés, 17 non suivis)
 
-> **Mise à jour du 6 septembre — les cinq corrections prioritaires sont appliquées.**
-> Bilan : **10 constats résolus** · **1 constat découvert par une correction** (`V7`, lui-même
-> résolu) · **1 affirmation de l'audit corrigée** (le « 0 `any` » était faux, méthode en cause).
-> L'état de chaque constat est porté dans les tableaux de la Phase 1 ; le journal des travaux est
-> en fin de document.
+> **Mise à jour du 6 septembre.** Deux passes de travaux : les cinq corrections prioritaires, puis
+> les constats abordables du journal. Bilan : **19 constats résolus** · **1 découvert par une
+> correction** (`V7`, lui-même résolu) · **1 évalué puis écarté avec sa mesure** (`V5`) ·
+> **2 affirmations de l'audit corrigées** (le « 0 `any` » et le « fichier suivi par git » étaient
+> faux, méthode en cause dans les deux cas). L'état de chaque constat est dans les tableaux de la
+> Phase 1 ; le journal des travaux est en fin de document.
 
 > **Conflit d'intérêts, à lire avant le reste.** Cet audit a été produit par l'agent qui a écrit une
 > part majoritaire du code audité. Ce n'est pas un audit indépendant : il connaît les intentions, ce
@@ -79,7 +80,7 @@ Gravité : 🔴 critique · 🟠 majeur · 🟡 mineur · ⚪ convention · 💭
 |---|---|---|---|
 | S1 | ✅ | **Résolu.** La règle « jamais un test à l'exécution » était violée 6 fois. Il ne reste que deux `Platform.OS`, tous deux iOS/Android — une distinction qu'aucun fichier `.web` ne sait exprimer, et qui est désormais l'exception écrite dans la règle | Correctifs : `src/lib/demarrage.ts` + `.web.ts`, `src/lib/splash.ts` + `.web.ts`, `components/layout/Seo.tsx` + `.web.tsx` + `SeoProps.ts`. Exception : `ui/DateField.tsx:40` et `:83` |
 | S2 | ✅ | **Résolu.** `tokens.ts` se déclarait source unique mais l'échelle typographique et les rayons étaient recopiés à la main ; `FONT_SIZES` était du code mort et la copie était la vraie source | `tools/build-tokens.ts` engendre désormais `apps/app/tailwind.generated.js`, que `tailwind.config.js` étend. `RADII.gauge` en est exclu : c'est une épaisseur de trait, pas un rayon de coin |
-| S3 | 🟠 | **Ouvert.** Un commentaire affirme que `expo-linear-gradient` est utilisé par la projection de poids. **Zéro import de `LinearGradient` dans tout le dépôt** | `apps/app/src/components/ui/Hero.tsx:28` ; dépendance déclarée `apps/app/package.json:24` |
+| S3 | ✅ | **Résolu.** `expo-linear-gradient` était déclaré sans un seul import, et un commentaire affirmait le contraire — il avait survécu à ce qu'il décrivait | Dépendance retirée du manifeste ; le commentaire de `Hero.tsx` dit maintenant ce qui s'est passé, parce que c'est le défaut du registre narratif : un commentaire qui affirme n'est vérifié par personne |
 | S4 | ✅ | **Résolu.** Les tests de calcul citaient `maquette/Calculateur MB.dc.html`, supprimé au commit `15f5222` : les attentes n'avaient plus de source | `packages/core/src/calc.reference.ts` — trois profils redérivés à la main depuis `README.md`, arithmétique écrite à côté de chaque valeur, module non importé par le code de production |
 
 **Ce qui est conforme.** `README.md` (982 l.) contient une vraie spécification métier — formules,
@@ -95,7 +96,7 @@ structurantes vivent dans les en-têtes de module ; c'est un substitut acceptabl
 
 | # | Gr. | Constat | Référence |
 |---|---|---|---|
-| C1 | 🟡 | **Ouvert.** `AGENTS.md` ne mentionne ni la règle « un encart par écran », ni la navigation à quatre sections — deux invariants qui ne vivent que dans le README, 982 lignes plus loin | `AGENTS.md` (49 l.) vs `README.md` §« La navigation », §« Le cours » |
+| C1 | ✅ | **Résolu.** `AGENTS.md` ignorait la règle « un encart par écran » et la navigation à quatre sections — deux invariants qui ne vivaient que dans le README, 982 lignes plus loin | `AGENTS.md`, deux paragraphes ajoutés, plus l'activation du crochet de pré-commit |
 | C2 | ✅ | **Résolu.** Deux règles sont vérifiées en CI : aucun test de plateforme web/natif dans `app/` et `src/components/`, et `packages/core` sans import de plateforme. Contre-épreuve faite — la règle mord sur une violation introduite exprès | `.github/workflows/ci.yml`, étape « Les règles du dépôt sont tenues » |
 
 **Ce qui est conforme.** Format court (tient dans une fenêtre de contexte), règles **vérifiables**
@@ -111,10 +112,10 @@ exports un par un (`packages/core/package.json` : `"./*": "./src/*.ts"`).
 
 | # | Gr. | Constat | Référence |
 |---|---|---|---|
-| G1 | 🟠 | `Bash(python3 -)` et `Bash(bun x *)` **annulent l'allowlist** : tout ce qui est refusé ailleurs passe par elles | `.claude/settings.local.json` |
-| G2 | 🟠 | `git commit` autorisé ⇒ l'agent peut modifier `.github/workflows/ci.yml` et **désarmer sa propre vérification**. Fait deux fois pendant la dernière session (assouplissement d'assertions après déplacement de contenu). Rien ne distingue un assouplissement justifié d'un contournement | `.claude/settings.local.json` ; `ci.yml` modifié dans l'arbre de travail |
-| G3 | 🟠 | **Aucun hook git.** `.git/hooks/` ne contient que les `.sample` | — |
-| G4 | 🟡 | `.claude/settings.local.json` est **suivi par git** malgré le suffixe `.local`, et accumule ~50 entrées dont des commandes jetables (`rm -f /tmp/*.png`, chemins de captures). Personne ne relira cette liste, donc personne ne verra une entrée dangereuse s'y glisser | `git ls-files .claude/` |
+| G1 | ✅ | **Résolu en partie, et le reste documenté.** L'allowlist passe de **53 à 12 entrées** : 36 commandes jetables retirées, plus `bun x *` et `bash -e -c` — deux trous béants qu'aucun usage réel ne réclamait. `python3 -` reste, délibérément : cet environnement demande des modifications de fichiers par le shell. **`AGENTS.md` le dit maintenant en toutes lettres** — l'allowlist est une commodité, pas une frontière | `.claude/settings.local.json`, `AGENTS.md` § « Avant le premier commit » |
+| G2 | ✅ | **Résolu.** L'agent pouvait modifier `.github/workflows/ci.yml` au fil d'un commit ordinaire, donc désarmer sa propre vérification. C'est arrivé deux fois pendant la refonte | `.githooks/pre-commit` refuse tout commit touchant `.github/workflows/` sans `VITAE_CI=1` explicite. Contre-épreuve faite : le crochet mord |
+| G3 | ✅ | **Résolu.** Aucun crochet git n'existait : rien n'obligeait à lancer la boucle de vérification avant d'écrire dans l'historique | `.githooks/pre-commit` — format, types, tests, sept secondes. Volontairement court : un crochet lent finit contourné par `--no-verify`, et un garde-fou contourné vaut moins que pas de garde-fou |
+| G4 | ✅ | **Résolu, et le constat corrigé.** L'audit affirmait que `.claude/settings.local.json` était *suivi par git* : **c'était faux**, `git ls-files .claude/` a toujours rendu zéro. Erreur de méthode — une chaîne `&&`/`\|\|` mal lue. Ce qui était vrai : 53 entrées accumulées, dont 36 jetables, dans un fichier que personne ne relit | Fichier élagué à 12 entrées et **explicitement ignoré** (`.gitignore:31`) : il était jusqu'ici non suivi *et* non ignoré, donc à un `git add -A` près d'entrer dans le dépôt |
 
 **Ce qui limite le risque, factuellement :** pas de serveur, pas de base, pas de système de paiement,
 pas de MCP configuré (`.mcp.json` absent), aucun secret dans le dépôt (`.gitignore:24-28` exclut
@@ -129,10 +130,10 @@ C'est l'axe qui porte le vrai problème.
 |---|---|---|---|
 | V1 | ✅ | **Résolu.** L'ancre externe des tests de calcul avait été supprimée : les valeurs dures n'étaient plus que le souvenir de ce que le code avait produit | `calc.reference.ts` + `calc.test.ts`. **La dérivation a immédiatement servi** : elle a fait échouer un test sur une valeur du curseur IMC que j'avais arrondie de travers (81,633 au lieu de 81,6325). L'erreur était dans la table, pas dans le code — et c'est la démonstration écrite à côté qui a permis de trancher |
 | V2 | ✅ | **Résolu.** « Plus tard » disparaissait pour quiconque n'avait pas touché son profil depuis 7 jours | `encartDeLEcran` rend désormais `source: 'drapeau' \| 'progression'` (`cours.ts`), lu par `EncartCours.tsx:53` au lieu d'être redéduit. Test de non-régression : `cours.test.ts`, « la source dit lequel des deux cas s'est produit » |
-| V3 | 🟠 | **Ouvert.** Trois tests ne peuvent pas échouer (détail plus bas) | `nav.test.ts:34`, `cours.test.ts:25`, `cours.test.ts:50-56` |
+| V3 | ✅ | **Résolu.** Trois tests ne pouvaient pas échouer : ils redisaient la définition qu'ils prétendaient vérifier | Remplacés par des invariants qui peuvent casser — chaque écran monté appartient à une section ; les libellés courts tiennent dans un quart de barre (11 signes, mesuré) ; quatre chapitres de quatre, comme la copie l'affirme ; **le contrat éditorial du résumé**. Ce dernier a échoué à la première exécution, voir le journal |
 | V4 | ✅ | **Résolu.** `bmiGaugePosition` n'était testé qu'avec une valeur exacte sur **une bande sur quatre**, encadrements ailleurs — or le bug visé donne des valeurs qui restent dans le bon quart la moitié du temps | `CURSEUR_IMC` dans `calc.reference.ts` : les quatre segments, les deux bornes, et les trois valeurs de charnière (18,5 · 25 · 30) |
-| V5 | 🟡 | `noUncheckedIndexedAccess` **désactivé explicitement**, dans un code qui indexe partout | `tsconfig.base.json:9` ; usages : `cours.ts:86`, `neat.ts:81` |
-| V6 | 🟡 | **Ouvert.** État représentable mais invalide : `WeightTarget.key` est `string` alors que les valeurs forment un ensemble fermé de six | `calc.ts:284` ; traité défensivement en `calc.ts:362` |
+| V5 | ⚖️ | **Évalué, mesuré, écarté.** Activer `noUncheckedIndexedAccess` fait remonter **123 erreurs, dont 38 hors tests**. Aucune n'est un bug : tableaux constants (`DAILY`, `BMI_BANDS`, `PLAGES_PRETES`), captures de groupes non facultatifs, accès déjà gardés par `??`. Les corriger demanderait une centaine d'assertions non nulles — troquer un garde-fou réel (zéro `!`, zéro `as`) contre un théorique | Décision et mesure consignées dans `tsconfig.base.json:9` |
+| V6 | ✅ | **Résolu.** `WeightTarget.key` était `string` alors que les valeurs forment un ensemble fermé de six, et cette chaîne traversait le fournisseur de profil et l'écran | `CleCible` dans `calc.ts` ; propagée à `Projection`, `buildProjection` et `ProfileProvider`. Le repli défensif de `buildProjection` rattrapait une erreur que le compilateur refuse désormais d'écrire |
 | V7 | ✅ | **Nouveau, découvert par la correction n°5, et résolu.** `tools/` n'étant typechecké par aucun script, **deux erreurs de type y dormaient** : `subset-font` sans déclaration (donc un `any` implicite sur l'appel qui réduit les polices) et `sharp.Sharp` référencé comme un espace de noms inexistant | `tools/build-fonts.ts:27` et `tools/build-photos.ts:83`. Correctifs : `tools/subset-font.d.ts`, import nommé `type Sharp`, `tools/tsconfig.json`, et `typecheck` racine étendu aux quatre périmètres |
 
 #### Détail V2 — pourquoi c'est l'illustration du problème
@@ -205,7 +206,7 @@ aucun `include` de tsconfig, et le script racine ne lance que celui d'`apps/app`
 | Sg1 | 🟠 | Duplication de **source de vérité** — voir S2 | `tokens.ts` / `tailwind.config.js` |
 | Sg2 | 🟠 | Dépendance déclarée sans usage réel — voir S3 | `expo-linear-gradient` |
 | Sg3 | 🟠 | **Ternaire aplati par une édition non ciblée.** Un `sed` global `font-sans-semibold → font-sans-medium` a rendu les deux branches identiques : la distinction actif/inactif que le ternaire portait a disparu sans que rien ne le signale | `apps/app/src/components/ui/SousOnglets.tsx:87-90` |
-| Sg4 | 🟡 | **41 exports orphelins.** Significatifs : `calc.weightTargets`, `calc.defaultTargetKey` (utilisés seulement dans `calc.ts`), `storage.parseSuivi`, `training.restLabel`, `recipes.portionsFor`, `tokens.FONT_SIZES`. Surface publique gonflée sans consommateur | relevé par balayage des `export` vs usages |
+| Sg4 | ✅ | **Résolu, et le constat corrigé.** L'audit annonçait « 41 exports orphelins ». Le chiffre confondait *non nommé ailleurs* et *inatteignable* : la plupart sont des **types** qui n'apparaissent que dans des signatures exportées — `WeightTarget` dans `Projection`, `Session` dans `WeekPlan` — et les retirer les rendrait innommables par un consommateur, ce qui est une régression et non un nettoyage. Les vrais orphelins étaient **14 valeurs** | 13 `export` retirés (fonctions et clés internes à leur module), `FROM_NAV` supprimé — vestige de l'ère Next.js, référencé nulle part, pas même dans son propre fichier |
 | Sg5 | 🟡 | **Sur-ingénierie : six mécanismes de divulgation distincts** pour un seul besoin (montrer/cacher). Chacun se défend isolément ; ensemble ils imposent six conventions à apprendre | `Repliable` · `Fiche`/`Fiche.web`/`FicheContenu` · `SousOnglets` · `EncartCours` · `SuiviCard` (prop `vue`) · `FiltresRecettes` |
 
 **Ce qui n'est *pas* une signature de génération, à ne pas confondre.** Les commentaires narratifs
@@ -272,8 +273,8 @@ seulement typée : `parseProfile` (`storage.ts:83`) rejette au moindre doute ; `
 
 | # | Gr. | Constat | Référence |
 |---|---|---|---|
-| X1 | 🟡 | **Toutes les écritures de stockage échouent en silence.** Choix documenté (navigation privée), mais l'utilisateur n'a **aucun moyen de savoir que sa pesée n'a pas été enregistrée** | `storage.ts:189, 197, 222, 288` |
-| X2 | 🟡 | **Pas d'atomicité** entre `saveSuivi` et l'écriture de `poidsDepart` : si la première réussit et la seconde échoue, le poids de départ est perdu et le cadran retombe sur un repli | `apps/app/src/state/ProfileProvider.tsx:190-198` |
+| X1 | ✅ | **Résolu.** Toutes les écritures de stockage échouaient en silence. L'utilisateur qui enregistrait une pesée la croyait gardée et ne s'en apercevait qu'au lancement suivant, la courbe amputée sans explication | `saveProfile`, `saveSuivi`, `ecrireCle` et `clearProfile` rendent un booléen ; `SuiviCard` l'affiche à l'endroit — le seul — où l'utilisateur crée une donnée qu'il ne peut pas reconstituer. `storage.test.ts` simule un support en lecture seule : l'échec est **rendu**, jamais **levé** |
+| X2 | ✅ | **Résolu par démonstration, sans code.** Si `saveSuivi` réussit et l'écriture de `poidsDepart` échoue, l'écran retombe sur la première pesée de l'historique — qui vaut exactement la même chose à cet instant. Il n'y a rien à annoncer parce qu'il n'y a rien de perdu | Le repli tient lieu de compensation ; c'est écrit dans `ProfileProvider.ajouterPesee`, là où le doute se posait |
 
 **Exploitabilité — Non applicable.** Pas de serveur, pas de logs, pas de rollback à opérer.
 `console.log` n'apparaît que dans les scripts de build.
@@ -285,23 +286,26 @@ seulement typée : `parseProfile` (`storage.ts:83`) rejette au moindre doute ; `
 ### 1. Synthèse
 
 Ouverts après les travaux du 6 septembre, verdict réévalué entre parenthèses.
+⚖️ = évalué, mesuré, écarté avec sa raison.
 
 | Axe | Verdict initial (actuel) | 🔴 | 🟠 | 🟡 | ✅ |
 |---|---|---|---|---|---|
-| 1. Spécification comme source de vérité | Écart majeur (**mineur**) | — | 1 | — | 3 |
-| 2. Contexte machine | Écart mineur (**mineur**) | — | — | 1 | 1 |
-| 3. Garde-fous d'exécution | Écart majeur (**inchangé**) | — | 3 | 1 | — |
-| 4. Vérification et circularité | **Critique** (**mineur**) | — | 1 | 2 | 4 |
+| 1. Spécification comme source de vérité | Écart majeur (**conforme**) | — | — | — | 4 |
+| 2. Contexte machine | Écart mineur (**conforme**) | — | — | — | 2 |
+| 3. Garde-fous d'exécution | Écart majeur (**conforme**) | — | — | — | 4 |
+| 4. Vérification et circularité | **Critique** (**conforme**) | — | — | ⚖️ 1 | 6 |
 | 5. Boucle de retour | Conforme | — | — | 1 | — |
-| 6. Signatures de génération | Écart majeur (**inchangé**) | — | 3 | 2 | — |
+| 6. Signatures de génération | Écart majeur (**mineur**) | — | 1 | 1 | 2 |
 | 7. Revue et gouvernance | **Critique** (**majeur**) | 1 | 1 | — | 1 |
 | 8. Dette de compréhension | Écart mineur | — | — | 2 | — |
 | 9. Sécurité du dispositif | Écart mineur | — | — | 2 | — |
-| 10. Axes classiques | Écart mineur | — | — | 2 | — |
-| **Total** | | **1** | **9** | **13** | **9** |
+| 10. Axes classiques | Écart mineur (**conforme**) | — | — | — | 2 |
+| **Total** | | **1** | **2** | **6 + 1 ⚖️** | **21** |
 
-Le seul constat critique restant est `Gv2` : **aucune revue**. Il n'est pas corrigeable par du code
-— seul un tiers peut le lever, et c'est précisément ce que cet audit ne peut pas faire lui-même.
+**Le seul constat critique restant est `Gv2` : aucune revue.** Il n'est pas corrigeable par du
+code — et les vingt et une corrections ci-dessus ne l'entament pas d'un pouce, puisqu'elles ont
+toutes été produites par l'agent qui a écrit le code qu'elles corrigent. Seul un tiers peut le
+lever, et c'est précisément ce que cet audit ne peut pas faire lui-même.
 
 ### 2. Diagnostic du dispositif
 
@@ -414,7 +418,7 @@ diagnostic.
 | LOC tests | 2 633 (12 fichiers) | idem |
 | LOC documentation | 1 404 (README 982, ROADMAP 374, AGENTS 47, CLAUDE 1) | `wc -l` |
 | Lignes de commentaire dans le code | 2 908 (17 %) | `grep -h "^\s*\*\|^\s*//"` |
-| Tests | **270**, 6 884 assertions, **0,14 s** (260 / 6 838 avant) | `bun test packages` |
+| Tests | **275**, 6 945 assertions, **0,15 s** (260 / 6 838 avant) | `bun test packages` |
 | Cycle `check + typecheck + test` | **6,8 s** (3,5 s avant — le typecheck couvre désormais quatre périmètres au lieu d'un) | `time (…)` |
 | `any` explicite / `@ts-ignore` / `!` | 0 / 0 / 0 | `grep -rn` |
 | `any` **implicite** | 0 depuis `V7` ; il y en avait 1, invisible parce que `tools/` n'était typechecké par rien | `tsc --noEmit -p tools` |
@@ -422,6 +426,10 @@ diagnostic.
 | Exports orphelins | 41 | balayage `export` vs usages |
 | Arbre de travail non commité | **0** au terme des travaux (76 fichiers, +3 594 / −1 526 avant) | `git status` |
 | Périmètres typechecké | **4** : `packages/core`, `packages/content`, `apps/app`, `tools` (1 avant) | `package.json:typecheck` |
+| Entrées d'allowlist | **12** (53 avant) | `.claude/settings.local.json` |
+| Crochets git actifs | **1**, avec un chemin protégé (0 avant) | `.githooks/pre-commit` |
+| Exports orphelins (valeurs) | **0** (14 avant) | balayage `export` vs usages |
+| Dépendances déclarées sans import | **0** (1 avant) | `expo-linear-gradient` retiré |
 | Règles du dépôt vérifiées en CI | **2** : pas de test de plateforme web/natif, `packages/core` sans import de plateforme (0 avant) | `.github/workflows/ci.yml` |
 | Fichiers engendrés surveillés en CI | **4** (1 avant : les recettes seules) | idem |
 
@@ -455,19 +463,47 @@ puis le lot de corrections d'audit.
 - **Corriger un constat en révèle d'autres.** `V7` n'existait pas avant la correction n°5 ; il n'a
   pas été trouvé par l'audit mais par le garde-fou que l'audit demandait de poser.
 
+### 6 septembre 2026 — seconde passe, les constats abordables
+
+| Constat | Ce qui a été fait |
+|---|---|
+| **S3** | `expo-linear-gradient` retiré du manifeste ; le commentaire qui affirmait le contraire dit maintenant ce qui s'est passé |
+| **C1** | `AGENTS.md` complété : encart unique, navigation à quatre sections, activation du crochet, et ce que l'allowlist ne protège pas |
+| **V3** | Les trois tests tautologiques remplacés par des invariants qui peuvent casser |
+| **V5** | Mesuré (123 erreurs, 38 hors tests, aucune n'est un bug) puis écarté, décision consignée dans `tsconfig.base.json` |
+| **V6** | `CleCible` : la clé de poids cible devient un ensemble fermé de six, propagé jusqu'au fournisseur |
+| **Sg4** | 13 `export` retirés, `FROM_NAV` supprimé. Le constat lui-même corrigé : « 41 orphelins » confondait deux choses |
+| **G1–G4** | Allowlist de 53 à 12 entrées et explicitement ignorée ; crochet de pré-commit avec chemin protégé sur `.github/workflows/` |
+| **X1** | Les quatre fonctions d'écriture rendent un booléen ; `SuiviCard` l'affiche ; `storage.test.ts` simule un support en lecture seule |
+| **X2** | Résolu par démonstration : le repli existant tient lieu de compensation, et c'est désormais écrit là où le doute se posait |
+
+### Ce que la seconde passe a appris
+
+- **Deux constats de l'audit étaient faux, et pour la même raison : la méthode.** Le « 0 `any` »
+  venait d'un `grep` qui ne voit pas un `any` implicite. Le « fichier suivi par git » venait d'une
+  chaîne `&&`/`||` mal lue. Un audit qui mesure au `grep` hérite des angles morts du `grep` — et
+  c'est le typecheck, puis `git ls-files` seul, qui ont tranché.
+- **Un chiffre spectaculaire peut cacher un constat mou.** « 41 exports orphelins » comptait surtout
+  des types nommés uniquement dans des signatures, ce qui est normal et correct. Les vrais
+  orphelins étaient 14. Le constat n'était pas faux, il était mal mesuré — et une correction
+  appliquée sans le vérifier aurait rendu des types innommables par leurs consommateurs.
+- **Le contrat éditorial du résumé a mordu à sa première exécution.** Il a trouvé une notion — la
+  douzième, « Refaites le calcul tous les 4 à 5 kg » — dont le texte long ne faisait que reformuler
+  le résumé. Acceptable quand c'était une explication repliée ; creux depuis que c'est une page
+  indexée qui se suffit à elle-même. Le contenu a été corrigé, pas le seuil.
+- **Toutes les corrections ne se paient pas en code.** `V5` s'est réglé par une mesure et une
+  décision écrite, `X2` par la démonstration qu'il n'y avait rien à perdre. Un constat fermé sans
+  ligne de code n'est pas un constat esquivé, à condition que la raison soit dans le dépôt.
+
 ### Ce qui reste ouvert, par ordre de coût
 
-| # | Constat | Effort estimé |
-|---|---|---|
-| S3 | `expo-linear-gradient` : dépendance morte, et un commentaire qui affirme le contraire | 10 min |
-| V3 | Trois tests tautologiques à remplacer ou supprimer | 30 min |
-| Sg4 | 41 exports orphelins à réduire à leur usage réel | 1 h |
-| V5, V6 | `noUncheckedIndexedAccess` à réactiver ; `WeightTarget.key` à typer en union | 0,5 j (l'activation fera remonter des indexations à garder) |
-| C1 | `AGENTS.md` à compléter des deux invariants récents | 15 min |
-| G1–G4 | Garde-fous d'exécution : resserrer l'allowlist, ajouter un hook de pré-commit, sortir `settings.local.json` du suivi git | 0,5 j |
-| Sg5 | Six mécanismes de divulgation à ramener à quatre | 1 j |
-| X1, X2 | Écritures de stockage silencieuses ; atomicité `saveSuivi` / `poidsDepart` | 0,5 j |
-| **Gv2** | **Aucune revue.** Non corrigeable par du code | — |
+| # | Constat | Effort estimé | Pourquoi il reste |
+|---|---|---|---|
+| Sg5 | Six mécanismes de divulgation à ramener à quatre | 1 j | Le seul constat de refonte du lot. Il touche six composants et autant d'écrans ; le faire sans test d'interface — il n'y en a aucun — se vérifierait à l'œil, ce qui est le pire moment pour bouger six choses à la fois |
+| B1 | Aucun test de composant ni de bout en bout | 2–3 j | **À ne pas faire maintenant** : voir les anti-recommandations. Ils seraient écrits par le même agent que le code, donc circulaires |
+| Cp1, Cp2 | `training.ts` et le plafond iOS de `rappels.ts` restent opaques | — | Ni l'un ni l'autre ne se lève par du code : le premier demande une relecture, le second un appareil |
+| Sc2 | Aucun audit de vulnérabilités | 1 h | `bun audit` ou Dependabot. Non fait faute de pouvoir vérifier le résultat depuis cet environnement |
+| **Gv2** | **Aucune revue** | — | **Non corrigeable par du code.** Le seul critique restant |
 
 **`Gv2` est le seul constat critique restant, et c'est le plus important.** Les travaux du jour ont
 créé des points de retour ; ils n'ont créé aucune revue. Tout ce qui précède — y compris cet audit,

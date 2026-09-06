@@ -25,8 +25,11 @@ import Overline from './Overline';
  * doit pas prendre un cadran par commodité : il affiche un `Chiffre` en taille `hero`, sans arc.
  * Rendre `part` facultatif rouvrirait la porte au cadran décoratif.
  *
- * Ce qui a disparu avec le dégradé : `expo-linear-gradient` n'est plus importé ici. Il reste une
- * dépendance du projet — la projection de poids s'en sert — donc rien à retirer du manifeste.
+ * Ce qui a disparu avec le dégradé : `expo-linear-gradient`, retiré du manifeste. Ce commentaire a
+ * d'abord dit qu'il restait une dépendance parce que « la projection de poids s'en sert » — c'était
+ * faux, plus rien ne l'importait. Un commentaire qui affirme n'est vérifié par personne, et celui-ci
+ * a survécu à ce qu'il décrivait ; c'est le défaut du registre narratif, et la seule parade est de
+ * relire les commentaires quand le code change dessous.
  */
 export default function Hero({
   surtitre,

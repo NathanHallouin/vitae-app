@@ -48,14 +48,19 @@ export type VueSuivi = 'peser' | 'historique' | null;
 export default function SuiviCard({ cible, vue }: { cible?: number; vue: VueSuivi }) {
   const { suivi, ajouterPesee, supprimerPesee, metrics } = useProfile();
   const [saisie, setSaisie] = useState('');
+  const [echec, setEchec] = useState(false);
 
   const valeur = Number.parseFloat(saisie.replace(',', '.'));
   const valide = Number.isFinite(valeur) && valeur >= POIDS_MIN && valeur <= POIDS_MAX;
 
   const enregistrer = () => {
     if (!valide) return;
-    ajouterPesee({ date: todayISO(), poids: valeur });
-    setSaisie('');
+    // Le seul endroit de l'application où l'utilisateur crée une donnée qu'il ne peut pas
+    // reconstituer. Une écriture qui échoue en silence lui ferait croire sa pesée gardée, et il ne
+    // s'en apercevrait qu'au prochain lancement, la courbe amputée sans explication.
+    const ecrit = ajouterPesee({ date: todayISO(), poids: valeur });
+    setEchec(!ecrit);
+    if (ecrit) setSaisie('');
   };
 
   // La cible sert de ligne de mire sur la courbe ; sans plan choisi, il n'y en a pas.
@@ -89,10 +94,23 @@ export default function SuiviCard({ cible, vue }: { cible?: number; vue: VueSuiv
               Enregistrer
             </Button>
           </View>
-          <Text className="font-sans mt-[10px] text-caption text-muted2">
-            Le matin à jeun, toujours dans les mêmes conditions. Une pesée par jour : la seconde
-            remplace la première.
-          </Text>
+          {echec ? (
+            <View
+              accessibilityLiveRegion="assertive"
+              className="mt-3 rounded-control bg-error-bg px-[14px] py-3"
+            >
+              <Text className="font-sans text-small leading-[20px] text-error-ink">
+                Cette pesée n’a pas pu être enregistrée. Le stockage de l’appareil est plein, ou
+                votre navigateur est en navigation privée verrouillée. Notez le chiffre quelque part
+                : il ne sera pas là au prochain lancement.
+              </Text>
+            </View>
+          ) : (
+            <Text className="font-sans mt-[10px] text-caption text-muted2">
+              Le matin à jeun, toujours dans les mêmes conditions. Une pesée par jour : la seconde
+              remplace la première.
+            </Text>
+          )}
         </Card>
       </View>
 

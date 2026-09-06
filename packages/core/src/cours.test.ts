@@ -23,10 +23,21 @@ import {
 } from './cours';
 
 describe('les seize notions', () => {
-  test('sont les quatre chapitres mis bout à bout', () => {
-    expect(TOTAL_NOTIONS).toBe(16);
+  /**
+   * Quatre chapitres de quatre, et le total qui en découle.
+   *
+   * La version précédente comparait `NOTIONS.length` à la somme des `items` des chapitres — or le
+   * premier est un `flatMap` du second, l'assertion redisait donc la construction. Ce qui peut
+   * réellement casser est ailleurs : **le compte de quatre par chapitre**, que la copie affirme en
+   * toutes lettres. Le fil de chaque chapitre annonce « Quatre questions », « D'abord… puis… et
+   * enfin » : un cinquième item, et le texte ment sans que rien ne le dise.
+   */
+  test('quatre chapitres de quatre notions, comme le dit leur fil', () => {
     expect(CHAPITRES).toHaveLength(4);
-    expect(NOTIONS).toHaveLength(CHAPITRES.reduce((n, c) => n + c.items.length, 0));
+    for (const chapitre of CHAPITRES) {
+      expect(chapitre.items).toHaveLength(4);
+    }
+    expect(TOTAL_NOTIONS).toBe(16);
   });
 
   test('portent des identifiants uniques', () => {
@@ -48,14 +59,27 @@ describe('les seize notions', () => {
     expect(NOTIONS[TOTAL_NOTIONS - 1].chapitre.slug).toBe(CHAPITRES[3].slug);
   });
 
-  test('gardent le texte de leur chapitre, sans le reformuler', () => {
-    for (const chapitre of CHAPITRES) {
-      for (const item of chapitre.items) {
-        const notion = notionParSlug(item.slug);
-        expect(notion?.texte).toBe(item.texte);
-        expect(notion?.resume).toBe(item.resume);
-        expect(notion?.ecran).toEqual(chapitre.ecran);
-      }
+  /**
+   * Le contrat éditorial du résumé, tel qu'`explainers.ts` l'énonce.
+   *
+   * Là encore, la version précédente ne pouvait pas échouer : elle comparait le texte d'une notion
+   * à celui dont il est copié trois lignes plus haut. Ce qui peut casser est la **règle d'écriture**
+   * — « le résumé doit tenir sur une ligne et se suffire à lui-même : s'il appelle le texte long,
+   * c'est un teaser, et un teaser se lit comme de la publicité ».
+   *
+   * Une notion ajoutée demain avec un résumé de trois lignes, ou un résumé qui promet sans
+   * répondre, passe aujourd'hui sans un mot. Ces bornes le disent.
+   */
+  test('chaque résumé répond en une ligne, et le texte en dit plus', () => {
+    for (const notion of NOTIONS) {
+      expect(notion.titre.length).toBeGreaterThan(0);
+      // Une ligne sur un téléphone : au-delà, le résumé cesse de se lire d'un coup d'œil et la
+      // carte qui le porte se met à défiler.
+      expect(notion.resume.length).toBeLessThanOrEqual(95);
+      // Il répond, il n'annonce pas : une phrase terminée, pas une accroche suspendue.
+      expect(notion.resume.trimEnd().endsWith('.')).toBe(true);
+      // Le texte long doit apporter davantage, sinon la page de la notion n'a rien à donner.
+      expect(notion.texte.length).toBeGreaterThan(notion.resume.length * 2);
     }
   });
 });

@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+#
+# Ce que rien ne vérifiait avant de committer.
+#
+# Le dépôt est majoritairement écrit par un agent qui a le droit de committer. Sa boucle de
+# vérification est bonne — types, règles, tests, en moins de sept secondes — mais rien ne l'obligeait
+# à la lancer avant d'écrire dans l'historique. Ce crochet en fait une condition.
+#
+# Il est volontairement court. Un crochet qui prend une minute finit contourné par `--no-verify`,
+# et un garde-fou contourné vaut moins que pas de garde-fou : il donne l'illusion d'exister.
+#
+# Activation, une fois par clone :
+#
+#     git config core.hooksPath .githooks
+#
+set -euo pipefail
+
+racine=$(git rev-parse --show-toplevel)
+cd "$racine"
+
+# ── Chemins protégés ────────────────────────────────────────────────────────────────────────────
+#
+# La CI est ce qui vérifie le travail de l'agent. Le laisser la modifier au fil d'un commit
+# ordinaire revient à le laisser désarmer son propre contrôle sans que personne ne le remarque —
+# c'est arrivé deux fois pendant la refonte, pour des raisons légitimes, et rien ne distinguait ces
+# assouplissements d'un contournement.
+#
+# La modification reste possible ; elle demande de le dire :
+#
+#     VITAE_CI=1 git commit …
+#
+protege=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '^\.github/workflows/' || true)
+if [ -n "$protege" ] && [ "${VITAE_CI:-}" != "1" ]; then
+  echo "✗ Ce commit modifie la vérification elle-même :"
+  echo "$protege" | sed 's/^/    /'
+  echo
+  echo "  Si c'est voulu, relancez avec :  VITAE_CI=1 git commit …"
+  echo "  Et dites dans le message ce que la règle ne vérifie plus."
+  exit 1
+fi
+
+# ── La boucle de vérification ───────────────────────────────────────────────────────────────────
+#
+# Sur l'arbre de travail et non sur l'index : le dépôt n'a pas d'usage du commit partiel, et
+# recopier l'index dans un répertoire temporaire coûterait plus que ce que cela rapporte ici.
+echo "→ Format et règles"
+bun run check
+echo "→ Types"
+bun run typecheck
+echo "→ Tests"
+bun test packages
+
+echo "✓ Vérifié"

@@ -280,8 +280,18 @@ export function warningText(m: Metrics): string {
   return '';
 }
 
+/**
+ * Les six poids cibles possibles, selon la bande d'IMC.
+ *
+ * Un ensemble fermé plutôt qu'une chaîne libre : `targetKey` traverse le stockage de session, le
+ * fournisseur de profil et l'écran, et rien n'empêchait jusqu'ici d'y faire circuler une valeur qui
+ * ne désigne aucune option. Le repli défensif de `buildProjection` la rattrapait — mais il
+ * rattrapait une erreur que le compilateur peut refuser d'écrire.
+ */
+export type CleCible = 'healthy' | 'mid' | 'step' | 'cut' | 'stable' | 'gain';
+
 export interface WeightTarget {
-  key: string;
+  key: CleCible;
   label: string;
   sub: string;
   /** poids cible en kg */
@@ -290,7 +300,7 @@ export interface WeightTarget {
 
 const round1 = (v: number) => Math.round(v * 10) / 10;
 
-export function weightTargets(m: Metrics): WeightTarget[] {
+function weightTargets(m: Metrics): WeightTarget[] {
   const m2 = (m.taille / 100) ** 2;
   if (m.bmi >= 25) {
     return [
@@ -323,7 +333,7 @@ export function weightTargets(m: Metrics): WeightTarget[] {
   ];
 }
 
-export function defaultTargetKey(m: Metrics, goal: GoalKey): string {
+function defaultTargetKey(m: Metrics, goal: GoalKey): CleCible {
   if (m.bmi >= 25) return goal === 'masse' ? 'step' : 'healthy';
   if (m.bmi < 18.5) return goal === 'seche' ? 'step' : 'healthy';
   return goal === 'masse' ? 'gain' : goal === 'seche' ? 'cut' : 'stable';
@@ -339,7 +349,7 @@ export interface ProjectionTick {
 
 export interface Projection {
   options: WeightTarget[];
-  key: string;
+  key: CleCible;
   selected: WeightTarget;
   /** kg par semaine, signé */
   rate: number;
@@ -356,7 +366,7 @@ export interface Projection {
   note: string;
 }
 
-export function buildProjection(m: Metrics, goal: GoalKey, targetKey: string | null): Projection {
+export function buildProjection(m: Metrics, goal: GoalKey, targetKey: CleCible | null): Projection {
   const options = weightTargets(m);
   const key =
     targetKey && options.some((o) => o.key === targetKey) ? targetKey : defaultTargetKey(m, goal);

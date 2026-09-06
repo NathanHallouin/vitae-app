@@ -24,6 +24,12 @@ apps/app/public/polices/
 apps/app/assets/polices/
 apps/app/assets/*.png
 
+# Les permissions accordées aux agents sont locales à la machine, comme le dit leur suffixe. Les
+# suivre dans le dépôt les faisait s'accumuler sans que personne ne les relise — cinquante-trois
+# entrées, dont trente-six commandes jetables — et une liste que personne ne relit est une liste où
+# une entrée dangereuse passe inaperçue.
+.claude/settings.local.json
+
 # Paquets de passation déposés à la racine le temps d'une refonte : des maquettes et des fichiers
 # de référence, pas du code du projet. Les ignorer les tient aussi hors de Biome, qui suit ce
 # fichier — sans quoi `bun run check` échouerait sur du code qui n'a jamais été destiné à tourner.

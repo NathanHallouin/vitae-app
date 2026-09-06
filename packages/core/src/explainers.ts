@@ -174,7 +174,7 @@ export const POIDS_EXPLAINER: Explainer = {
       titre: 'Refaites le calcul tous les 4 à 5 kg',
       resume: 'Vos besoins baissent avec votre poids : mettre à jour le poids suffit.',
       texte:
-        'Vos besoins baissent avec votre poids. Mettre à jour votre poids suffit à recalculer l’ensemble.',
+        'Chaque kilo perdu retire environ 10 kcal par jour à votre métabolisme de base — c’est le premier terme de la formule — et un peu plus une fois multiplié par votre facteur d’activité. Quatre kilos, c’est donc de l’ordre de 50 kcal de dépense en moins chaque jour : le déficit que vous croyez tenir s’est refermé d’autant, sans que rien n’ait changé dans votre assiette. C’est la première cause de palier, bien avant le métabolisme qui « s’adapterait ». Mettre à jour votre poids dans le profil suffit : la fourchette, les macronutriments et la projection se recalculent avec.',
     },
   ],
 };

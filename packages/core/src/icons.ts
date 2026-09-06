@@ -7,7 +7,7 @@
  * compilateur qu'elles dessinent bien le même jeu, sans que `packages/core` ne dépende d'un
  * moteur de rendu.
  */
-export const ICON_NAMES = [
+const ICON_NAMES = [
   // Navigation et résultats
   'flamme',
   'assiette',

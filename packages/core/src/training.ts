@@ -457,7 +457,7 @@ const LEVER_CHAISE: Template = {
 
 /* ------------------------------------------------------------ mise en séance */
 
-export function restLabel(seconds: number): string {
+function restLabel(seconds: number): string {
   if (seconds < 60) return `${seconds} s`;
   const min = Math.floor(seconds / 60);
   const rest = seconds % 60;

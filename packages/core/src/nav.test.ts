@@ -30,12 +30,41 @@ describe('destinationAuDemarrage', () => {
 });
 
 describe('plan de navigation', () => {
-  test('la barre du bas reprend les pages de résultats, dans le même ordre', () => {
-    expect(MOBILE_PAGES.slice(0, RESULT_PAGES.length)).toEqual(RESULT_PAGES);
-  });
-
   test('aucune destination n’est déclarée deux fois', () => {
     expect(new Set(MOBILE_PAGES.map((p) => p.href)).size).toBe(MOBILE_PAGES.length);
+  });
+
+  /**
+   * Remplace un test qui ne pouvait pas échouer.
+   *
+   * Il comparait `MOBILE_PAGES.slice(0, 4)` à `RESULT_PAGES` alors que le premier est **défini**
+   * comme `[...RESULT_PAGES, profil]` : l'assertion redisait la définition. Ce qui suit est ce que
+   * cette liste peut réellement casser.
+   */
+  test('chaque écran monté appartient à une section, sinon la barre se vide dessus', () => {
+    for (const page of MOBILE_PAGES) {
+      expect(sectionDe(page.href)?.cle).toBeDefined();
+    }
+  });
+
+  test('les adresses sont des chemins absolus, sans barre finale', () => {
+    for (const page of [...MOBILE_PAGES, ...SECTIONS.map((s) => ({ href: s.racine }))]) {
+      expect(page.href.startsWith('/')).toBe(true);
+      expect(page.href.endsWith('/')).toBe(false);
+    }
+  });
+
+  /**
+   * Le bandeau du second niveau partage sa largeur entre quatre libellés. « Métabolisme » y a été
+   * tronqué en « Métabolis… » tant qu'une icône occupait une partie de chaque quart ; l'icône est
+   * partie, mais un libellé plus long referait le même défaut sans que rien ne le signale.
+   *
+   * Onze signes, mesuré : la longueur de « Métabolisme », qui tient tout juste sur 390 points.
+   */
+  test('les libellés courts tiennent dans un quart de la barre', () => {
+    for (const page of RESULT_PAGES) {
+      expect(page.short.length).toBeLessThanOrEqual(11);
+    }
   });
 });
 

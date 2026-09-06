@@ -19,9 +19,6 @@ import type { IconName } from './icons';
  */
 export const NAV_BREAKPOINT = 700;
 
-/** À partir du seuil : onglets du haut. Sous le seuil, c'est la barre du bas qui prend le relais. */
-export const FROM_NAV = `@media (min-width: ${NAV_BREAKPOINT}px)`;
-
 export interface NavPage {
   href: string;
   label: string;

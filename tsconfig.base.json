@@ -6,6 +6,13 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "strict": true,
+    // Volontairement désactivé, et mesuré avant de l'être : l'activer fait remonter 123 erreurs,
+    // dont 38 hors tests. Aucune n'est un bug — ce sont des indexations de tableaux **constants**
+    // (`DAILY`, `BMI_BANDS`, `PLAGES_PRETES`), des captures de groupes non facultatifs, ou des
+    // accès déjà gardés par un `??`. Les corriger demanderait une centaine d'assertions non nulles,
+    // c'est-à-dire de troquer un garde-fou réel — zéro `!` et zéro `as` dans tout le dépôt — contre
+    // un garde-fou théorique. Les seuls index venus de données persistées (`p.activity`,
+    // `profile.daily`) sont bornés par `parseProfile` avant d'être employés.
     "noUncheckedIndexedAccess": false,
     "esModuleInterop": true,
     "resolveJsonModule": true,

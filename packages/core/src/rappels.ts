@@ -29,7 +29,7 @@
 
 import { ecrireCle, lireCle } from './storage';
 
-export const RAPPELS_KEY = 'vitae.v1.rappels';
+const RAPPELS_KEY = 'vitae.v1.rappels';
 
 /** Le jour entier, en minutes. Les bornes des plages vivent dans [0, JOUR]. */
 export const JOUR = 24 * 60;

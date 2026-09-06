@@ -22,7 +22,7 @@
 import { lirePesees, parseLu, parseProfile, type StoredProfile } from './storage';
 import type { Pesee } from './suivi';
 
-export const SAUVEGARDE_VERSION = 1;
+const SAUVEGARDE_VERSION = 1;
 
 export interface Sauvegarde {
   profil: StoredProfile | null;

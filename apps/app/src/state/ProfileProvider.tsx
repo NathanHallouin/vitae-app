@@ -11,7 +11,7 @@
  * selon la plateforme — pas par un test à l'exécution.
  */
 
-import { computeMetrics, type Metrics } from '@vitae/core/calc';
+import { type CleCible, computeMetrics, type Metrics } from '@vitae/core/calc';
 import type { GoalKey } from '@vitae/core/constants';
 import { ageFrom, isWeightStale } from '@vitae/core/date';
 import type { Exclusion } from '@vitae/core/recipes';
@@ -88,8 +88,8 @@ interface ProfileValue {
   /** poids enregistré datant de plus d'une semaine */
   staleWeight: StaleWeight | null;
   /** poids cible choisi à la main sur l'écran « Mon poids » ; `null` = automatique */
-  targetKey: string | null;
-  setTargetKey: (key: string) => void;
+  targetKey: CleCible | null;
+  setTargetKey: (key: CleCible) => void;
   save: (input: ProfileInput) => void;
   setGoal: (goal: GoalKey) => void;
   /** filtres d'ingrédients, réglés sur l'écran « Ce que je mange » */
@@ -110,7 +110,8 @@ interface ProfileValue {
    */
   coursRepousse: boolean;
   repousserCours: () => void;
-  ajouterPesee: (pesee: Pesee) => void;
+  /** rend `false` si l'écriture n'a pas abouti — stockage plein, navigation privée verrouillée */
+  ajouterPesee: (pesee: Pesee) => boolean;
   supprimerPesee: (date: string) => void;
   /** remplace le profil et les pesées par ceux d'un fichier de sauvegarde */
   restaurer: (sauvegarde: Sauvegarde) => void;
@@ -131,7 +132,7 @@ export default function ProfileProvider({ children }: { children: ReactNode }) {
   const [{ profile, staleWeight, pesees, lu }, setDonnees] = useState<Donnees>(() =>
     LECTURE_IMMEDIATE ? lire() : { profile: null, staleWeight: null, pesees: [], lu: [] },
   );
-  const [targetKey, setTargetKey] = useState<string | null>(null);
+  const [targetKey, setTargetKey] = useState<CleCible | null>(null);
   const [coursRepousse, setCoursRepousse] = useState(false);
 
   const setProfile = useCallback((next: StoredProfile | null) => {
@@ -186,8 +187,9 @@ export default function ProfileProvider({ children }: { children: ReactNode }) {
    * prochain démarrage — pas une version optimiste de celui-ci.
    */
   const enregistrerPesees = useCallback((prochaines: Pesee[]) => {
-    saveSuivi(prochaines);
+    const ecrit = saveSuivi(prochaines);
     setDonnees((avant) => ({ ...avant, pesees: loadSuivi() }));
+    return ecrit;
   }, []);
 
   /**
@@ -212,14 +214,20 @@ export default function ProfileProvider({ children }: { children: ReactNode }) {
   const ajouterPesee = useCallback(
     (pesee: Pesee) => {
       const prochaines = ajouter(pesees, pesee);
-      enregistrerPesees(prochaines);
+      const ecrit = enregistrerPesees(prochaines);
 
-      if (!profile || profile.poidsDepart !== undefined) return;
-      if (pesees.length !== 0 || prochaines.length !== 1) return;
+      if (!profile || profile.poidsDepart !== undefined) return ecrit;
+      if (pesees.length !== 0 || prochaines.length !== 1) return ecrit;
 
       const { v: _v, updatedAt, ...rest } = profile;
       saveProfile({ ...rest, poidsDepart: prochaines[0].poids }, new Date(updatedAt));
       setDonnees((avant) => ({ ...avant, profile: loadProfile() }));
+
+      // Le sort du poids de départ n'entre pas dans le retour, et c'est délibéré : s'il n'a pas pu
+      // s'écrire alors que la pesée l'a été, l'écran retombe sur la première pesée de l'historique
+      // (voir `PoidsScreen`), qui vaut exactement la même chose à cet instant. Il n'y a rien à
+      // annoncer, donc rien à faire remonter — c'est le repli qui tient lieu de compensation.
+      return ecrit;
     },
     [pesees, enregistrerPesees, profile],
   );
