@@ -79,7 +79,17 @@ export function formFromProfile(
     goal: profile.goal,
     excluded: profile.excluded,
     staleWeight,
-    // Une date de naissance enregistrée est figée : « Recommencer » est la seule sortie.
+    // Une date de naissance enregistrée est figée. Le champ se grise, et la seule sortie est
+    // « Tout effacer » — qui emporte aussi les pesées, délibérément : le bouton promet d'effacer
+    // ce qui vous concerne, et une donnée de santé oubliée dans un coin serait pire.
+    //
+    // **La raison du verrou n'est écrite nulle part.** Il est antérieur au monorepo et son commit
+    // d'origine ne le mentionne pas ; ce commentaire disait « Recommencer », nom que le bouton n'a
+    // plus, ce qui indique qu'il n'a pas été relu depuis. Le coût, lui, est certain : une faute de
+    // frappe dans l'année coûte tout l'historique de pesées. Il est atténué — l'âge calculé
+    // s'affiche sous le champ à la saisie, donc l'erreur se voit tout de suite, et la sauvegarde
+    // JSON permet de reprendre ses pesées. Lever le verrou est un arbitrage de produit, pas une
+    // correction : consigné dans `AUDIT.md` sous `Vr1` plutôt que décidé ici.
     naissanceLocked: Boolean(profile.naissance),
   };
 }

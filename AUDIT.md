@@ -433,7 +433,7 @@ diagnostic.
 | Crochets git actifs | **1**, avec **deux** garde-fous : `.github/workflows/` et les versions de format persisté (0 avant) | `.githooks/pre-commit` |
 | Ternaires dont les deux branches sont identiques | **0** (1 avant) | balayage `apps/app/src` et `apps/app/app` |
 | Paires de glyphes indiscernables | **0** (1 avant) | balayage des 35 tracés de `Icon.tsx` ; les trois flèches sont un même tracé pivoté, à dessein |
-| Écrans regardés après les corrections | **16** (0 avant la cinquième passe) | captures + `--dump-dom` sur l'export |
+| Écrans regardés après les corrections | **19** (0 avant la cinquième passe) | captures + `--dump-dom` sur l'export |
 | Exports orphelins (valeurs) | **0** (14 avant) | balayage `export` vs usages |
 | Dépendances déclarées sans import | **0** (1 avant) | `expo-linear-gradient` retiré |
 | Règles du dépôt vérifiées en CI | **2** : pas de test de plateforme web/natif, `packages/core` sans import de plateforme (0 avant) | `.github/workflows/ci.yml` |
@@ -751,6 +751,70 @@ endroit : une convention d'interface (le clavier à virgule) que le métier igno
 commentaire qui justifie le clavier et le code qui tronque la virgule sont à deux modules l'un de
 l'autre, tous deux écrits ici, et aucun test ne les faisait se rencontrer.
 
+### 6 septembre 2026 — huitième passe, vérifier les affirmations du dépôt
+
+Les sept passes précédentes cherchaient des défauts. Celle-ci part de l'autre bout : **le dépôt
+affirme des choses**, dans ses commentaires et jusque dans sa copie visible, et une affirmation
+qu'on ne vérifie pas finit par devenir fausse. C'est écrit dans `AGENTS.md` — « un commentaire qui
+affirme n'est vérifié par personne, et il survit à ce qu'il décrit ».
+
+| Affirmation | Où | Vérifiée ? |
+|---|---|---|
+| « les contrastes ont été repris un par un » | `ApparenceCard`, **affiché à l'utilisateur** | ✅ Le plus faible rapport texte/fond est 4,91:1, au-dessus du seuil AA. Dix rôles de texte × six fonds, dans les deux thèmes |
+| « `primary` / `gaugeTrack` est calculé pour cela, dans les deux thèmes » | `tokens.ts:17` | ✅ 5,99:1 en clair, 6,45:1 en sombre — et symétrique, ce que « dans les deux thèmes » promettait |
+| `primaryTint` reste lisible | implicite | ✅ Composité sur les trois fonds : 5,60 à 8,42 selon le thème |
+| « un contenu replié se cache avec `display: 'none'`, jamais par un rendu conditionnel » | `AGENTS.md` | ✅ Les six mécanismes de repli du dépôt le font — `Repliable`, `Fiche`, `SousOnglets`, `SuiviCard` (deux panneaux), `DonneesCard`, `RappelsCard` |
+| « Lire (1 min) » | `EncartCours` | ✅ Honnête : les seize notions font de 25 à 101 mots, soit 8 à 30 secondes. La promesse majore |
+| Aucun autre nombre affiché n'est écrit en dur | — | ✅ Balayage des pourcentages puis des unités dans le JSX : le « 10 % » de la septième passe était le seul |
+| « Recommencer » | `state.ts`, `store.ts` | ❌ **Le bouton s'appelle « Tout effacer » depuis longtemps.** Voir ci-dessous |
+
+Six affirmations sur sept tiennent. C'est un résultat, et il valait d'être établi plutôt que
+supposé — d'autant que la première est **montrée à l'utilisateur** : une application qui se vante
+de ses contrastes doit pouvoir le prouver.
+
+#### `Lb1` 🟡 — deux commentaires nommaient un bouton qui a changé de nom
+
+`state.ts` et `store.ts` renvoyaient à un « Recommencer » qui s'appelle « Tout effacer » partout
+ailleurs, y compris dans la politique de confidentialité. Corrigés.
+
+Le balayage qui a suivi est le vrai résultat : **180 libellés cités entre guillemets dans des
+commentaires**, confrontés un par un au code. Trois faux positifs — « J'ai compris » est une
+hypothèse que le commentaire rejette, « Rechercher » est le libellé de la touche entrée d'iOS,
+« Réduire les animations » est un réglage système. Aucun autre libellé périmé. La classe est close,
+et on sait maintenant qu'elle l'est.
+
+#### `Vr1` ⚖️ — la date de naissance est verrouillée, sans raison écrite, et la sortie coûte cher
+
+Une fois enregistrée, la date de naissance se grise. Le seul moyen de la corriger est
+« Tout effacer » — qui efface aussi **toutes les pesées**, délibérément et à juste titre : le bouton
+promet d'effacer ce qui vous concerne, et une donnée de santé oubliée dans un coin serait pire.
+
+Donc : **une faute de frappe dans l'année coûte tout l'historique de poids.**
+
+La raison du verrou n'est écrite nulle part. Il est antérieur au monorepo, son commit d'origine ne
+le mentionne pas, et le commentaire qui le décrivait nommait un bouton disparu — signe qu'il n'a
+pas été relu depuis. Deux atténuations existent, et elles comptent : l'âge calculé s'affiche sous le
+champ pendant la saisie, donc une erreur se voit immédiatement ; et la sauvegarde JSON permet de
+reprendre ses pesées après l'effacement.
+
+**Non corrigé, et volontairement.** Lever le verrou est une ligne, mais c'est un arbitrage de
+produit : le verrou a peut-être une raison que le dépôt a perdue, et la remplacer par ma
+supposition serait pire que la consigner. Ce qui est fait : le commentaire dit désormais ce qu'on
+sait, ce qu'on ne sait pas, et ce que ça coûte.
+
+### Ce que la huitième passe a appris
+
+**Vérifier une affirmation vraie a autant de valeur que trouver un défaut**, et coûte moins cher.
+Sept affirmations, six confirmées chiffres à l'appui, une fausse : le dépôt sait à présent lesquelles
+il peut citer. Avant cette passe, les sept avaient exactement le même statut — écrites, jamais
+exécutées.
+
+Le seul défaut trouvé est un **nom périmé**, la classe même qu'`AGENTS.md` désigne comme le risque
+propre à ce dépôt. Il n'était pas trouvable par la lecture : il fallait extraire les 180 libellés
+cités et les confronter au code. Trente lignes de script, une fois — et le résultat n'est pas
+seulement « un défaut corrigé », c'est **« il n'y en a pas d'autre »**, ce qu'aucune relecture ne
+peut affirmer.
+
 ### Ce qui reste ouvert, par ordre de coût
 
 **Cette phrase a été écrite deux fois — « la liste des constats corrigeables est épuisée » — et
@@ -768,6 +832,7 @@ Les quatre entrées ci-dessous ne se ferment pas par du code écrit ici.
 | B1 🟡 | Aucun test de composant ni de bout en bout | **À ne pas faire**, et c'est dans les anti-recommandations : écrits par le même agent que le code, ils seraient circulaires eux aussi. Le manque se compense par les assertions sur le HTML livré, qui vérifient un artefact et non une intention |
 | V5 ⚖️ | `noUncheckedIndexedAccess` | Évalué, mesuré, écarté, décision dans `tsconfig.base.json`. À rouvrir si le dépôt se met à indexer des tableaux dont la taille dépend de données persistées |
 | Cp2 ⚖️ | Le plafond iOS de `rappels.ts` | Documenté chiffres à l'appui, non vérifié : cela demande un appareil. `bun test` contrôle que la génération s'arrête à 60, rien de plus |
+| Vr1 ⚖️ | Le verrou sur la date de naissance | La raison n'est écrite nulle part et le coût de la sortie est tout l'historique de pesées. Lever le verrou est une ligne ; décider s'il doit l'être est un arbitrage de produit, pas une correction. Ce qui est su, ce qui ne l'est pas et ce que ça coûte sont désormais dans `state.ts` |
 | Hy2 ⚖️ | La moitié **largeur** de l'échec d'hydratation | `useWindowDimensions()` vaut 0 sous Node : `useLarge`, `useColumns` et le `<nav>` divergent encore entre le HTML livré et le premier rendu du navigateur. La brancher sur `useHydrate()` coûte une peinture en mise en page mobile avant bascule sur grand écran. **C'est un arbitrage de produit, pas une dette technique** — et le prix est écrit dans `ROADMAP.md` |
 | **Gv2 🔴** | **Aucune revue** | **Non corrigeable par du code, et non entamé par six passes.** Toutes les corrections ont été produites par l'agent qui a écrit le code qu'elles corrigent — y compris les quatre qui corrigent l'audit lui-même. C'est la définition du constat |
 

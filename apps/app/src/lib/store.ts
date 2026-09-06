@@ -28,7 +28,7 @@ export const nativeProfileStore: ProfileStore = {
  * Le thème choisi, à part du profil.
  *
  * Séparé volontairement : c'est une préférence d'affichage, pas une donnée de santé. La mêler au
- * profil ferait qu'un « Recommencer » repasserait l'application en clair, ce que personne ne
+ * profil ferait qu'un « Tout effacer » repasserait l'application en clair, ce que personne ne
  * demande.
  */
 const THEME_KEY = 'vitae.v1.theme';
