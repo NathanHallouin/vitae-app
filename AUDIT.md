@@ -3,7 +3,7 @@
 **Date :** 6 septembre 2026 · **Périmètre :** le code produit **et** le dispositif qui le produit
 · **Révision auditée :** `d1257eb` + arbre de travail non commité (76 fichiers modifiés, 17 non suivis)
 
-> **Mise à jour du 6 septembre.** Quatre passes de travaux : les cinq corrections prioritaires, puis
+> **Mise à jour du 6 septembre.** Cinq passes de travaux : les cinq corrections prioritaires, puis
 > les constats abordables du journal. Bilan : **19 constats résolus** · **1 découvert par une
 > correction** (`V7`, lui-même résolu) · **1 évalué puis écarté avec sa mesure** (`V5`) ·
 > **2 affirmations de l'audit corrigées** (le « 0 `any` » et le « fichier suivi par git » étaient
@@ -205,6 +205,7 @@ aucun `include` de tsconfig, et le script racine ne lance que celui d'`apps/app`
 |---|---|---|---|
 | Sg1 | ✅ | **Résolu** — c'est `S2` sous un autre angle : la duplication de source de vérité entre `tokens.ts` et `tailwind.config.js` | `tools/build-tokens.ts` engendre `tailwind.generated.js` |
 | Sg2 | ✅ | **Résolu** — c'est `S3` : `expo-linear-gradient` déclaré sans usage | Dépendance retirée du manifeste |
+| Sg6 | ✅ | **Nouveau, découvert en regardant l'écran, et résolu.** `reglage` et `soleil` étaient **le même tracé** — un cercle et huit rayons, à un rayon près — et je les avais posés côte à côte sur le choix de thème : « Système » ressemblait à « Clair ». Deux glyphes jumeaux dans un jeu d'icônes ne se voient pas en les dessinant ; ils se voient le jour où quelqu'un les met à vingt pixels l'un de l'autre | `reglage` redessiné en deux curseurs ; « Système » prend `telephone`, qui dit ce que l'option fait. **Balayage du jeu entier** : les seules paires proches restantes sont les trois flèches, qui sont le même tracé pivoté à dessein |
 | Sg3 | ✅ | **Résolu.** Un `sed` global `font-sans-semibold` → `font-sans-medium` avait rendu les deux branches d'un ternaire identiques : la distinction actif/inactif que le ternaire portait avait disparu, sans que rien ne le signale | `SousOnglets.tsx` : la graisse redevient distinctive, avec la trace de l'accident dans le commentaire. **Balayage du dépôt : aucun autre ternaire aplati**, y compris sur plusieurs lignes |
 | Sg4 | ✅ | **Résolu, et le constat corrigé.** L'audit annonçait « 41 exports orphelins ». Le chiffre confondait *non nommé ailleurs* et *inatteignable* : la plupart sont des **types** qui n'apparaissent que dans des signatures exportées — `WeightTarget` dans `Projection`, `Session` dans `WeekPlan` — et les retirer les rendrait innommables par un consommateur, ce qui est une régression et non un nettoyage. Les vrais orphelins étaient **14 valeurs** | 13 `export` retirés (fonctions et clés internes à leur module), `FROM_NAV` supprimé — vestige de l'ère Next.js, référencé nulle part, pas même dans son propre fichier |
 | Sg5 | ✅ | **Résolu, et le constat corrigé.** « Six mécanismes de divulgation » en confondait trois besoins : `SousOnglets` est de la navigation entre pairs, `EncartCours` est un rejet. Les vrais mécanismes de divulgation étaient **quatre**. L'un d'eux — la feuille modale de `Fiche`, en natif — était redondant : **trois fichiers, 344 lignes et une paire de plateforme pour un seul appelant**, `NeatCard` | `Fiche.web.tsx` et `FicheContenu.tsx` supprimés, tout fondu dans `Fiche.tsx` (220 l.) qui déplie sur place partout. `scrim` retiré de la palette, son unique consommateur ayant disparu. Les deux autres — le panneau de `SuiviCard` et celui de `FiltresRecettes` — ont un déclencheur posé à l'extérieur par nécessité (deux boutons sous le cadran, une pastille qui porte un compte) : ce sont des variantes d'un même geste, pas des mécanismes de plus |
@@ -295,12 +296,12 @@ Ouverts après les travaux du 6 septembre, verdict réévalué entre parenthèse
 | 3. Garde-fous d'exécution | Écart majeur (**conforme**) | — | — | — | 4 |
 | 4. Vérification et circularité | **Critique** (**conforme**) | — | — | ⚖️ 1 | 6 |
 | 5. Boucle de retour | Conforme | — | — | 1 | — |
-| 6. Signatures de génération | Écart majeur (**conforme**) | — | — | — | 5 |
+| 6. Signatures de génération | Écart majeur (**conforme**) | — | — | — | 6 |
 | 7. Revue et gouvernance | **Critique** (**critique**) | 1 | — | — | 2 |
 | 8. Dette de compréhension | Écart mineur (**conforme**) | — | — | ⚖️ 1 | 1 |
 | 9. Sécurité du dispositif | Écart mineur (**conforme**) | — | — | — | 2 |
 | 10. Axes classiques | Écart mineur (**conforme**) | — | — | — | 2 |
-| **Total** | | **1** | **0** | **1 + 2 ⚖️** | **29** |
+| **Total** | | **1** | **0** | **1 + 2 ⚖️** | **30** |
 
 **Le seul constat critique restant est `Gv2` : aucune revue.** Il n'est pas corrigeable par du
 code — et les vingt et une corrections ci-dessus ne l'entament pas d'un pouce, puisqu'elles ont
@@ -431,6 +432,8 @@ diagnostic.
 | Entrées d'allowlist | **12** (53 avant) | `.claude/settings.local.json` |
 | Crochets git actifs | **1**, avec **deux** garde-fous : `.github/workflows/` et les versions de format persisté (0 avant) | `.githooks/pre-commit` |
 | Ternaires dont les deux branches sont identiques | **0** (1 avant) | balayage `apps/app/src` et `apps/app/app` |
+| Paires de glyphes indiscernables | **0** (1 avant) | balayage des 35 tracés de `Icon.tsx` ; les trois flèches sont un même tracé pivoté, à dessein |
+| Écrans regardés après les corrections | **3** (0 avant les cinq passes) | captures + `--dump-dom` sur l'export |
 | Exports orphelins (valeurs) | **0** (14 avant) | balayage `export` vs usages |
 | Dépendances déclarées sans import | **0** (1 avant) | `expo-linear-gradient` retiré |
 | Règles du dépôt vérifiées en CI | **2** : pas de test de plateforme web/natif, `packages/core` sans import de plateforme (0 avant) | `.github/workflows/ci.yml` |
@@ -549,6 +552,24 @@ puis le lot de corrections d'audit.
   par un tiers appliqué comme instruction — n'a pas de parade automatique : distinguer un document
   de confiance d'un autre est un jugement. Ce qui manquait était la règle qui impose ce jugement,
   pas un contrôle de plus.
+
+### 6 septembre 2026 — cinquième passe, la vérification qui manquait
+
+Quatre passes de corrections avaient changé des choses **visibles** — la feuille modale de `Fiche`
+remplacée par un dépli, la graisse des sous-onglets, le sélecteur de thème — et toutes avaient été
+vérifiées **au `grep`**. Aucune n'avait été regardée.
+
+| Vérifié | Résultat |
+|---|---|
+| Le dépli de `Fiche` sur « Bouger » | La ligne se rend bien ; le détail est dans le DOM après hydratation et masqué par `display: none`, comme la règle l'exige |
+| La graisse des sous-onglets (`Sg3`) | La distinction actif/inactif est de retour |
+| Le sélecteur de thème | **Défaut trouvé** : deux pictogrammes sur trois étaient le même dessin. Voir `Sg6` |
+
+**Ce que cette passe apprend sur l'audit lui-même.** Il n'avait aucun axe pour « est-ce que cela se
+lit à l'écran ». Ses trente-trois constats sont sortis de `grep`, de `tsc` et de `git log` — et un
+défaut d'interface posé au milieu d'un écran y a survécu quatre passes. Le `dump-dom` et la capture
+sont des outils d'audit au même titre que le compilateur ; ils n'avaient simplement pas été
+employés.
 
 ### Ce qui reste ouvert, par ordre de coût
 

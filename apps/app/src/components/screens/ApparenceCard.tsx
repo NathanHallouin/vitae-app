@@ -24,10 +24,13 @@ import { usePalette } from '@/theme/palette';
 export default function ApparenceCard() {
   const { preference, setPreference } = useColorMode();
 
+  // Le téléphone plutôt que la roue dentée pour « Système » : l'option dit qu'elle suit le réglage
+  // de l'appareil, et le pictogramme le dit aussi. C'était une roue — dont le tracé, à 17 px, se
+  // confondait avec le soleil de « Clair » posé deux cases plus loin.
   const choix: Array<{ cle: StoredTheme; label: string; icone: IconName }> = [
     { cle: 'light', label: 'Clair', icone: 'soleil' },
     { cle: 'dark', label: 'Sombre', icone: 'lune' },
-    { cle: 'system', label: 'Système', icone: 'reglage' },
+    { cle: 'system', label: 'Système', icone: 'telephone' },
   ];
 
   return (

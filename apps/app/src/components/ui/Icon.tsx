@@ -208,10 +208,21 @@ const PATHS: Record<IconName, ReactNode> = {
   //
   // La roue dentée est dessinée à huit dents plutôt qu'aux douze habituelles : à 18 px dans
   // l'en-tête, douze dents se referment en un disque flou.
+  /**
+   * Deux curseurs, et non une roue dentée.
+   *
+   * La roue était **le même tracé que `soleil`** — un cercle et huit rayons, à un rayon près — et
+   * les deux se retrouvaient côte à côte sur le choix de thème, où « Système » ressemblait à
+   * « Clair ». Deux glyphes qui se ressemblent dans un jeu d'icônes ne se voient pas en les
+   * dessinant : ils se voient le jour où quelqu'un les met à vingt pixels l'un de l'autre.
+   *
+   * Les curseurs ne ressemblent à rien d'autre du jeu, et se lisent à 16 px.
+   */
   reglage: (
     <>
-      <Circle cx="12" cy="12" r="3" />
-      <Path d="M12 2.5v2.2M12 19.3v2.2M21.5 12h-2.2M4.7 12H2.5M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6M18.7 18.7l-1.6-1.6M6.9 6.9 5.3 5.3" />
+      <Path d="M4 8h16M4 16h16" />
+      <Circle cx="9.5" cy="8" r="2.4" />
+      <Circle cx="15" cy="16" r="2.4" />
     </>
   ),
   cloche: (
