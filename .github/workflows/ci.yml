@@ -72,12 +72,23 @@ jobs:
           # le jour où `/` n'était qu'une redirection.
           verifie index.html 'Combien votre corps'
           verifie metabolisme.html 'Mon métabolisme'
-          # Les explications sont repliées à l'écran mais restent dans le document : c'est ce qui
-          # donne à lire quelque chose à un moteur de recherche sur une page dont les chiffres
-          # dépendent de l'appareil du visiteur. Un rendu conditionnel les ferait disparaître sans
-          # que rien n'échoue.
-          verifie metabolisme.html 'Par l’équation de Mifflin-St Jeor'
           verifie recettes/index.html 'Recettes'
+
+          # Le cours porte désormais les seize notions, une par route. C'est la seule famille de
+          # pages du site dont le contenu est entier sans profil : le texte complet doit donc s'y
+          # trouver, pas seulement le résumé.
+          verifie comprendre/index.html 'Seize notions'
+          verifie comprendre/comment-il-est-calcule.html 'Par l’équation de Mifflin-St Jeor'
+          verifie comprendre/les-seances.html 'une séance de renforcement en dépense'
+
+          # Les écrans de résultats, eux, ne portent plus les explications : ils finissent par le
+          # renvoi vers l'écran suivant, qui est ce qui fait des quatre onglets un parcours.
+          verifie metabolisme.html 'Ce que ces chiffres changent dans l’assiette'
+          verifie bouger.html 'Des recettes pour tenir ces repères'
+          # Les réglages : le thème y est expliqué, et le site y dit pourquoi les rappels de
+          # mouvement n'existent que dans l'application.
+          verifie reglages.html 'Le thème sombre reprend'
+          verifie reglages.html 'ne sonne que si l’onglet est resté ouvert'
           verifie confidentialite.html 'aucune donnée'
 
           recette=apps/app/dist/recettes/omelette-aux-champignons.html
@@ -100,15 +111,46 @@ jobs:
             grep -q '<main[ >]' "$page" || { echo "$page : pas de <main>"; exit 1; }
           }
           for page in index.html metabolisme.html alimentation.html poids.html bouger.html \
-                      profil.html confidentialite.html recettes/index.html \
-                      recettes/omelette-aux-champignons.html; do
+                      profil.html reglages.html confidentialite.html recettes/index.html \
+                      recettes/omelette-aux-champignons.html comprendre/index.html \
+                      comprendre/pourquoi-une-fourchette.html; do
             structure "$page"
           done
 
           # L'accueil doit mener quelque part : le catalogue de recettes est la porte que
-          # l'acquisition emprunte.
+          # l'acquisition emprunte, le cours celle qui n'exige rien du visiteur.
           grep -q '<a [^>]*href="/recettes"' apps/app/dist/index.html \
             || { echo "l'accueil n'a aucun lien vers /recettes"; exit 1; }
+          grep -q '<a [^>]*href="/comprendre"' apps/app/dist/index.html \
+            || { echo "l'accueil n'a aucun lien vers /comprendre"; exit 1; }
+
+          # La navigation est faite de vrais liens, et elle est dans le HTML livré : c'est par elle
+          # qu'un moteur passe d'une page à l'autre. Les quatre sections sur tout écran qui en fait
+          # partie, et le second niveau sur les quatre écrans de résultats.
+          for page in metabolisme.html recettes/index.html comprendre/index.html profil.html; do
+            for cible in /metabolisme /recettes /comprendre /profil; do
+              grep -q "<a [^>]*href=\"$cible\"" "apps/app/dist/$page" \
+                || { echo "$page : la barre des sections ne lie pas $cible"; exit 1; }
+            done
+          done
+          for cible in /alimentation /poids /bouger; do
+            grep -q "<a [^>]*href=\"$cible\"" apps/app/dist/metabolisme.html \
+              || { echo "le second niveau ne lie pas $cible"; exit 1; }
+          done
+
+          # L'en-tête ne porte plus que la marque : une commande qui y reviendrait serait hors de
+          # portée du pouce, et rétrécirait la marque jusqu'à la tronquer.
+          if grep -q '<a [^>]*href="/reglages"' apps/app/dist/recettes/index.html; then
+            echo "une commande de réglage est revenue dans l'en-tête"
+            exit 1
+          fi
+
+          # Le sommaire du cours mène à ses seize notions. Une page qui les listerait sans les
+          # lier laisserait seize routes orphelines, que rien ne ferait découvrir.
+          notions=$(grep -o 'href="/comprendre/[a-z0-9-]*"' apps/app/dist/comprendre/index.html \
+            | sort -u | wc -l)
+          [ "$notions" = "16" ] \
+            || { echo "le sommaire du cours lie $notions notions, 16 attendues"; exit 1; }
 
           # Le catalogue est une liste, et chaque recette y est un lien suivi d'un titre de
           # niveau 2 : c'est ce qui en fait un sommaire plutôt qu'un tas de cartes.
@@ -139,30 +181,80 @@ jobs:
 
       - name: Seules les polices utilisées sont livrées
         # Importer une coupe de `@expo-google-fonts` enregistre la famille entière : trente-six
-        # fichiers et 7,7 Mo partaient dans l'export pour cinq coupes affichées. Le jour où un
+        # fichiers et 7,7 Mo partaient dans l'export pour les coupes affichées. Le jour où un
         # écran réimporte le paquet au lieu de passer par `src/lib/polices.ts`, tout revient — et
         # rien ne le signalerait, l'application ayant exactement le même aspect.
+        #
+        # Trois coupes depuis la refonte « Cadran », contre cinq : une seule famille porte les
+        # titres, les libellés et les chiffres.
         run: |
           embarquees=$(find apps/app/dist/assets -name "*.ttf" | wc -l)
           [ "$embarquees" = "0" ] \
             || { echo "$embarquees polices embarquées par Metro : un écran importe-t-il @expo-google-fonts ?"; exit 1; }
 
           livrees=$(find apps/app/dist/polices -name "*.woff2" | wc -l)
-          [ "$livrees" = "5" ] || { echo "$livrees woff2 dans dist/polices, 5 attendus"; exit 1; }
+          [ "$livrees" = "3" ] || { echo "$livrees woff2 dans dist/polices, 3 attendus"; exit 1; }
           # Le TTF entier n'a rien à faire sur le site : il ne sert qu'au natif.
           [ "$(find apps/app/dist/polices -name "*.ttf" | wc -l)" = "0" ] \
             || { echo "des TTF entiers sont livrés au site"; exit 1; }
 
-          grep -q 'rel="preload"[^>]*Fraunces_600SemiBold.woff2' apps/app/dist/index.html \
-            || { echo "la police des titres n'est pas préchargée"; exit 1; }
+          for coupe in SpaceGrotesk_400Regular SpaceGrotesk_700Bold; do
+            grep -q "rel=\"preload\"[^>]*$coupe.woff2" apps/app/dist/index.html \
+              || { echo "$coupe n'est pas préchargée"; exit 1; }
+          done
+          # La coupe des libellés ne se précharge pas : elle se demande à la découverte du texte
+          # qui l'emploie. La précharger volerait de la bande passante aux deux autres.
+          #
+          # `if` et non `grep && exit` : le shell de la CI s'arrête au premier échec, et un `grep`
+          # qui ne trouve rien — le cas nominal ici — sortirait 1 et ferait échouer l'étape.
+          if grep -q 'rel="preload"[^>]*SpaceGrotesk_500Medium.woff2' apps/app/dist/index.html; then
+            echo "la coupe des libellés est préchargée à tort"
+            exit 1
+          fi
           grep -q "@font-face" apps/app/dist/index.html \
             || { echo "les @font-face ne sont pas dans le document"; exit 1; }
 
-      - name: Les fichiers engendrés sont à jour
+      - name: Les règles du dépôt sont tenues
+        # Deux règles qu'`AGENTS.md` énonce depuis le premier jour et que rien ne vérifiait. Elles
+        # avaient toutes deux été enfreintes sans que personne ne le voie — c'est ce que produit
+        # une règle écrite en français et jamais exécutée.
         run: |
-          if ! git diff --quiet -- packages/content/src/recettes.generated.ts; then
-            echo "packages/content/src/recettes.generated.ts ne correspond pas aux Markdown."
-            echo "Lancer 'bun run content' et committer le résultat."
-            git --no-pager diff --stat -- packages/content/src/recettes.generated.ts
+          # 1. Aucune différence web / natif décidée à l'exécution. Elle passe par un fichier que
+          #    Metro choisit. Les distinctions iOS / Android restent admises : aucun fichier `.web`
+          #    ne sait les exprimer.
+          # Les lignes de commentaire sont écartées : plusieurs en-têtes citent la règle et
+          # l'ancien code qu'elle a remplacé. `[[:space:]]` et non `\s`, que grep ne lit pas.
+          fautes=$(grep -rn "Platform.OS" apps/app/app apps/app/src/components \
+            | grep -v ':[[:space:]]*\*' | grep -v ':[[:space:]]*//' | grep "'web'" || true)
+          if [ -n "$fautes" ]; then
+            echo "Test de plateforme web / natif hors d'un fichier .web :"
+            echo "$fautes"
+            exit 1
+          fi
+
+          # 2. Le métier ne connaît aucune plateforme. Sans cela, il cesse d'être testable sans
+          #    environnement de rendu — et c'est ce qui fait tourner les 270 tests en 160 ms.
+          interdits=$(grep -rnE "from '(react|react-native|node:)" packages/core/src || true)
+          if [ -n "$interdits" ]; then
+            echo "packages/core importe une dépendance de plateforme :"
+            echo "$interdits"
+            exit 1
+          fi
+
+      - name: Les fichiers engendrés sont à jour
+        # `bun run generate` a été lancé en première étape : tout fichier engendré qui diffère de
+        # sa version committée est donc une divergence entre une source et sa copie.
+        #
+        # La vérification ne portait que sur les recettes. Elle porte désormais sur **tous** les
+        # fichiers engendrés, parce que le défaut qu'elle attrape est le même : une source
+        # modifiée sans que sa copie suive, et rien pour le signaler. C'est exactement ce qui
+        # était arrivé à l'échelle typographique, recopiée à la main dans `tailwind.config.js`
+        # pendant que `tokens.ts` se déclarait source unique.
+        run: |
+          engendres=$(git ls-files | grep -E '\.generated\.|tailwind\.generated\.js')
+          if ! git diff --quiet -- $engendres; then
+            echo "Des fichiers engendrés ne correspondent plus à leur source."
+            echo "Lancer 'bun run generate' et committer le résultat."
+            git --no-pager diff --stat -- $engendres
             exit 1
           fi

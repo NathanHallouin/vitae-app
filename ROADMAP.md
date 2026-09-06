@@ -86,21 +86,26 @@ L'export embarquait **trente-six** fichiers de police, 7,7 Mo, pour cinq coupes 
 `@expo-google-fonts` enregistre la famille entière dès qu'on en importe une. Les paquets sont
 passés en dépendances de développement et `tools/build-fonts.ts` prélève ce qui sert.
 
-| | avant | après |
-|---|---|---|
-| Polices livrées au site | 36 fichiers, 7,7 Mo | 5 fichiers, **126 Ko** |
-| Export complet | 17 Mo | 9,7 Mo |
-| Paquet JavaScript | 2 739 Ko | 2 698 Ko |
-| Départ du téléchargement des polices | après exécution du paquet | avec l'analyse du HTML |
+| | avant | après | depuis « Cadran » |
+|---|---|---|---|
+| Polices livrées au site | 36 fichiers, 7,7 Mo | 5 fichiers, 126 Ko | 3 fichiers, **43 Ko** |
+| Export complet | 17 Mo | 9,7 Mo | — |
+| Paquet JavaScript | 2 739 Ko | 2 698 Ko | 2 768 Ko |
+| Départ du téléchargement des polices | après exécution du paquet | avec l'analyse du HTML | idem |
 
-Mesuré dans le navigateur : la Fraunces des titres part en même temps que le paquet et arrive en
-2 ms, soit complète avant la fin du téléchargement du paquet. Les trois Inter suivent à la
+Mesuré dans le navigateur : la police des titres part en même temps que le paquet et arrive en
+2 ms, soit complète avant la fin du téléchargement du paquet. Les coupes restantes suivent à la
 découverte du texte qui les emploie.
 
+La refonte « Cadran » a fait tomber la moitié de ce qui restait : une seule famille porte désormais
+les titres, les libellés et les chiffres — la Space Grotesk, dont les chiffres sont à chasse
+constante par construction, ce qui était la seule raison d'être de la serif de titre.
+
 **Trouvé en vérifiant** : le texte courant ne portait aucune classe `font-*` et retombait sur la
-pile système. Les deux tiers des textes de l'application n'étaient donc pas en Inter, contrairement
-aux libellés — alors que `Chiffre` documente son unité comme étant « en Inter ». Corrigé dans un
-commit séparé, révocable d'un `git revert` si l'effet ne convient pas.
+pile système. Les deux tiers des textes de l'application n'étaient donc pas dans la police du
+projet, contrairement aux libellés. Corrigé dans un commit séparé, révocable d'un `git revert` si
+l'effet ne convient pas. Le défaut reste possible avec une seule famille en jeu — il est seulement
+plus facile à attraper.
 
 Le woff2 est fait, sans la dépendance Python redoutée : `subset-font` embarque harfbuzz en wasm et
 s'installe par `bun install`, donc la CI le construit comme le reste. Le sous-ensemble est **relevé
@@ -116,8 +121,13 @@ au jalon v1.0 ci-dessus : ouvrir les comptes, mettre le site en ligne, prendre l
 ### 1. Contraste des textes : fait
 
 Réglé lors de la refonte visuelle : le `faint` de la maquette (`#9e9e9e`, 2,7:1 sur blanc) a été
-remplacé par `#6f7d75` (4,6:1), et la palette sombre a été reconstruite sur la même exigence.
-Mesuré dans le navigateur : les petits textes tournent autour de 7:1 en mode sombre.
+remplacé par une valeur mesurée, et la palette sombre a été reconstruite sur la même exigence.
+
+La palette « Cadran » a été calculée sur la même règle, et vérifiée avant d'être écrite : minimum
+**5,35:1** en clair (`faint` sur `surface2`), **5,41:1** en sombre. Les valeurs mesurées sont dans
+l'en-tête de `packages/core/src/tokens.ts`, rôle par rôle. Toute couleur ajoutée doit passer 4,5:1
+sur son fond, **dans les deux thèmes** — c'est ce qui a écarté l'indigo tel quel en sombre, où il
+tombe sous le seuil sans devenir pastel : la teinte est conservée, c'est la clarté qui monte.
 
 ### 2. Groupes d'options : fait
 
@@ -189,9 +199,40 @@ un poste de travail, et l'écart ne se verrait qu'une fois un lien partagé.
 - **Suivi des séances** : 1 j
   Cocher une séance faite dans la semaine, et voir la régularité sur le mois. Local, comme le
   reste.
-- **Rappels anti-sédentarité : faits.** Réglables sur l'écran « Bouger » (intervalle, plage
-  horaire), notifications locales, silencieuses, absentes du site. Deux suites possibles, aucune
-  urgente :
+- **Le cours : fait.** Les seize notions d'`explainers.ts` ont quitté le pied des écrans de
+  résultats pour devenir seize routes sous `/comprendre`, pré-rendues, dont le contenu est entier
+  **sans profil**. Ce qui a été lu vit sous `vitae.v1.lu`, et trois mécanismes relient les écrans au
+  cours : le sommaire du chapitre, l'encart qui propose la notion suivante non lue, et le renvoi
+  déclenché par un drapeau du métier. Voir `README.md`, « Le cours ».
+
+  Ce qui reste ouvert, et qui n'est pas urgent : **le mot lié**. La maquette prévoyait qu'un terme
+  du texte courant — « métabolisme de base », « NEAT » — ouvre une bulle au toucher et mène à la
+  notion au second. Cela suppose une convention de balisage dans des chaînes qui sont aujourd'hui
+  du texte pur, donc une reprise de toute la copie de `packages/core`. À faire d'un bloc, ou pas du
+  tout : à moitié, la moitié des termes seraient liés et l'autre non, ce qui se lit comme un défaut.
+- **L'arrivée variable : faite.** L'application s'ouvre là où quelque chose est à faire — pesée de
+  plus d'une semaine, profil modifié, sinon l'assiette du jour. En natif seulement.
+- **La navigation à quatre sections : faite.** L'en-tête ne porte plus que la marque ; la barre du
+  bas porte quatre intentions au lieu de cinq destinations ; les quatre écrans de résultats
+  deviennent un second niveau sous l'en-tête. Le thème est passé sur le profil, en trois choix.
+  Voir `README.md`, « La navigation ».
+
+  Ce que cela laisse ouvert : `/reglages` n'est plus atteignable que depuis le profil. C'est
+  volontaire — on ne règle les rappels qu'une fois — mais si les retours montrent qu'on les cherche
+  ailleurs, le bon geste sera de les remonter sur le profil, pas de rouvrir une commande dans
+  l'en-tête.
+- **Rappels anti-sédentarité : faits.** Réglables dans `/reglages` (intervalle, et autant de
+  **plages horaires** qu'on veut, au pas de la demi-heure), notifications locales, silencieuses,
+  absentes du site.
+
+  **Deux écarts avec ce qui était prévu ici.** Le réglage vivait sur l'écran « Bouger », sous la
+  phrase qu'il prolonge ; il a déménagé dans les réglages, parce qu'un réglage se cherche là où
+  l'on cherche les réglages — « Bouger » garde une carte qui dit son état et y mène. Et la plage
+  unique de 9 h à 19 h est devenue une liste de plages : une bande continue sonne pendant le
+  déjeuner et le trajet, et un rappel au mauvais moment fait couper *toutes* les notifications de
+  l'application. L'ancien réglage est relu et converti. Voir `README.md`.
+
+  Deux suites possibles, aucune urgente :
   - **Restreindre à la semaine** : demande un déclencheur hebdomadaire par jour et par heure, soit
     cinq fois plus de notifications en attente. iOS en plafonne soixante-quatre : il faudrait
     reprogrammer glissant, à l'ouverture de l'application, plutôt que tout poser d'un coup.

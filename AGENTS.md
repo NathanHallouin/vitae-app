@@ -34,10 +34,14 @@ du stockage ou du routeur reçoit ce dont elle a besoin en paramètre.
 cache avec `display: 'none'`, jamais par un rendu conditionnel — sinon il disparaît du HTML livré
 aux moteurs de recherche. La CI le vérifie sur le fichier produit.
 
-**Une seule concession de plateforme est admise**, et elle est déjà écrite : le moment où le profil
-est lu au démarrage. Tout le reste doit se comporter pareil partout. Quand une différence est
-inévitable, elle passe par un fichier `.web.ts` que Metro choisit, jamais par un test à l'exécution
-éparpillé dans les écrans.
+**Aucun test `Platform.OS` entre le web et le natif, nulle part.** Quand la différence est
+inévitable, elle passe par un fichier `.web.ts` ou `.web.tsx` que Metro choisit — c'est le cas de
+la lecture du profil au démarrage (`lib/store.ts`), de la redirection (`lib/demarrage.ts`), de
+l'écran de lancement (`lib/splash.ts`), des balises de tête (`components/layout/Seo.tsx`) et de
+quatre autres. La CI le vérifie sur `app/` et `src/components/`.
+
+La seule exception est une distinction qui **n'est pas** web contre natif : `DateField.tsx`
+distingue iOS d'Android, ce qu'aucun fichier `.web` ne saurait exprimer.
 
 **Les textes sont en français, dans le métier.** Les copies d'interface vivent dans
 `packages/core` (`constants.ts`, `explainers.ts`, `legal.ts`, `nutrition.ts`, `training.ts`), pas

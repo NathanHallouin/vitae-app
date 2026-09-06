@@ -1,5 +1,12 @@
 /**
- * Valeurs de référence issues du prototype (`maquette/Calculateur MB.dc.html`).
+ * Ce que ce fichier protège : que les chiffres affichés soient ceux que les formules donnent.
+ *
+ * Les attentes ne sont **pas** écrites ici. Elles vivent dans `calc.reference.ts`, redérivées à la
+ * main depuis `README.md`, arithmétique à l'appui. La raison est celle qui vaut sur tout projet où
+ * le code et ses tests sont écrits par le même auteur, dans le même mouvement : sans source
+ * indépendante, ajuster un nombre attendu pour faire passer un test est indiscernable de corriger
+ * une erreur, et rien ne dit lequel des deux vient d'arriver.
+ *
  * `bun test`
  */
 
@@ -10,9 +17,11 @@ import {
   buildPlan,
   buildProjection,
   computeMetrics,
+  proteinReferenceWeight,
   rangeBar,
 } from './calc';
-import { DAILY, SESSIONS } from './constants';
+import { CURSEUR_IMC, PROFILS_DE_REFERENCE } from './calc.reference';
+import { activityFactor, DAILY, SESSIONS } from './constants';
 import { fmtGap, fmtKg, fmtWeekly, kcal } from './format';
 import { emptyForm, formFromProfile, profileFromForm, reducer, validate } from './state';
 
@@ -29,21 +38,52 @@ const HOMME = {
 
 const COLORS = { prot: '#2e7d54', fat: '#b06f10', carb: '#3a6ea5' };
 
-describe('computeMetrics', () => {
-  test('Mifflin-St Jeor, DET et fourchette (homme 30 ans, 175 cm, 70 kg, ×1,42, sèche)', () => {
-    const m = computeMetrics(HOMME);
-    expect(m).not.toBeNull();
-    if (!m) return;
-    expect(m.bmr).toBe(1649);
-    expect(m.tdee).toBe(2341); // 1 648,75 × 1,42
-    expect(m.min).toBe(1756);
-    expect(m.max).toBe(2107);
-    expect(m.target).toBe(1920);
-    expect(m.healthyMin).toBe(57);
-    expect(m.healthyMax).toBe(76);
-    expect(m.band.label).toBe('Corpulence normale');
-  });
+/**
+ * Le cœur du contrat : chaque profil de référence, confronté à sa dérivation manuelle.
+ *
+ * Un échec ici ne se corrige pas en ajustant le nombre attendu. Soit l'implémentation a dérivé,
+ * soit l'arithmétique de `calc.reference.ts` est fausse — et dans le second cas c'est la
+ * démonstration écrite à côté de la valeur qu'il faut refaire, pas la valeur.
+ */
+describe('computeMetrics face aux valeurs dérivées à la main', () => {
+  for (const profil of PROFILS_DE_REFERENCE) {
+    test(profil.couvre, () => {
+      const m = computeMetrics(profil.entree);
+      expect(m).not.toBeNull();
+      if (!m) return;
 
+      const a = profil.attendu;
+      expect(activityFactor(profil.entree.daily, profil.entree.sessions)).toBeCloseTo(
+        profil.facteur,
+        5,
+      );
+      expect(m.bmr).toBe(a.bmr);
+      expect(m.tdee).toBe(a.tdee);
+      expect(m.min).toBe(a.min);
+      expect(m.max).toBe(a.max);
+      expect(m.target).toBe(a.target);
+      expect(m.raised).toBe(a.raised);
+      expect(m.clamped).toBe(a.clamped);
+      expect(m.belowFloor).toBe(a.belowFloor);
+      expect(m.bmi).toBeCloseTo(a.bmi, 3);
+      expect(m.healthyMin).toBe(a.healthyMin);
+      expect(m.healthyMax).toBe(a.healthyMax);
+      expect(m.band.label).toBe(a.bandLabel);
+      expect(proteinReferenceWeight(m)).toBeCloseTo(a.poidsReferenceProteines, 3);
+    });
+  }
+
+  test('les grammes de protéines suivent le poids de référence, pas le poids réel', () => {
+    for (const profil of PROFILS_DE_REFERENCE) {
+      const m = computeMetrics(profil.entree);
+      if (!m) throw new Error(`métriques attendues pour : ${profil.couvre}`);
+      const proteines = buildMacros(m, COLORS).find((x) => x.label === 'Protéines');
+      expect(proteines?.grams).toBe(profil.attendu.proteines);
+    }
+  });
+});
+
+describe('computeMetrics', () => {
   test('renvoie null tant que le profil est incomplet', () => {
     expect(computeMetrics({ ...HOMME, sexe: '' })).toBeNull();
     expect(computeMetrics({ ...HOMME, poids: '' })).toBeNull();
@@ -81,12 +121,25 @@ describe('computeMetrics', () => {
 });
 
 describe('jauge IMC', () => {
-  test('le curseur tombe dans la bande annoncée', () => {
-    expect(bmiGaugePosition(17)).toBeLessThan(25); // < 18,5
-    expect(bmiGaugePosition(22.857)).toBeCloseTo(41.76, 2); // 18,5 – 25
-    expect(bmiGaugePosition(27)).toBeGreaterThanOrEqual(50); // 25 – 30
-    expect(bmiGaugePosition(27)).toBeLessThan(75);
-    expect(bmiGaugePosition(34)).toBeGreaterThanOrEqual(75); // > 30
+  /**
+   * Les quatre segments, et les deux bornes.
+   *
+   * La version précédente n'exigeait une valeur exacte que sur **un** segment sur quatre et se
+   * contentait d'encadrements ailleurs. Or le bug que ce test existe pour attraper — un curseur
+   * placé sur l'échelle entière au lieu de l'intérieur du segment — donne justement des valeurs
+   * qui restent dans le bon quart la moitié du temps. Un encadrement ne l'aurait pas vu.
+   */
+  for (const cas of CURSEUR_IMC) {
+    test(`IMC ${cas.imc} → ${cas.calcul}`, () => {
+      expect(bmiGaugePosition(cas.imc)).toBeCloseTo(cas.attendu, 3);
+    });
+  }
+
+  test('le curseur reste dans la bande de son IMC, jamais dans la voisine', () => {
+    // Aux bornes de segment exactement : c'est là que le découpage par morceaux se casse.
+    expect(bmiGaugePosition(18.5)).toBeCloseTo(25, 3);
+    expect(bmiGaugePosition(25)).toBeCloseTo(50, 3);
+    expect(bmiGaugePosition(30)).toBeCloseTo(75, 3);
   });
 
   test('reste dans les bornes 2 – 98 %', () => {

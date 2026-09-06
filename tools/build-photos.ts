@@ -25,7 +25,7 @@
 import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import sharp from 'sharp';
+import sharp, { type Sharp } from 'sharp';
 
 const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SOURCES = path.join(RACINE, 'photos');
@@ -80,7 +80,7 @@ async function sources(): Promise<string[]> {
  * à l'embarquer dans le paquet plutôt qu'à le demander au réseau — une requête pour un aperçu
  * annulerait tout l'intérêt de l'aperçu.
  */
-async function apercu(image: sharp.Sharp): Promise<string> {
+async function apercu(image: Sharp): Promise<string> {
   const flou = await image
     .clone()
     .resize(16, Math.round(16 / RAPPORT), { fit: 'cover', position: 'attention' })

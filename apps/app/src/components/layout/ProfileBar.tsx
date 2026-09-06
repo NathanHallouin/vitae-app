@@ -31,7 +31,7 @@ export default function ProfileBar() {
         onPress={() => router.navigate('/profil')}
         className="flex-none rounded-control px-2 py-1 active:bg-primary-tint"
       >
-        <Text className="text-caption font-sans-semibold text-primary-ink">Modifier</Text>
+        <Text className="text-caption font-sans-medium text-primary-ink">Modifier</Text>
       </Pressable>
     </View>
   );

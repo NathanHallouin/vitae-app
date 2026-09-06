@@ -215,6 +215,11 @@ rien. kcal ≈ `MET × poids × minutes / 60`, arrondi au multiple de 5.
 | Ménage, courses, jardinage | 3.5 | 30 | 0, 1, 2, 3 |
 | Une marche de 15 min après le repas | 3.5 | 15 | 1, 2, 3 |
 
+Chaque geste porte en plus un pictogramme et deux textes de détail — *pourquoi ça marche* et
+*comment s'y prendre* — qui alimentent sa fiche à l'écran (voir « Expliquer sans faire un mur »).
+Le pictogramme n'est pas décoratif : dans une liste de sept lignes qui se ressemblent, c'est lui
+qu'on retrouve du regard avant d'avoir relu le libellé.
+
 Conseils NEAT par cran de mouvement quotidien : voir `NEAT_TIPS`, textes à reprendre verbatim.
 
 `movementSplit()` départage les deux dépenses : le NEAT vaut `MB × (base − 1)`, les séances valent
@@ -245,7 +250,11 @@ sur les valeurs finales.
 Trois sections décrivaient le prototype d'origine : le détail des écrans au pixel près, un modèle
 d'état à trois vues (`screen: "home" | "input" | "result"`), et une palette Material bleue en
 Roboto avec ses ombres. Rien de tout cela n'a survécu au portage — l'application a des routes et
-non un état d'écran, et sa palette est crème et bleu profond, sans ombre, en Fraunces et Inter.
+non un état d'écran, et sa palette est gris-violet et indigo, sans ombre, en Space Grotesk.
+
+La refonte « Cadran » a effacé une deuxième couche : le crème et le bleu profond, la Fraunces des
+titres et l'Inter du texte, et le bandeau en dégradé qui portait la réponse de chaque écran. Ce
+qu'ils sont devenus est décrit plus bas, dans « Le système visuel ».
 
 Ce qui les remplace, et qui fait autorité :
 
@@ -309,24 +318,31 @@ lien sortant sur l'accueil, une liste dans le catalogue.
 
 ### Les polices, et pourquoi elles ne se chargent pas de la même façon
 
+**Une seule famille, la Space Grotesk, en trois coupes** — 400, 500, 700. Elle a remplacé le couple
+Fraunces / Inter avec la refonte, et pas pour le goût : ses chiffres sont à chasse constante par
+construction, ce qui était la seule raison d'être de la serif sur les grands nombres, et son œil
+large tient à 11 px là où une serif de titre ne tenait pas. Ce qui disparaît avec l'ancien couple :
+deux familles, deux coupes, et 83 Ko de woff2 sur le site.
+
 `@expo-google-fonts` enregistre la famille **entière** dès qu'on importe une seule coupe : trente-six
-fichiers et 7,7 Mo partaient dans l'export du site pour les cinq coupes affichées. Les paquets sont
-donc passés en dépendances de développement à la racine — plus rien ne les importe — et
-`tools/build-fonts.ts` prélève les cinq fichiers utiles vers deux destinations, parce que les deux
+fichiers et 7,7 Mo partaient dans l'export du site pour les coupes réellement affichées. Les paquets
+sont donc passés en dépendances de développement à la racine — plus rien ne les importe — et
+`tools/build-fonts.ts` prélève les trois fichiers utiles vers deux destinations, parce que les deux
 plateformes ne chargent pas une police de la même façon :
 
 | | Où | Quoi | Comment |
 |---|---|---|---|
-| Natif | `assets/polices/` | le TTF entier, 1,4 Mo — React Native ne lit pas le woff2 | `expo-font`, au démarrage, le splash tenant l'écran |
-| Web | `public/polices/` | un woff2 réduit aux caractères employés, 126 Ko | `@font-face` dans le document, et deux préchargements |
+| Natif | `assets/polices/` | le TTF entier, 254 Ko — React Native ne lit pas le woff2 | `expo-font`, au démarrage, le splash tenant l'écran |
+| Web | `public/polices/` | un woff2 réduit aux caractères employés, 43 Ko | `@font-face` dans le document, et deux préchargements |
 
 La différence est loin d'être cosmétique. Chargées par `expo-font` comme en natif, les polices
 n'étaient demandées qu'une fois les 2,7 Mo de JavaScript téléchargés **et exécutés**. Déclarées dans
-le document, elles partent avec l'analyse du HTML : mesuré dans le navigateur, la Fraunces des
-titres est arrivée en 2 ms, complète avant même la fin du téléchargement du paquet.
+le document, elles partent avec l'analyse du HTML : mesuré dans le navigateur, la police des titres
+est arrivée en 2 ms, complète avant même la fin du téléchargement du paquet.
 
-Deux coupes sont préchargées : celle des titres et celle du corps de texte. Les trois autres ne
-portent que des libellés et se chargent à la découverte du texte qui les emploie.
+Deux coupes sont préchargées : le corps de texte, et la graisse des grands chiffres — qui est, au
+centre du cadran, le premier élément vu de chaque écran. La troisième ne porte que des libellés et
+se charge à la découverte du texte qui l'emploie.
 
 **Le sous-ensemble ne se devine pas.** Un caractère absent ne provoque aucune erreur : il s'affiche
 en rectangle vide. Le sous-ensemble « latin » de Google Fonts, référence naturelle, ne contient ni
@@ -336,10 +352,12 @@ imprimable et du supplément Latin-1 pour couvrir la saisie et les formats fran�
 surveiller : un caractère fabriqué à l'exécution et absent des sources sortirait en rectangle sur le
 site, mais correctement en natif, qui garde la police entière.
 
-Le nom des cinq coupes est écrit à quatre endroits qu'aucun contrôle ne rapproche : `tools/polices.ts`
-(les scripts), `apps/app/tailwind.config.js` (une famille par graisse), `src/lib/polices.ts` (le
-chargement natif) et `+html.tsx` (les `@font-face`). Une divergence fait retomber l'interface sur la
-police système, sans erreur.
+Le nom des trois coupes est écrit à **cinq** endroits qu'aucun contrôle ne rapproche :
+`tools/polices.ts` (les scripts), `apps/app/tailwind.config.js` (une famille par graisse),
+`src/lib/polices.ts` (le chargement natif), `+html.tsx` (les `@font-face`) et
+`app/(tabs)/_layout.tsx` — la barre d'onglets est dessinée par React Navigation, hors de l'arbre
+NativeWind, et n'a donc pas d'autre moyen de nommer sa coupe. Une divergence fait retomber
+l'interface sur la police système, sans erreur.
 
 ### Le suivi de poids, et pourquoi il ne se superpose pas à la projection
 
@@ -391,12 +409,13 @@ icônes. Le sélecteur est `.dark:root`, donc **tout dépend d'une classe posée
 
 Tant que la préférence vaut « système », NativeWind ne la pose pas sur le web : `useColorScheme()`
 rendait bien `dark`, la palette JavaScript suivait, et les variables restaient claires. Résultat :
-fonds et textes en clair, accents en ambre, sur tout premier visiteur d'un système en sombre. Deux
-bascules explicites remettaient les choses d'aplomb, ce qui n'est pas une solution.
+fonds et textes en clair, accents dans la couleur du thème sombre, sur tout premier visiteur d'un
+système en sombre. Deux bascules explicites remettaient les choses d'aplomb, ce qui n'est pas une
+solution.
 
 `src/theme/classeTheme.web.ts` écrit donc le mode **effectif** dans le document à chaque changement.
-Le défaut ne se voyait pas en lisant le code — il s'est révélé en ajoutant une courbe qui sortait en
-ambre sur une page claire.
+Le défaut ne se voyait pas en lisant le code — il s'est révélé en ajoutant une courbe qui sortait
+dans la couleur du thème sombre sur une page claire.
 
 ### Le site s'installe, et fonctionne hors ligne
 
@@ -436,20 +455,21 @@ n'y a jamais deux versions du site en mémoire.
 | `recipes.ts` | suggestions par repas : recettes de l'application d'abord, plats extérieurs ensuite |
 | `nutrition.ts` | conseils alimentaires selon l'objectif |
 | `quantites.ts` | mise à l'échelle des quantités d'une recette |
-| `rappels.ts` | rappels anti-sédentarité : créneaux, messages, réglage persisté |
+| `rappels.ts` | rappels anti-sédentarité : plages horaires, créneaux, messages, réglage persisté |
 | `suivi.ts` | pesées dans le temps : tendance, courbe, comparaison au plan |
 | `sauvegarde.ts` | export et import des données locales, en JSON |
 | `state.ts` | état du formulaire de saisie et validation |
-| `storage.ts` | profil et pesées versionnés (`vitae.v1.profile`, `vitae.v1.suivi`), support **injecté** |
+| `storage.ts` | profil, pesées, notions lues et dernière ouverture, versionnés (`vitae.v1.profile`, `vitae.v1.suivi`, `vitae.v1.lu`, `vitae.v1.ouverture`), support **injecté** |
 | `format.ts` | formats français (espace insécable, virgule décimale, `−` U+2212) |
 | `date.ts` | âge calculé depuis la date de naissance, fraîcheur du poids (7 jours) |
 | `tokens.ts` | palette claire et sombre, échelle typographique, rayons |
 | `icons.ts` | le nom des icônes, pas leur tracé |
-| `nav.ts` | plan de navigation, partagé par la barre d'onglets |
-| `explainers.ts` | les textes d'explication des quatre écrans de résultats |
+| `nav.ts` | les quatre sections, les quatre écrans de résultats, et l'écran sur lequel l'application s'ouvre |
+| `explainers.ts` | les textes d'explication, en quatre chapitres de quatre notions |
+| `cours.ts` | les seize notions à plat : rang, adresse, chapitre, et quel encart chaque écran montre |
 | `legal.ts` | politique de confidentialité |
 
-Rien ici n'importe React, ni `react-native`, ni `node:fs`. C'est ce qui permet aux 93 tests de
+Rien ici n'importe React, ni `react-native`, ni `node:fs`. C'est ce qui permet aux 219 tests de
 tourner sous `bun test` sans environnement de rendu.
 
 Trois choix méritent d'être connus avant de toucher au code :
@@ -472,17 +492,18 @@ MMKV, Reanimated.
 app/
   _layout.tsx           polices, thème, profil, pile de navigation
   +html.tsx             le document HTML — web uniquement, rendu à la compilation
-  index.tsx             redirection : les chiffres si un profil existe, la présentation sinon
-  accueil.tsx           présentation
+  index.tsx             présentation ; en natif, une redirection unique décidée par `destinationAuDemarrage`
   confidentialite.tsx   politique de confidentialité
+  reglages.tsx          rappels, apparence, données — hors onglets, atteint par l'en-tête
   (tabs)/               les cinq onglets, tirés de `MOBILE_PAGES`
-  recettes/            index et détail, `generateStaticParams` pour le pré-rendu
+  recettes/             index et détail, `generateStaticParams` pour le pré-rendu
+  comprendre/           le cours : sommaire et une route par notion, pré-rendues elles aussi
 src/
   components/
-    layout/             ce qui encadre un écran : en-tête, onglets, cadre, balises de tête
+    layout/             ce qui encadre un écran : en-tête, barre des sections, bandeau, cadre, balises de tête
     screens/            le contenu d'un écran, découpé en cartes
     recette/            l'atelier de cuisine et les filtres du catalogue
-    ui/                 le système visuel : Hero, Chiffre, Card, Repliable, icônes…
+    ui/                 le système visuel : Cadran, Hero, Chiffre, Ligne, Card, Fiche, Repliable, icônes…
   state/                le profil, point de passage unique vers les données persistées
   theme/                palette, mouvement, bascule clair / sombre
   lib/                  les adaptateurs de plateforme, et eux seuls
@@ -495,16 +516,154 @@ src/
 `lib/` ne contient que ce qui dépend de la plateforme, et c'est une règle : quand un fichier y
 atterrit sans avoir de variante `.web`, c'est qu'il appartient au métier ou à un composant.
 
+### La navigation : quatre sections, deux niveaux, rien dans l'en-tête
+
+L'application a sept destinations, ce qui est trop pour une barre du bas. La première réponse a été
+« les cinq plus utilisées en bas, les deux autres dans l'en-tête ». C'était une erreur, et elle se
+voyait : sur un téléphone, le haut de l'écran est hors de portée du pouce, et il avait fini par
+porter deux liens, une roue dentée et une bascule de thème — quatre commandes qui rétrécissaient la
+marque jusqu'à la tronquer.
+
+La bonne coupe n'est pas « les plus fréquentes, puis le reste », mais **quatre intentions** :
+
+| Section | La question à laquelle elle répond |
+|---|---|
+| Mes chiffres | qu'est-ce que mon corps dépense, et qu'est-ce que j'en fais |
+| Recettes | qu'est-ce que je cuisine |
+| Comprendre | pourquoi ces chiffres-là |
+| Profil | mes informations, et les réglages |
+
+Les quatre écrans de résultats **ne sont pas quatre destinations** : ils partagent un profil et une
+chaîne de lecture, et ils étaient déjà présentés ensemble sur grand écran par `ResultTabs`. Ils
+forment une section, et ce bandeau descend simplement sur mobile, collé sous l'en-tête, où il
+devient le second niveau. Revenir à « Mes chiffres » rouvre le dernier écran vu.
+
+Deux niveaux, tous deux atteignables au pouce, et aucune destination cachée. `SECTIONS` et
+`sectionDe` vivent dans `@vitae/core/nav`, avec le reste du plan.
+
+**La barre est posée à la racine, pas dans le navigateur d'onglets.** Ce n'est pas un détail : les
+recettes et le cours sont des routes de la pile, et une barre portée par les onglets disparaissait
+dès qu'on ouvrait une fiche — laissant l'écran sans aucun chemin de retour, l'en-tête ne portant
+plus rien. Le navigateur d'onglets reste, sa barre masquée, pour ce qu'il fait de mieux : garder
+cinq écrans montés et gelés.
+
+Au-dessus de `NAV_BREAKPOINT`, la barre du bas se retire et les quatre sections passent dans
+l'en-tête. L'argument qui les en chasse — le pouce — ne vaut pas sur un écran de bureau, où le bas
+de la fenêtre est au contraire le point le plus éloigné du regard comme du curseur.
+
+**Le thème a suivi le mouvement.** Il était une bascule dans l'en-tête ; il est trois choix nommés
+sur le profil — clair, sombre, système. Une icône ne dit pas son état (une lune se lit aussi bien
+« vous êtes en sombre » que « passer en sombre »), et deux états ne peuvent pas exprimer « suis le
+téléphone », qui est pourtant le défaut.
+
+### Le cours, et pourquoi les explications ont quitté les écrans
+
+Seize notions, quatre par écran de résultats, écrites dans `explainers.ts` et repliées en pied de
+page. Elles étaient justes et personne ne les lisait. Trois raisons, dont deux structurelles :
+
+- **elles n'avaient pas d'adresse.** Impossible d'y renvoyer depuis un avertissement, depuis un
+  mot, ou depuis l'extérieur — une notion repliée n'existe que sur l'écran qui la porte ;
+- **elles n'avaient pas d'ordre.** Quatre cartes indépendantes : rien ne disait que la cinquième
+  notion suit la quatrième, alors qu'elles se lisent dans un ordre précis ;
+- **rien ne retenait ce qui avait été lu**, donc l'application ne pouvait que tout reproposer.
+
+Elles sont désormais **une route chacune**, sous `/comprendre`, et elles ont quitté les écrans de
+résultats — qui finissent maintenant par le seul renvoi vers l'écran suivant (`SuiteEcran`). Ce que
+le dépôt y gagne se mesure : seize pages pré-rendues dont le contenu est **entier sans profil**,
+avec titre, description et canonique — aucun écran de résultats ne peut en dire autant de ses
+chiffres, qui dépendent de l'appareil du visiteur. Rien n'a été rédigé pour autant : les textes
+sont ceux d'`explainers.ts`, verbatim, et `cours.ts` ne fait que les aplatir, les numéroter et les
+relier.
+
+**Une notion se marque lue d'un bouton, pas à l'ouverture.** Ouvrir n'est pas lire : on ouvre pour
+voir la longueur, on referme, on y revient. Marquer à l'affichage aurait fait avancer le compteur
+sans que rien ne soit lu, ce qui vide de sens le « 5 sur 16 » et le bouton « Reprendre ».
+
+#### L'encart pédagogique : une seule forme, trois déclencheurs
+
+C'est le point de `EncartCours`. Qu'il apparaisse parce que votre fourchette a été relevée, parce
+que votre rythme diverge du plan, ou simplement parce qu'il reste des notions à lire, il a
+**exactement le même aspect** : fond `surface2`, pastille ronde portant un « i », surtitre
+« Comprendre », numéro de notion, titre, résumé, puis un bouton bordé « Lire (1 min) ». On
+reconnaît au premier coup d'œil un bloc qui explique — et qui ne demande rien.
+
+Ce qui change est la **ligne de contexte**, qui dit pourquoi il est là : « Parce que votre minimum
+a été relevé », « La suite de votre lecture ». Elle vit dans le métier (`CONTEXTE_PAR_DRAPEAU`).
+
+**Un seul par écran, sans exception.** Deux blocs de même forme l'un sous l'autre cessent d'être
+des exceptions et deviennent un décor : on apprend à les sauter en trois visites. C'est
+`encartDeLEcran` qui tranche — dans le métier, donc testable sans écran : un drapeau levé d'abord,
+la suite du cours à défaut, rien une fois les seize lues. Une notion déjà lue ne rejoue pas son
+drapeau.
+
+La table des drapeaux (`NOTION_PAR_DRAPEAU`) n'invente rien : fourchette relevée, protéines
+calculées sur un poids de référence, rythme inhabituel, tendance qui s'écarte du plan, poids
+périmé, IMC hors norme, quotidien saturé. Chacune de ces situations est déjà calculée quelque part
+pour être affichée ailleurs.
+
+**L'avertissement ambre n'est pas un encart.** Le bandeau `warnBg` d'« Ce que je mange » dit ce que
+le calcul a fait ; l'encart gris propose de comprendre pourquoi. Deux registres, deux traitements :
+l'un alerte, l'autre enseigne. Les confondre mettrait sur le même plan une correction subie et une
+lecture facultative.
+
+**Ce qui est lu vit sous `vitae.v1.lu`**, une liste de slugs et rien d'autre : ni date, ni durée, ni
+compteur d'ouvertures, qui seraient de la mesure d'audience. Un slug est donc une adresse publique
+et une clé de progression à la fois — c'est pourquoi il doit survivre à une reformulation du titre,
+et pourquoi `cours.test.ts` vérifie qu'aucun ne se répète.
+
+`vitae.v1.lu` n'est pas effacé par « Tout effacer » : ce n'est pas une donnée personnelle, c'est une
+lecture, et repartir de la première notion parce qu'on a corrigé son poids n'aurait aucun sens.
+
+### L'écran sur lequel l'application s'ouvre
+
+En natif, une redirection unique par lancement, décidée par `destinationAuDemarrage` : pesée de plus
+d'une semaine → `/poids`, profil modifié depuis la dernière ouverture → `/metabolisme`, sinon
+`/alimentation`. Elle a remplacé la destination fixe `/metabolisme`, qui ouvrait toujours sur le
+chiffre le plus stable de l'application — celui qui a le moins de raisons d'être reconsulté.
+
+La comparaison demande une valeur de plus dans le stockage : `vitae.v1.ouverture`, un horodatage
+écrit à chaque lancement et comparé à l'`updatedAt` du profil. Un horodatage et non un drapeau —
+un drapeau devrait être remis à zéro par celui qui l'a levé, donc coordonné entre deux écritures ;
+deux dates se comparent sans rien coordonner.
+
+**Sur le web, aucune redirection.** `/` reste la page de présentation, pré-rendue et indexable :
+quelqu'un qui arrive d'un moteur de recherche n'a pas de profil, et l'envoyer sur un écran de
+résultats vide serait le pire accueil possible.
+
+Le risque assumé : une arrivée variable est une arrivée qu'on n'apprend pas. Les deux premiers cas
+sont donc rares et font suite à un événement que l'utilisateur a lui-même provoqué ; le troisième
+est le cas ordinaire, et c'est celui-là qu'on apprend.
+
 ### Les rappels anti-sédentarité
 
 L'écran « Bouger » explique que se lever quelques minutes par heure est le geste qui casse le mieux
-la sédentarité. Le réglage est posé juste sous cette phrase, et non dans un écran de préférences :
-c'en est la suite immédiate.
+la sédentarité. Le réglage y a d'abord été posé juste sous cette phrase, et l'argument se tenait :
+c'en était la suite immédiate. Ce qui n'a pas tenu, c'est le **retour** — décaler une plage d'une
+heure obligeait à retrouver un écran de conseils, à le parcourir et à repérer une carte au milieu.
+Un réglage se cherche là où l'on cherche les réglages ; il vit donc dans `/reglages`, et l'écran
+« Bouger » garde une carte qui dit son état et y mène (`RappelsLien`).
+
+**Le réglage porte des plages, et non une plage.** Une seule bande continue de 9 h à 19 h ne
+ressemble à aucune journée réelle : elle sonne pendant le déjeuner, pendant le trajet, pendant la
+sieste d'un enfant. Or un rappel qui tombe au mauvais moment ne coûte pas zéro — c'est celui-là qui
+fait couper les notifications de l'application, et avec elles les douze autres qui étaient utiles.
+On règle donc autant de plages qu'on veut (quatre au plus), à la demi-heure, avec des plages toutes
+faites — matinée, après-midi, soirée — pour éviter le réglage manuel dans le cas courant.
+
+Trois règles tiennent la normalisation, et chacune évite un réglage qui s'afficherait bien sans
+rien produire : les bornes de chaque plage sont ramenées dans la journée et arrondies au pas, les
+plages sont triées, et celles qui se chevauchent **ou se touchent** sont fusionnées — deux plages
+superposées feraient sonner deux fois la même minute. Une liste vide repart des plages par défaut :
+un interrupteur allumé doit sonner.
 
 Le partage des rôles est le même que partout ailleurs. `packages/core/src/rappels.ts` calcule
-*quand* et *quoi*, en fonctions pures couvertes par quinze tests — c'est là que sont les cas
-tordus : bornes incluses, plage inversée, plafond de soixante-quatre notifications en attente
-qu'impose iOS. `apps/app/src/lib/rappels.ts` se contente de le dire au système.
+*quand* et *quoi*, en fonctions pures couvertes par trente-six tests — c'est là que sont les cas
+tordus : bornes incluses, plage inversée, fusion, plafond de soixante-quatre notifications en
+attente qu'impose iOS. `apps/app/src/lib/rappels.ts` se contente de le dire au système.
+
+L'ancien réglage — une plage unique en `debutHeure` / `finHeure` — est **relu et converti** par
+`loadRappels`. Sans cela, quelqu'un qui avait allumé ses rappels les aurait vus se replacer
+silencieusement sur les heures par défaut à la mise à jour.
 
 Trois décisions à connaître avant d'y toucher :
 
@@ -588,28 +747,50 @@ Trois règles tiennent la famille, et les trois viennent d'erreurs faites en la 
   bord en guise de bouche. Un motif qui marche à vingt pixels dans une barre d'onglets ne marche
   pas forcément à cent.
 - **Les mêmes jetons pour les mêmes rôles** : `divider` pour ce qui est inerte ou en retrait,
-  `primary` pour ce qui est acquis, `primaryInk` pour le trait qui porte le sens, `surface2` pour
-  le fond doux. C'est ce qui fait qu'une illustration ajoutée demain ressemblera aux autres.
+  `gaugeTrack` pour la portion vide d'une jauge, `primary` pour ce qui est acquis, `primaryInk`
+  pour le trait qui porte le sens, `surface2` pour le fond doux. C'est ce qui fait qu'une
+  illustration ajoutée demain ressemblera aux autres.
 
 Aucune ne porte de texte : rien à traduire, rien qui grossisse mal, rien qui double le titre voisin.
 
 ### Le système visuel
 
-Ce qui rend un écran de cette application reconnaissable tient en quatre éléments, et ce sont des
-composants plutôt que des conventions — une convention se perd au troisième écran.
+Ce qui rend un écran de cette application reconnaissable tient en six composants plutôt qu'en
+conventions — une convention se perd au troisième écran.
 
 | | Rôle |
 |---|---|
-| `Hero` | la réponse de l'écran : dégradé plein, surtitre, grand chiffre. **Une par écran, jamais deux** — c'est elle qui dit ce qui est la réponse et ce qui est le détail |
-| `Chiffre` | le grand nombre. Fraunces, chasse fixe, unité en Inter plus petite. Quatre tailles, de la réponse principale à la tuile |
-| `Card` | bordure fine, fond plein, **jamais d'ombre**. C'est ce qui donne l'air de papier plutôt que d'interface |
+| `Cadran` | l'arc gradué qui entoure la réponse. **L'arc dit toujours une part d'un tout**, sans exception |
+| `Hero` | la réponse de l'écran : le cadran, le grand chiffre en son centre, et la phrase qui dit ce que l'arc mesure. **Un par écran, jamais deux** |
+| `Chiffre` | le grand nombre. Space Grotesk 700, chasse fixe, unité en 400 plus petite. Quatre tailles, de la réponse principale à la tuile |
+| `Ligne` / `Lignes` | la ligne « libellé à gauche, valeur à droite », et sa pile. Le filet appartient à la pile, pas à la ligne |
+| `Card` | fond plein, **jamais d'ombre**. Bordure en clair seulement, où l'écart entre `surface` et `bg` ne suffit pas seul |
 | `Overline` | le surtitre 11 px en majuscules espacées, en tête de chaque carte. `niveau` en fait un vrai titre de document |
 | `Titre` | un titre et son rang. Le rang est obligatoire : sans lui, le web rendrait un `<h1>` de plus |
+| `EncartCours` | le bloc qui explique : une seule forme, quel que soit ce qui le déclenche. Un seul par écran |
 
 Le grand chiffre est l'élément signature, et ce n'est pas arbitraire : c'est une application de
 chiffres. Le traitement était réécrit dans huit fichiers avec des tailles et des interlignes qui
 divergeaient ; `Chiffre` les remet d'aplomb et impose la chasse fixe, sans laquelle un nombre qui se
 met à jour fait sautiller toute la ligne.
+
+**La règle du cadran, et pourquoi elle ne souffre pas d'exception.** L'arc mesure une part : le
+métabolisme de base dans la dépense, le repère quotidien dans la dépense, le chemin fait depuis le
+poids de départ, la place du quotidien dans le mouvement. Un écran dont la réponse n'est la part de
+rien n'a pas de cadran — il a un `Chiffre` en taille `hero`. C'est pourquoi `part` et `legende` sont
+obligatoires sur `Hero` : les rendre facultatifs rouvrirait la porte au cadran décoratif, et l'objet
+cesserait de vouloir dire quelque chose d'un écran à l'autre.
+
+**Deux couleurs, deux rôles.** `primary` est la couleur de ce sur quoi on agit et de ce qui est
+acquis ; `accent` est celle de ce qui se **mesure** face à ce qui était prévu — le repère de dépense
+sur la barre de fourchette, le rythme réel face au rythme du plan, le curseur d'IMC. Deux couleurs
+d'action rendraient l'interface illisible ; une couleur d'action et une couleur de mesure se lisent
+d'elles-mêmes.
+
+**`divider` sépare, `gaugeTrack` mesure.** Les deux sont des gris, et c'est la seule chose qu'ils
+ont en commun. Un filet de séparation doit se voir à peine ; le fond d'une jauge doit se lire comme
+une valeur — « il reste ça ». Une seule couleur pour les deux donnait soit des filets trop lourds,
+soit un arc dont la portion vide s'évanouissait.
 
 ### Le mouvement
 
@@ -638,22 +819,82 @@ Trois pièges rencontrés, et qui se reproduiront :
   des vertiges chez les personnes sensibles, et les trois systèmes exposent un réglage. Quand il est
   actif, on **supprime** le mouvement, on ne le ralentit pas : un fondu lent reste un mouvement.
 
-### Deux façons de replier, et quand employer laquelle
+### Expliquer sans faire un mur : la fiche
 
 Les écrans portent beaucoup de matière — c'est voulu, on y apprend des choses — mais tout déplier
-d'un bloc revient à ne rien donner à lire. Deux composants s'en chargent, et ils ne sont pas
-interchangeables :
+d'un bloc revient à ne rien donner à lire. C'est le motif de `Fiche`, et il s'applique partout où
+l'application explique quelque chose :
 
-- `Explainer` déplie **une** question à la fois, numérotée, sous un fil qui annonce l'ordre. C'est
-  une lecture suivie : on va de la première à la dernière.
-- `Repliable` est une carte qui se plie, plusieurs pouvant être ouvertes ensemble. C'est de la
-  consultation : on compare deux séances, on ouvre celle du jour. Son résumé — « Haut du corps ·
-  40 min · 5 exercices » — doit suffire à décider sans ouvrir ; une carte dont le résumé n'apprend
-  rien n'a pas à être repliée.
+```
+┌──────────────────────────────────────┐
+│ ▲  Prendre les escaliers  ≈ 110 kcal │   la ligne courte : sujet, ordre de
+│    Réparti sur la journée, à la      │   grandeur, une phrase. Elle suffit
+│    place de l'ascenseur.             │   à décider dans la plupart des cas
+│    ⓘ En savoir plus                  │
+└──────────────────────────────────────┘
+              ↓ appui
+       feuille (natif) / dépli (web)
+       Pourquoi ça marche · Comment s'y prendre
+```
 
-Dans les deux cas le contenu fermé reste dans le document (`display: 'none'`, jamais un rendu
+Deux choses le font tenir, et aucune n'est cosmétique :
+
+- **Le résumé d'une ligne est obligatoire.** Sans lui, une ligne repliée annonce un *sujet* et non
+  une *réponse* : on ouvre les quatre, ou aucun. C'est la différence entre un parcours et un pavé
+  caché — lequel est pire qu'un pavé visible.
+- **Le détail s'ouvre par-dessus la page, et non dedans** (en natif) : on lit, on referme, et la
+  liste est exactement là où on l'avait laissée. Une carte dépliée, elle, repousse tout le reste
+  vers le bas.
+
+`Fiche.tsx` monte une feuille depuis le bas — le bord que le pouce atteint. `Fiche.web.tsx` déplie
+sur place, parce qu'une feuille n'existe qu'à l'ouverture : son texte ne serait pas dans le HTML
+livré, et c'est justement ce texte-là que lit un moteur de recherche sur des pages dont les chiffres
+dépendent de l'appareil. Les deux fichiers partagent `FicheContenu.tsx`, pour que la fiche du
+téléphone et celle du site ne puissent pas diverger.
+
+`Repliable` reste, et n'est pas interchangeable : c'est une carte qui se plie, plusieurs pouvant
+être ouvertes ensemble. C'est de la **consultation** — on compare deux séances, on ouvre celle du
+jour — là où la fiche est de l'**explication**. Son résumé (« Haut du corps · 40 min · 5 exercices »)
+doit suffire à décider sans ouvrir ; une carte dont le résumé n'apprend rien n'a pas à être repliée.
+
+Dans tous les cas le contenu fermé reste dans le document (`display: 'none'`, jamais un rendu
 conditionnel) : c'est lui qui donne à lire quelque chose à un moteur de recherche sur des pages dont
 les chiffres dépendent de l'appareil.
+
+### Un écran par question, et deux sous-onglets quand la question est double
+
+« Bouger » traite deux leviers qu'on additionne d'ordinaire à tort, et il le disait déjà — deux
+sections, séparées par un intertitre. La distinction était donc écrite, mais elle ne se voyait pas :
+quinze cartes se suivaient, et qui venait consulter son programme de la semaine traversait d'abord
+sept gestes du quotidien.
+
+`SousOnglets` les met côte à côte : « Mon quotidien » et « Mes séances ». Ce n'est pas de la
+navigation — on ne quitte pas l'écran, les deux panneaux restent montés, rien n'est chargé. Ce qui
+reste **au-dessus** des onglets n'est pas un reste : ce sont les deux cartes qui parlent des deux
+leviers à la fois et qui justifient qu'ils soient séparés.
+
+Deux sous-onglets plutôt que deux routes, pour deux raisons : la barre du bas garde ses cinq
+destinations, et le site continue de livrer les deux moitiés dans un seul fichier HTML — le panneau
+caché est en `display: 'none'`, comme partout ailleurs.
+
+Visuellement, le segment plein se distingue exprès de la navigation principale, qui est soulignée :
+deux barres d'onglets identiques l'une sous l'autre laisseraient croire qu'on a changé de page.
+
+### Les réglages, et pourquoi ils n'étaient nulle part
+
+L'application n'avait pas d'écran de réglages, et ses trois réglages vivaient donc là où ils avaient
+été écrits : les rappels au milieu de « Bouger », la sauvegarde au bas du profil, le thème dans un
+coin de l'en-tête. Chacun se défendait à l'endroit où il était — et aucun ne se retrouvait. Un
+réglage a ceci de particulier qu'on y **revient** : la première fois on tombe dessus, les suivantes
+on le cherche, et on le cherche dans les réglages.
+
+`/reglages` vit hors des onglets, atteint par la roue dentée de l'en-tête, présente sur toutes les
+largeurs. Un sixième onglet aurait rétréci les cinq autres pour une page qu'on ouvre trois fois par
+an ; sur un téléphone, le libellé de la bascule de thème tombe en échange, l'icône seule suffisant
+là où la roue vient de prendre la place.
+
+Ce que cet écran **ne prend pas** : le profil. Poids, taille, âge et objectif ne sont pas des
+préférences, ce sont les données du calcul — ils restent avec le formulaire qui les édite.
 
 ### La seule concession de plateforme
 
@@ -676,7 +917,7 @@ bun run generate        # jetons, icônes, recettes, sitemap, manifeste — avan
 bun run build:web       # export statique du site → apps/app/dist, service worker compris
 bun run prebuild        # projets natifs ios/ et android/
 
-bun test packages/core  # 93 tests du métier
+bun test packages/core  # 219 tests du métier
 bun run typecheck
 bun run check           # Biome : format, règles, imports
 bun run check:fix
@@ -723,3 +964,19 @@ Le chemin critique est l'**ouverture des comptes développeur** — plusieurs jo
   difficulté, arrêt des séries deux à trois répétitions avant l'échec.
 - Les garde-fous de la fourchette (`safeMin`, recommandé borné) et le positionnement par morceaux
   du curseur IMC sont implémentés tels que décrits, avec commentaires dans `calc.ts`.
+- Les seize notions du cours portent des identifiants uniques, utilisables tels quels dans une
+  adresse, et se suivent de 1 à 16 dans l'ordre des chapitres (`cours.test.ts`). Un slug est à la
+  fois une adresse indexée et une clé de progression : le dupliquer ferait pointer deux notions sur
+  la même page, le renommer casserait un lien et remettrait la progression à zéro — et ni l'un ni
+  l'autre ne se verrait à l'écran.
+- La semaine d'entraînement dit la même chose en toutes lettres et en sept pastilles : chaque jour
+  nommé dans la phrase est marqué, et deux séances ne tombent jamais sur trois jours d'affilée.
+- Le chemin parcouru sur le poids se compte de la même façon en perte et en prise, se borne à 1
+  plutôt que de repartir en arrière, et ne rend rien quand le départ et la cible se confondent.
+- Il n'y a **jamais deux encarts sur un écran** : `encartDeLEcran` rend un drapeau levé s'il y en a
+  un, la suite du cours sinon, rien une fois les seize notions lues — et une notion déjà lue ne
+  rejoue pas son drapeau (`cours.test.ts`).
+- Chaque chemin de l'application tombe dans exactement une section, détail compris : une fiche de
+  recette est dans « Recettes », une notion dans « Comprendre », les réglages dans « Profil ». La
+  comparaison se fait au segment et non au préfixe — sans quoi `/recettes-du-jour` serait dans la
+  section des recettes (`nav.test.ts`).

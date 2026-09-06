@@ -1,68 +1,16 @@
+import type { SeoProps } from './SeoProps';
+
 /**
- * Les balises de tête d'une route, sur le web uniquement.
+ * Les balises de tête d'une route — la version native, qui ne rend rien.
  *
- * C'est la contrepartie du passage à une base de code unique : Next remplissait `<head>` depuis un
- * objet `metadata` exporté par chaque page, ce qui n'existe pas ici. Expo Router expose un `Head`
- * qui écrit dans le document — y compris pendant l'export statique, donc le HTML livré au robot
- * contient bien le titre, la description et le JSON-LD, sans exécution de JavaScript.
+ * Ce n'est pas un oubli : `Head` d'expo-router sert en natif à tout autre chose (Handoff, recherche
+ * système), et l'alimenter avec un titre de page, une canonique et du JSON-LD n'aurait aucun sens.
+ * Une application native n'a ni URL à canoniser, ni robot à renseigner.
  *
- * Le composant ne rend rien en natif : `Head` y sert à tout autre chose (Handoff, recherche
- * système), et l'appeler avec des balises web n'aurait pas de sens.
+ * Le composant existe quand même, et il accepte les mêmes propriétés que la version web : c'est ce
+ * qui permet aux écrans d'appeler `<Seo …/>` sans savoir où ils tournent. Metro choisit
+ * `Seo.web.tsx` sur le web et ce fichier ailleurs.
  */
-
-import { SITE_NAME, SITE_URL } from '@vitae/core/site';
-import Head from 'expo-router/head';
-import { Platform } from 'react-native';
-
-export default function Seo({
-  title,
-  description,
-  canonical,
-  image,
-  jsonLd,
-}: {
-  title: string;
-  description: string;
-  /** URL absolue de la page */
-  canonical: string;
-  /**
-   * L'image affichée quand le lien est collé dans une conversation.
-   *
-   * Par défaut la carte de marque ; les recettes passent la leur, avec leur titre et leurs
-   * valeurs. Elles sont engendrées par `tools/build-og.ts`, pas dessinées à la main.
-   */
-  image?: string;
-  /** données structurées schema.org, sérialisées telles quelles */
-  jsonLd?: Record<string, unknown>;
-}) {
-  if (Platform.OS !== 'web') return null;
-
-  return (
-    <Head>
-      <title>{title}</title>
-      <meta name="description" content={description} />
-      <link rel="canonical" href={canonical} />
-      <meta property="og:type" content="website" />
-      <meta property="og:title" content={title} />
-      <meta property="og:description" content={description} />
-      <meta property="og:url" content={canonical} />
-      <meta property="og:site_name" content={SITE_NAME} />
-      <meta property="og:locale" content="fr_FR" />
-      <meta property="og:image" content={image ?? `${SITE_URL}/og.png`} />
-      {/* Les dimensions évitent que le réseau ne recadre pendant qu'il télécharge l'image. */}
-      <meta property="og:image:width" content="1200" />
-      <meta property="og:image:height" content="630" />
-      <meta name="twitter:card" content="summary_large_image" />
-      {jsonLd ? (
-        // Le contenu passe par les enfants et non par `dangerouslySetInnerHTML` : la bibliothèque
-        // qui alimente `Head` lit le texte du script, pas la propriété de React.
-        //
-        // `<` est échappé, parce que `JSON.stringify` ne protège pas d'une injection de balise
-        // par le contenu — un titre de recette contenant `</script>` refermerait le bloc.
-        <script type="application/ld+json">
-          {JSON.stringify(jsonLd).replace(/</g, '\\u003c')}
-        </script>
-      ) : null}
-    </Head>
-  );
+export default function Seo(_props: SeoProps) {
+  return null;
 }
