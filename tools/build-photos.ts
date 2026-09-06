@@ -22,6 +22,7 @@
  * `bun run photos`
  */
 
+import { existsSync } from 'node:fs';
 import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -156,10 +157,33 @@ export const PHOTOS: Record<string, PhotoRecette> = ${JSON.stringify(
 )};
 `;
 
-await writeFile(MANIFESTE, module, 'utf8');
+/**
+ * Un dossier source vide n'efface pas un manifeste plein.
+ *
+ * Les originaux ne sont pas versionnés — cent soixante et un mégaoctets qui resteraient à jamais
+ * dans l'historique de git, alors que `photos/sources.json` suffit à les reprendre à l'identique.
+ * La conséquence est qu'un clone neuf n'a pas de dossier `photos/`, et qu'un `bun run generate` y
+ * réécrirait le manifeste à vide : soixante-deux fiches perdraient leur photo sans que personne
+ * l'ait demandé, et la CI le signalerait comme une divergence.
+ *
+ * Écraser demande donc d'avoir quelque chose à écrire. Reconstruire pour de bon reste possible —
+ * `photos:fetch` rapporte les originaux, et cette condition tombe d'elle-même.
+ */
+const manifestePlein = existsSync(MANIFESTE)
+  ? /"[a-z0-9-]+": \{/.test(await readFile(MANIFESTE, 'utf8'))
+  : false;
 
-if (photos.length === 0) {
-  console.log('Aucune photo dans `photos/`. Les fiches gardent leur illustration.');
+if (photos.length === 0 && manifestePlein) {
+  console.log(
+    'Aucun original dans `photos/` : le manifeste existant est gardé. ' +
+      '`bun run photos:fetch` les rapporte.',
+  );
 } else {
+  await writeFile(MANIFESTE, module, 'utf8');
+}
+
+if (photos.length === 0 && !manifestePlein) {
+  console.log('Aucune photo dans `photos/`. Les fiches gardent leur illustration.');
+} else if (photos.length > 0) {
   console.log(`→ ${photos.length} photo(s), ${Math.round(octets / 1024)} Ko livrés au site`);
 }

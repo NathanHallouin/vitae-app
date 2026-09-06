@@ -17,7 +17,11 @@ apps/app/public/robots.txt
 apps/app/public/manifest.json
 apps/app/public/og.png
 apps/app/public/og/
-apps/app/public/photos/
+# `apps/app/public/photos/` est **versionné**, contrairement à `public/og/` juste au-dessus.
+# La différence tient à ce qui les engendre : les images de partage se refont depuis les recettes,
+# qui sont dans le dépôt ; les photos se refont depuis Pexels, qui demande une clé. Les ignorer
+# reviendrait à livrer un site dont soixante-deux images manquent à quiconque clone sans clé.
+# Vingt et un mégaoctets, contre cent soixante et un pour les originaux, qui restent dehors.
 apps/app/public/icone-*.png
 apps/app/public/apple-touch-icon.png
 apps/app/public/polices/
