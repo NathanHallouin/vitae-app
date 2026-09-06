@@ -9,6 +9,11 @@
  * celui de Tailwind 4 utilisé par le site. Les jetons, eux, sont les mêmes.
  */
 
+// Engendré par `bun run tokens` depuis `packages/core/src/tokens.ts`. Recopier ces valeurs ici
+// plutôt que les importer avait fait de `FONT_SIZES` du code mort et de cette copie la vraie
+// source — deux tables libres de diverger en silence.
+const { borderRadius, fontSize } = require('./tailwind.generated');
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: ['./app/**/*.{ts,tsx}', './src/**/*.{ts,tsx}'],
@@ -31,6 +36,9 @@ module.exports = {
         'primary-dark': 'var(--t-primary-dark)',
         'primary-ink': 'var(--t-primary-ink)',
         'primary-tint': 'var(--t-primary-tint)',
+        // Le fond des jauges et de l'arc du cadran. Distinct de `divider`, qui sépare : un filet
+        // doit se voir à peine, un fond de jauge doit se lire comme une valeur.
+        'gauge-track': 'var(--t-gauge-track)',
         'hero-from': 'var(--t-hero-from)',
         'hero-to': 'var(--t-hero-to)',
         'hero-text': 'var(--t-hero-text)',
@@ -53,38 +61,24 @@ module.exports = {
        * dans la famille. React Native ne sait pas faire cela : sur Android il fabrique une fausse
        * graisse en épaississant le tracé, ce qui donne un rendu sale sur les petits corps — et
        * c'est justement là que l'interface met ses libellés. Nommer chaque coupe évite la
-       * synthèse, au prix d'un `font-sans-semibold` un peu plus bavard que `font-semibold`.
+       * synthèse, au prix d'un `font-sans-medium` un peu plus bavard que `font-medium`.
        *
-       * `display` n'a qu'une coupe parce que la maquette n'utilise la Fraunces qu'en 600.
+       * `display` et `sans-bold` désignent la même coupe depuis la refonte : une seule famille
+       * porte les titres, les libellés et les chiffres. Les deux noms restent parce qu'ils ne
+       * disent pas la même chose — `display` est un rôle (le grand chiffre, le titre), `sans-bold`
+       * est une graisse. Le jour où le rôle changera de coupe, un seul nom sera à toucher.
+       *
+       * Ce qui a disparu : `font-sans-semibold`, que plus rien n'employait une fois les surtitres
+       * passés en 500.
        */
       fontFamily: {
-        display: ['Fraunces_600SemiBold'],
-        sans: ['Inter_400Regular'],
-        'sans-medium': ['Inter_500Medium'],
-        'sans-semibold': ['Inter_600SemiBold'],
-        'sans-bold': ['Inter_700Bold'],
+        display: ['SpaceGrotesk_700Bold'],
+        sans: ['SpaceGrotesk_400Regular'],
+        'sans-medium': ['SpaceGrotesk_500Medium'],
+        'sans-bold': ['SpaceGrotesk_700Bold'],
       },
-      fontSize: {
-        micro: '11px',
-        caption: '12px',
-        small: '13px',
-        base: '14px',
-        option: '15px',
-        body: '16px',
-        input: '16px',
-        stat3: '18px',
-        h3: '20px',
-        stat2: '22px',
-        h2: '28px',
-        stat: '32px',
-        h1: '38px',
-        display: '40px',
-        hero: '58px',
-      },
-      borderRadius: {
-        card: '16px',
-        control: '10px',
-      },
+      fontSize,
+      borderRadius,
     },
   },
   plugins: [],

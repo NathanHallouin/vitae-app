@@ -8,7 +8,7 @@ import { describe, expect, test } from 'bun:test';
 import { computeMetrics, type Metrics } from './calc';
 import type { GoalKey } from './constants';
 import { buildNeat, movementSplit, neatKcal } from './neat';
-import { buildWeek } from './training';
+import { buildWeek, JOURS_COURTS } from './training';
 
 function metrics(input: {
   sexe?: 'femme' | 'homme';
@@ -241,6 +241,38 @@ describe('séances adaptées à l’objectif et au métabolisme', () => {
             `${w.adaptations[0].label.split(' ')[0]} séries`,
           );
         }
+      }
+    }
+  });
+});
+
+describe('placement des séances dans la semaine', () => {
+  test('sept jours, autant de jours marqués que de séances', () => {
+    for (const sessions of [0, 1, 2, 3, 4]) {
+      const w = week({ sessions });
+      expect(w.days).toHaveLength(JOURS_COURTS.length);
+      expect(w.days.filter(Boolean)).toHaveLength(w.strengthPerWeek);
+    }
+  });
+
+  test('la phrase et les pastilles décrivent la même semaine', () => {
+    // Le piège que le tableau `PLACEMENTS` sert à fermer : deux sources qui divergent. Chaque jour
+    // nommé dans la phrase doit être marqué, et réciproquement.
+    const noms = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
+    for (const sessions of [1, 2, 3, 4]) {
+      const w = week({ sessions });
+      const phrase = w.schedule.toLowerCase();
+      for (const [i, nom] of noms.entries()) {
+        if (phrase.includes(nom)) expect(w.days[i]).toBe(true);
+      }
+    }
+  });
+
+  test('deux séances ne tombent jamais sur trois jours d’affilée', () => {
+    for (const sessions of [1, 2, 3, 4]) {
+      const { days } = week({ sessions });
+      for (let i = 0; i + 2 < days.length; i++) {
+        expect(days[i] && days[i + 1] && days[i + 2]).toBe(false);
       }
     }
   });

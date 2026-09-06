@@ -1,6 +1,7 @@
 import { kcal } from '@vitae/core/format';
 import type { NeatPlan } from '@vitae/core/neat';
 import { Text, View } from 'react-native';
+import Fiche from '@/components/ui/Fiche';
 import Overline from '@/components/ui/Overline';
 import { TileRow } from '@/components/ui/Page';
 import { Bullet, Card } from '@/components/ui/primitives';
@@ -13,20 +14,23 @@ import StatTile from '@/components/ui/StatTile';
  * Volontairement sans séries ni répétitions : ce qui compte ici est la répétition quotidienne, pas
  * la performance. Les kcal affichées sont calculées pour le poids de la personne.
  *
- * Une seule carte reste ouverte, celle qui porte les chiffres — c'est la réponse à la question de
- * l'écran. Les gestes et les repères se replient : ils se lisent quand on a décidé d'agir, pas
- * pendant qu'on cherche à comprendre.
+ * **Les gestes ne sont plus repliés derrière un résumé collectif.** Ils l'étaient — « 7 gestes à
+ * répéter tous les jours » —, et c'était une erreur de niveau : ce sont eux la réponse concrète à
+ * la question de la page, pas une annexe. Ils sont donc à découvert, chacun avec son pictogramme,
+ * son ordre de grandeur et une phrase ; c'est le *pourquoi ça marche* et le *comment s'y prendre*
+ * qui passent derrière « En savoir plus ». La liste se parcourt du regard en quelques secondes, et
+ * on n'ouvre que le geste qu'on envisage vraiment.
  */
 export default function NeatCard({ neat }: { neat: NeatPlan }) {
   const reperes = [neat.steps, ...neat.tips];
 
   return (
-    <View className="gap-4">
-      <Card className="p-6">
-        <Overline niveau={2} className="mb-[10px]">
+    <View className="gap-3">
+      <Card className="px-[18px] py-4">
+        <Overline niveau={2} className="mb-[6px]">
           Ce que votre quotidien dépense déjà
         </Overline>
-        <Text className="font-sans mb-5 text-base leading-[22px] text-muted">{neat.lead}</Text>
+        <Text className="font-sans mb-[14px] text-base leading-[21px] text-muted">{neat.lead}</Text>
 
         <TileRow>
           <StatTile
@@ -44,46 +48,45 @@ export default function NeatCard({ neat }: { neat: NeatPlan }) {
           ) : null}
         </TileRow>
 
-        <Text className="font-sans mt-[14px] text-small leading-[22px] text-muted">
+        <Text className="font-sans mt-[14px] text-small leading-[20px] text-muted">
           {neat.note}
         </Text>
       </Card>
 
-      <Repliable
-        titre="Où aller la chercher"
-        resume={`${neat.actions.length} gestes à répéter tous les jours, chiffrés pour votre poids`}
-      >
-        <Text className="font-sans mb-1 text-small text-muted">
-          À répéter tous les jours, y compris les jours de séance.
+      <Card taille className="px-[18px] py-4">
+        <Overline niveau={2} className="mb-[6px]">
+          Les gestes qui paient, chez vous
+        </Overline>
+        <Text className="font-sans mb-2 text-base leading-[21px] text-muted">
+          Des gestes à répéter tous les jours, y compris les jours de séance, chiffrés pour votre
+          poids. Aucun ne demande de récupération : contrairement à une séance, ils se cumulent sans
+          jamais avoir à lever le pied.
         </Text>
-        <View>
-          {neat.actions.map((action) => (
-            <View
+
+        <View className="border-t border-divider">
+          {neat.actions.map((action, i) => (
+            <Fiche
               key={action.label}
-              className="flex-row items-start gap-4 border-t border-divider py-3"
-            >
-              <View className="flex-1">
-                <Text className="mb-[2px] text-option font-sans-medium text-ink">
-                  {action.label}
-                </Text>
-                <Text className="font-sans text-small leading-[19px] text-muted">
-                  {action.detail}
-                </Text>
-              </View>
-              <Text
-                style={{ fontVariant: ['tabular-nums'] }}
-                className="flex-none pt-[1px] text-small font-sans-medium text-primary-ink"
-              >
-                ≈ {action.kcal} kcal
-              </Text>
-            </View>
+              separateur={i > 0}
+              icone={action.icon}
+              titre={action.label}
+              // Le gain seul, sans son unité : elle est écrite une fois sous la liste, où elle
+              // porte aussi le poids qui a servi au calcul. Répétée sept fois, elle ferait une
+              // colonne de « kcal » que l'œil doit sauter pour comparer les chiffres.
+              chiffre={`+ ${action.kcal}`}
+              resume={action.detail}
+              sections={[
+                { titre: 'Pourquoi ça marche', texte: action.pourquoi },
+                { titre: 'Comment s’y prendre', texte: action.comment },
+              ]}
+            />
           ))}
         </View>
-        <Text className="font-sans mt-3 text-caption leading-[19px] text-muted2">
-          Ces gestes ne demandent aucune récupération : contrairement à une séance, vous pouvez les
-          cumuler tous les jours sans jamais avoir à lever le pied.
+
+        <Text className="font-sans mt-2 text-caption text-muted2">
+          kcal par jour, pour {Math.round(neat.poids)} kg
         </Text>
-      </Repliable>
+      </Card>
 
       <Repliable
         titre="Vos repères"

@@ -48,12 +48,59 @@ export interface WeekPlan {
   weeklyKcal: number;
   /** exemple de placement dans la semaine */
   schedule: string;
+  /**
+   * Les sept jours de la semaine, du lundi au dimanche : vrai quand une séance y tombe.
+   *
+   * La même information que `schedule`, sous la forme que l'écran dessine — sept pastilles, celles
+   * des jours de séance en `primary`. Les deux sont produits ensemble, par le même choix : une
+   * phrase et un dessin qui ne diraient pas la même semaine seraient pires qu'un seul des deux.
+   */
+  days: readonly boolean[];
   warmup: string;
   cardio: string[];
   adaptations: Adaptation[];
   progression: string[];
   note: string;
 }
+
+/**
+ * Où tombent les séances dans la semaine, selon leur nombre.
+ *
+ * La phrase et les sept cases sont écrites côte à côte parce qu'elles disent la même chose : les
+ * séparer, c'est se garantir qu'un jour la phrase parlera de lundi-mercredi-vendredi pendant que
+ * les pastilles montreront mardi et samedi. Les tableaux vont du lundi au dimanche.
+ *
+ * Ce ne sont que des exemples, et la phrase le dit : ce qui compte est l'espacement — au moins un
+ * jour de récupération entre deux séances qui sollicitent les mêmes muscles.
+ */
+const PLACEMENTS = {
+  quatre: {
+    days: [true, true, false, true, true, false, false],
+    phrase: 'Lundi, mardi, jeudi, vendredi, puis deux jours de repos d’affilée en fin de semaine.',
+  },
+  trois: {
+    days: [true, false, true, false, true, false, false],
+    phrase: 'Lundi, mercredi, vendredi : un jour de récupération entre chaque séance.',
+  },
+  deux: {
+    days: [false, true, false, false, false, true, false],
+    phrase: 'Mardi et samedi, ou deux jours espacés d’au moins 48 h.',
+  },
+} as const;
+
+/** Les initiales des sept jours, dans l'ordre de `WeekPlan.days`. */
+export const JOURS_COURTS = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
+
+/** Le nom entier des sept jours : les initiales seules ne se lisent pas au lecteur d'écran. */
+export const JOURS_LONGS = [
+  'lundi',
+  'mardi',
+  'mercredi',
+  'jeudi',
+  'vendredi',
+  'samedi',
+  'dimanche',
+];
 
 /* ------------------------------------------------------------------ réglages */
 
@@ -655,18 +702,19 @@ export function buildWeek(
   const weeklyKcal = weekSessions.reduce((sum, s) => sum + s.kcal, 0);
   const kcalParSeance = Math.round(weeklyKcal / weekSessions.length / 5) * 5;
 
-  const schedule =
+  const placement =
     strengthPerWeek >= 4
-      ? 'Lundi, mardi, jeudi, vendredi, puis deux jours de repos d’affilée en fin de semaine.'
+      ? PLACEMENTS.quatre
       : strengthPerWeek === 3
-        ? 'Lundi, mercredi, vendredi : un jour de récupération entre chaque séance.'
-        : 'Mardi et samedi, ou deux jours espacés d’au moins 48 h.';
+        ? PLACEMENTS.trois
+        : PLACEMENTS.deux;
 
   return {
     strengthPerWeek,
     sessions: weekSessions,
     weeklyKcal,
-    schedule,
+    schedule: placement.phrase,
+    days: placement.days,
     warmup: warmupText(metrics),
     cardio: cardioLines(metrics, goal, activityLevel(daily, sessions), setup.lowImpact),
     adaptations: setup.adaptations,

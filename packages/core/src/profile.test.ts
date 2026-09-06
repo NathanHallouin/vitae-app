@@ -107,6 +107,23 @@ describe('lecture du profil enregistré', () => {
     expect(migré?.daily).toBe(1);
   });
 
+  test('le poids de départ est relu, et les valeurs aberrantes écartées sans perdre le profil', () => {
+    const avec = { ...valide, poidsDepart: 88.5 };
+    expect(parseProfile(JSON.stringify(avec))?.poidsDepart).toBe(88.5);
+
+    // Hors bornes de saisie, ou d'un autre type : le champ tombe, le profil reste. C'est un
+    // confort d'affichage, pas une donnée dont dépend un calcul.
+    for (const aberrant of [12, 900, '86', null, Number.NaN]) {
+      const lu = parseProfile(JSON.stringify({ ...valide, poidsDepart: aberrant }));
+      expect(lu).not.toBeNull();
+      expect(lu?.poidsDepart).toBeUndefined();
+    }
+  });
+
+  test('un profil enregistré avant ce champ reste valide', () => {
+    expect(parseProfile(JSON.stringify(valide))?.poidsDepart).toBeUndefined();
+  });
+
   test('les filtres d’ingrédient sont relus, et les valeurs inconnues ignorées', () => {
     const avec = { ...valide, excluded: ['poisson', 'inventé', 42, 'vegetarien'] };
     expect(parseProfile(JSON.stringify(avec))?.excluded).toEqual(['poisson', 'vegetarien']);

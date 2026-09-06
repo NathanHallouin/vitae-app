@@ -13,6 +13,11 @@
  * et l'écart passerait inaperçu jusqu'à ce que quelqu'un partage un lien. On écrit donc une
  * configuration fontconfig qui ne désigne que les deux fichiers du projet.
  *
+ * Depuis la refonte « Cadran », ces deux fichiers sont deux coupes d'une même famille : fontconfig
+ * ne sait pas choisir une graisse dans un dossier, il choisit une famille. Les deux sont donc
+ * déposées sous des noms de famille distincts — `Vitae Titre` et `Vitae Texte` — plutôt que sous
+ * le nom réel de la police, faute de quoi les deux `<text>` sortiraient dans la même graisse.
+ *
  * Elle doit être en place *avant* le démarrage du processus : fontconfig la lit à l'initialisation
  * de la bibliothèque native, et la poser depuis le script arrive trop tard — l'image sort dans une
  * police générique, sans le moindre avertissement. Le script se relance donc une fois, avec la
@@ -46,14 +51,14 @@ async function preparerPolices(): Promise<string> {
   await mkdir(polices, { recursive: true });
   await mkdir(path.join(CACHE, 'cache'), { recursive: true });
 
-  const source = path.join(RACINE, 'node_modules/@expo-google-fonts');
+  const source = path.join(RACINE, 'node_modules/@expo-google-fonts/space-grotesk');
   await Bun.write(
-    Bun.file(path.join(polices, 'Fraunces.ttf')),
-    Bun.file(path.join(source, 'fraunces/600SemiBold/Fraunces_600SemiBold.ttf')),
+    Bun.file(path.join(polices, 'VitaeTitre.ttf')),
+    Bun.file(path.join(source, '700Bold/SpaceGrotesk_700Bold.ttf')),
   );
   await Bun.write(
-    Bun.file(path.join(polices, 'Inter.ttf')),
-    Bun.file(path.join(source, 'inter/400Regular/Inter_400Regular.ttf')),
+    Bun.file(path.join(polices, 'VitaeTexte.ttf')),
+    Bun.file(path.join(source, '400Regular/SpaceGrotesk_400Regular.ttf')),
   );
 
   const conf = path.join(CACHE, 'fonts.conf');
@@ -64,6 +69,14 @@ async function preparerPolices(): Promise<string> {
 <fontconfig>
   <dir>${polices}</dir>
   <cachedir>${path.join(CACHE, 'cache')}</cachedir>
+  <match target="scan">
+    <test name="file"><string>${path.join(polices, 'VitaeTitre.ttf')}</string></test>
+    <edit name="family" mode="assign"><string>Vitae Titre</string></edit>
+  </match>
+  <match target="scan">
+    <test name="file"><string>${path.join(polices, 'VitaeTexte.ttf')}</string></test>
+    <edit name="family" mode="assign"><string>Vitae Texte</string></edit>
+  </match>
 </fontconfig>
 `,
     'utf8',
@@ -79,11 +92,13 @@ function echapper(texte: string): string {
 /**
  * Découpe un titre en lignes qui tiennent dans la largeur.
  *
- * La largeur moyenne d'un caractère de la Fraunces tourne autour de 52 % de son corps ; un mot qui
- * dépasse seul n'est pas coupé, on préfère un débordement discret à une césure fautive.
+ * La largeur moyenne d'un caractère de la Space Grotesk en 700 tourne autour de 55 % de son corps
+ * — un peu plus que la Fraunces qu'elle remplace, dont elle a la chasse des chiffres mais pas
+ * l'étroitesse des bas-de-casse. Un mot qui dépasse seul n'est pas coupé : on préfère un
+ * débordement discret à une césure fautive.
  */
 function lignes(texte: string, corps: number, largeurMax: number): string[] {
-  const parCaractere = corps * 0.52;
+  const parCaractere = corps * 0.55;
   const maxi = Math.floor(largeurMax / parCaractere);
   const out: string[] = [];
   let courante = '';
@@ -115,26 +130,23 @@ function carte({ titre, sous }: { titre: string; sous: string }): Buffer {
   const titreSvg = rendues
     .map(
       (l, i) =>
-        `<text x="100" y="${depart + i * corps * 1.2}" font-family="Fraunces" font-size="${corps}" fill="${LIGHT.heroText}">${echapper(l)}</text>`,
+        `<text x="100" y="${depart + i * corps * 1.2}" font-family="Vitae Titre" font-size="${corps}" fill="${LIGHT.heroText}">${echapper(l)}</text>`,
     )
     .join('\n  ');
 
+  // Un aplat, plus un dégradé : `heroFrom` et `heroTo` portent la même valeur depuis la refonte,
+  // et deux arrêts identiques ne feraient qu'un dégradé qui se prétend tel. La lecture se lit sur
+  // `heroFrom` seul, qui reste la couleur de l'aplat de marque.
   return Buffer.from(
     `<svg xmlns="http://www.w3.org/2000/svg" width="${LARGEUR}" height="${HAUTEUR}">
-  <defs>
-    <linearGradient id="fond" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="${LIGHT.heroFrom}"/>
-      <stop offset="100%" stop-color="${LIGHT.heroTo}"/>
-    </linearGradient>
-  </defs>
-  <rect width="${LARGEUR}" height="${HAUTEUR}" fill="url(#fond)"/>
+  <rect width="${LARGEUR}" height="${HAUTEUR}" fill="${LIGHT.heroFrom}"/>
   <g transform="translate(100 74) scale(2.2)" fill="none" stroke="${LIGHT.heroText}" stroke-width="1.6"
      stroke-linecap="round" stroke-linejoin="round">
     <path d="${FLAMME}"/>
   </g>
-  <text x="160" y="112" font-family="Inter" font-size="28" fill="${LIGHT.heroText}" opacity="0.85">Métabolisme de base</text>
+  <text x="160" y="112" font-family="Vitae Texte" font-size="28" fill="${LIGHT.heroText}" opacity="0.85">Métabolisme de base</text>
   ${titreSvg}
-  <text x="100" y="${HAUTEUR - 70}" font-family="Inter" font-size="30" fill="${LIGHT.heroText}" opacity="0.9">${echapper(sous)}</text>
+  <text x="100" y="${HAUTEUR - 70}" font-family="Vitae Texte" font-size="30" fill="${LIGHT.heroText}" opacity="0.9">${echapper(sous)}</text>
 </svg>`,
     'utf8',
   );

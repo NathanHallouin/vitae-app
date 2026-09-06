@@ -80,8 +80,11 @@ export default function OptionButton({
         onNavigate(geste);
       }}
       className={cx(
-        'w-full rounded-xl border',
-        selected ? 'border-primary-ink bg-primary-tint' : 'border-line bg-surface',
+        'w-full rounded-control',
+        // Voir `OptionButton.tsx` : la marge négative compense l'épaississement de la bordure.
+        selected
+          ? 'border-2 border-primary-ink bg-primary-tint m-[-1px]'
+          : 'border border-line bg-surface',
         className,
       )}
     >

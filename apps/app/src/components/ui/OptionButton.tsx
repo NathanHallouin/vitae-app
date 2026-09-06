@@ -41,8 +41,14 @@ export default function OptionButton({
       accessibilityLabel={accessibilityLabel}
       onPress={onPress}
       className={cx(
-        'w-full rounded-xl border',
-        selected ? 'border-primary-ink bg-primary-tint' : 'border-line bg-surface',
+        'w-full rounded-control',
+        // Bordure épaissie sur l'option choisie, et marge négative d'un point pour compenser :
+        // sans elle, la ligne choisie grandirait d'un pixel et ferait sauter tout le groupe. Deux
+        // points plutôt qu'un parce que sur le gris-violet de la refonte, le fond `primaryTint`
+        // à 10 % ne suffit plus seul à distinguer la ligne choisie de ses voisines.
+        selected
+          ? 'border-2 border-primary-ink bg-primary-tint m-[-1px]'
+          : 'border border-line bg-surface',
         className,
       )}
     >

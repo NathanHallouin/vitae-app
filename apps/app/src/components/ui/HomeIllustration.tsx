@@ -34,16 +34,18 @@ export default function HomeIllustration() {
         accessibilityRole="image"
         accessibilityLabel="Une jauge d’énergie surmontée d’une flamme, au-dessus du rythme de la dépense sur une journée"
       >
-        {/* Disque : pose la flamme sur un fond, sans bord dur. Teinte chaude plutôt que le bleu
-            translucide, qui vire au gris sur le fond crème. */}
+        {/* Disque : pose la flamme sur un fond, sans bord dur. `surface2` plutôt qu'une teinte
+            translucide de la couleur d'action, qui vire au gris sur le fond de page. */}
         <Circle cx="160" cy="112" r="44" fill={palette.surface2} />
 
-        {/* Jauge : piste complète, puis portion remplie */}
+        {/* Jauge : piste complète, puis portion remplie. La piste est en `gaugeTrack` et non en
+            `divider` — elle mesure, elle ne sépare pas, et c'est exactement la distinction que la
+            refonte a introduite entre ces deux gris. */}
         <Path
           d="M86.7 138.7A78 78 0 1 1 233.3 138.7"
           fill="none"
           strokeWidth="12"
-          stroke={palette.divider}
+          stroke={palette.gaugeTrack}
           strokeLinecap="round"
         />
         <Path

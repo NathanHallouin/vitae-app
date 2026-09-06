@@ -176,7 +176,7 @@ export default function FiltresRecettes({
 function Groupe({ titre, children }: { titre: string; children: ReactNode }) {
   return (
     <View>
-      <Text className="mb-2 text-micro font-sans-semibold uppercase tracking-[1.1px] text-muted2">
+      <Text className="mb-2 text-micro font-sans-medium uppercase tracking-[1.6px] text-muted2">
         {titre}
       </Text>
       <View className="flex-row flex-wrap gap-2">{children}</View>

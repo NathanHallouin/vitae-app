@@ -59,7 +59,7 @@ export default function DateField({
         boxSizing: 'border-box',
         padding: '14px',
         fontSize: 16,
-        fontFamily: 'Inter_400Regular',
+        fontFamily: 'SpaceGrotesk_400Regular',
         color: palette.text,
         backgroundColor: palette.surface2,
         // Même repère de focalisation que les champs numériques : bordure d'action, pas le

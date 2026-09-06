@@ -1,8 +1,8 @@
-import type { WeekPlan } from '@vitae/core/training';
+import { JOURS_COURTS, JOURS_LONGS, type WeekPlan } from '@vitae/core/training';
 import { Text, View } from 'react-native';
-import Chiffre from '@/components/ui/Chiffre';
+import { Ligne, Lignes } from '@/components/ui/Ligne';
 import Overline from '@/components/ui/Overline';
-import { Bullet, Card } from '@/components/ui/primitives';
+import { Bullet, Card, cx } from '@/components/ui/primitives';
 import Repliable from '@/components/ui/Repliable';
 
 /**
@@ -18,20 +18,56 @@ import Repliable from '@/components/ui/Repliable';
  */
 export default function WeekPlanCard({ week }: { week: WeekPlan }) {
   return (
-    <View className="gap-4">
-      <Card className="p-6">
-        <Overline niveau={2} className="mb-1">
+    <View className="gap-3">
+      <Card className="px-[18px] py-4">
+        <Overline niveau={2} className="mb-3">
           Votre semaine type
         </Overline>
-        <View className="my-2">
-          <Chiffre
-            valeur={week.strengthPerWeek}
-            unite="séances de renforcement par semaine"
-            taille="grand"
-            ton="primary"
-          />
+
+        {/* Sept pastilles plutôt qu'un grand chiffre : « 3 » ne dit pas où tomberont les séances,
+            et c'est la question qu'on se pose en regardant sa semaine. La phrase de `schedule`
+            reste en dessous — la couleur seule ne nomme aucun jour pour qui ne la distingue pas. */}
+        <View
+          accessibilityRole="image"
+          accessibilityLabel={`Séances les ${week.days
+            .map((seance, i) => (seance ? JOURS_LONGS[i] : null))
+            .filter(Boolean)
+            .join(', ')}.`}
+          className="mb-[14px] flex-row gap-[6px]"
+        >
+          {week.days.map((seance, i) => (
+            <View
+              // Les sept jours sont fixes et deux d'entre eux portent la même initiale : c'est la
+              // position qui les distingue, donc l'index qui fait la clé.
+              // biome-ignore lint/suspicious/noArrayIndexKey: semaine de longueur fixe
+              key={i}
+              className={cx(
+                'flex-1 items-center rounded-lg py-[9px]',
+                seance ? 'bg-primary' : 'bg-surface2',
+              )}
+            >
+              <Text
+                className={cx(
+                  'text-caption',
+                  seance ? 'font-sans-medium text-hero-text' : 'font-sans text-muted2',
+                )}
+              >
+                {JOURS_COURTS[i]}
+              </Text>
+            </View>
+          ))}
         </View>
-        <Text className="font-sans text-base leading-[22px] text-muted">{week.note}</Text>
+
+        <Lignes>
+          <Ligne label="Séances par semaine" valeur={week.strengthPerWeek} />
+          <Ligne
+            label="Dépense estimée par séance"
+            valeur={`≈ ${Math.round(week.weeklyKcal / Math.max(1, week.sessions.length))}`}
+            suffixe="kcal"
+          />
+        </Lignes>
+
+        <Text className="font-sans mt-3 text-base leading-[21px] text-muted">{week.note}</Text>
         <Text className="font-sans mt-[10px] text-small text-muted2">
           Répartition conseillée : {week.schedule}
         </Text>

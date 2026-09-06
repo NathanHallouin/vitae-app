@@ -99,7 +99,7 @@ function Portions({
   proteines: number;
 }) {
   return (
-    <Card className="mb-4 p-4">
+    <Card className="mb-3 px-[18px] py-4">
       <View className="flex-row items-center justify-between gap-4">
         <View className="min-w-0 flex-1">
           <Text className="text-option font-sans-medium text-ink">Pour combien de personnes ?</Text>
@@ -189,7 +189,7 @@ function Section({
   children: ReactNode;
 }) {
   return (
-    <Card className="mb-4 p-4">
+    <Card className="mb-3 px-[18px] py-4">
       <View className="mb-1 flex-row items-baseline justify-between gap-3">
         <Text className="font-display text-h3 text-ink">{titre}</Text>
         {faits > 0 ? (
@@ -237,7 +237,12 @@ function Cochable({
       accessibilityRole="checkbox"
       accessibilityState={{ checked: fait }}
       onPress={onPress}
-      className="w-full flex-row items-start gap-3 rounded-xl px-2 py-3 active:bg-surface2"
+      className={cx(
+        'w-full flex-row items-start gap-3 rounded-control px-2 py-[10px] active:bg-surface2',
+        // La ligne faite garde un fond, et pas seulement un texte barré : sur une liste de neuf
+        // ingrédients lue à un mètre au-dessus d'un plan de travail, la rature seule se perd.
+        fait && 'bg-surface2',
+      )}
     >
       <View
         className={cx(

@@ -24,6 +24,11 @@ apps/app/public/polices/
 apps/app/assets/polices/
 apps/app/assets/*.png
 
+# Paquets de passation déposés à la racine le temps d'une refonte : des maquettes et des fichiers
+# de référence, pas du code du projet. Les ignorer les tient aussi hors de Biome, qui suit ce
+# fichier — sans quoi `bun run check` échouerait sur du code qui n'a jamais été destiné à tourner.
+design_handoff_*/
+
 # Signature d'applications : ne doit jamais entrer dans le dépôt
 *.jks
 *.p8

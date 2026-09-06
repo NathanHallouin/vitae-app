@@ -33,7 +33,7 @@ export default function RecettePage() {
     return (
       <View className="flex-1 items-center justify-center gap-4 bg-bg p-6">
         <Text className="font-display text-h3 text-ink">Cette recette n’existe pas</Text>
-        <Link href="/recettes" className="text-base font-sans-semibold text-primary-ink">
+        <Link href="/recettes" className="text-base font-sans-medium text-primary-ink">
           Voir toutes les recettes
         </Link>
       </View>

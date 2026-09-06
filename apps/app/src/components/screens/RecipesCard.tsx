@@ -60,7 +60,7 @@ export default function RecipesCard({ metrics, goal }: { metrics: Metrics; goal:
     setOffsets((o) => ({ ...o, [slotKey]: (o[slotKey] ?? 0) + 1 }));
 
   return (
-    <Card className="p-6">
+    <Card className="px-[18px] py-4">
       <Overline niveau={2} className="mb-1">
         Des recettes pour ces repères
       </Overline>
@@ -169,7 +169,7 @@ function RecipeLink({ recipe, onChange }: { recipe: Suggestion; onChange: () => 
         maison ? router.navigate(versRoute(recipe.url)) : WebBrowser.openBrowserAsync(recipe.url)
       }
       className={cx(
-        'gap-[6px] rounded-xl border p-[14px] active:border-primary-ink active:bg-surface2',
+        'gap-[6px] rounded-control border p-[14px] active:border-primary-ink active:bg-surface2',
         // Une recette de l'application se distingue d'un simple lien : c'est du contenu rédigé,
         // aux valeurs contrôlées, pas une recherche dont le résultat reste à choisir.
         maison ? 'border-primary-ink bg-primary-tint' : 'border-line',

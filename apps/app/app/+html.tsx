@@ -20,7 +20,7 @@ export default function Root({ children }: { children: ReactNode }) {
           name="viewport"
           content="width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover"
         />
-        <meta name="theme-color" content="#084684" />
+        <meta name="theme-color" content="#3a3495" />
 
         {/* Le site est installable : rien n'y est chargé depuis un serveur, il n'a donc aucune
             raison de rester un onglet. Le manifeste et l'icône sont engendrés par
@@ -40,13 +40,13 @@ export default function Root({ children }: { children: ReactNode }) {
             react-native-web défilent à l'intérieur d'une page qui ne défile pas. */}
         <ScrollViewStyleReset />
 
-        {/* Les deux coupes qui portent la première image de la page : le titre, et le corps de
-            texte qui en occupe l'essentiel. Préchargées, elles partent dès l'analyse du HTML — en
-            parallèle du paquet JavaScript, et non après son exécution. Mesuré : la Fraunces est
-            prête avant même que le paquet ait fini d'arriver.
+        {/* Les deux coupes qui portent la première image de la page : le corps de texte, et la
+            graisse des grands chiffres — qui est ici le premier élément vu de chaque écran, au
+            centre du cadran. Préchargées, elles partent dès l'analyse du HTML — en parallèle du
+            paquet JavaScript, et non après son exécution.
 
-            Ces deux-là seulement. Les trois autres ne servent qu'aux libellés et aux chiffres :
-            elles se chargent à la découverte du texte qui les emploie, ce qui est le bon moment.
+            Ces deux-là seulement. La 500 ne porte que des libellés et se charge à la découverte du
+            texte qui l'emploie, ce qui est le bon moment.
 
             `crossOrigin` est exigé même pour une police du même domaine — elles sont toujours
             demandées en mode CORS, et sans lui le navigateur les téléchargerait deux fois. */}
@@ -54,14 +54,14 @@ export default function Root({ children }: { children: ReactNode }) {
           rel="preload"
           as="font"
           type="font/woff2"
-          href="/polices/Fraunces_600SemiBold.woff2"
+          href="/polices/SpaceGrotesk_400Regular.woff2"
           crossOrigin="anonymous"
         />
         <link
           rel="preload"
           as="font"
           type="font/woff2"
-          href="/polices/Inter_400Regular.woff2"
+          href="/polices/SpaceGrotesk_700Bold.woff2"
           crossOrigin="anonymous"
         />
 
@@ -80,7 +80,7 @@ export default function Root({ children }: { children: ReactNode }) {
  * C'est la contrepartie web de `src/lib/polices.ts` : en natif `expo-font` les charge au démarrage,
  * ici le navigateur les demande en analysant le HTML — donc en parallèle du paquet, et non après
  * lui. Les fichiers sont réduits aux caractères employés et convertis en woff2 par
- * `tools/build-fonts.ts` — 334 Ko de TTF deviennent 27 Ko. Ajouter une coupe suppose de la
+ * `tools/build-fonts.ts` — 254 Ko de TTF deviennent 43 Ko. Ajouter une coupe suppose de la
  * déclarer aux trois endroits, celui-ci compris.
  *
  * Une famille par graisse, et `font-weight: 400` partout : c'est la règle de `tailwind.config.js`,
@@ -91,19 +91,14 @@ export default function Root({ children }: { children: ReactNode }) {
  * l'arrivée. L'alternative — un texte invisible pendant le chargement — est bien pire sur une
  * page dont tout l'intérêt est d'être lue.
  *
- * Toutes les cinq servent, et cela n'a pas toujours été vrai : le texte courant ne portait aucune
- * classe `font-*` et retombait sur la pile système du navigateur, si bien que les deux tiers des
- * textes de l'application sortaient en Segoe UI ou en Roboto pendant que les libellés étaient en
- * Inter. Le défaut ne se voyait pas au premier coup d'œil et rien ne pouvait le signaler — d'où la
- * vérification en navigateur, qui reste le seul moyen de l'attraper.
+ * Les trois servent, et cela n'a pas toujours été vrai : le texte courant ne portait aucune classe
+ * `font-*` et retombait sur la pile système du navigateur, si bien que les deux tiers des textes de
+ * l'application sortaient en Segoe UI ou en Roboto pendant que les libellés étaient dans la police
+ * du projet. Le défaut ne se voyait pas au premier coup d'œil et rien ne pouvait le signaler — d'où
+ * la vérification en navigateur, qui reste le seul moyen de l'attraper. Une seule famille en jeu le
+ * rend plus facile à attraper, pas impossible.
  */
-const POLICES = [
-  'Fraunces_600SemiBold',
-  'Inter_400Regular',
-  'Inter_500Medium',
-  'Inter_600SemiBold',
-  'Inter_700Bold',
-]
+const POLICES = ['SpaceGrotesk_400Regular', 'SpaceGrotesk_500Medium', 'SpaceGrotesk_700Bold']
   .map(
     (coupe) => `
 @font-face {
@@ -117,9 +112,9 @@ const POLICES = [
   .join('');
 
 const FOND = `
-body { background-color: #fbf7f2; }
+body { background-color: #f3f2f7; }
 @media (prefers-color-scheme: dark) {
-  body { background-color: #16120e; }
+  body { background-color: #0d0c13; }
 }
 `;
 

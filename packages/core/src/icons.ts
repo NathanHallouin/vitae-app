@@ -21,6 +21,10 @@ export const ICON_NAMES = [
   'marche',
   'debout',
   'caisse',
+  'escalier',
+  'velo',
+  'menage',
+  'telephone',
   // Entraînement
   'haltere',
   'aucun',
@@ -39,6 +43,13 @@ export const ICON_NAMES = [
   'lienExterne',
   'eclair',
   'silhouette',
+  // Réglages, et le motif « en savoir plus »
+  'reglage',
+  'cloche',
+  'bouclier',
+  'croix',
+  'plus',
+  'info',
 ] as const;
 
 export type IconName = (typeof ICON_NAMES)[number];

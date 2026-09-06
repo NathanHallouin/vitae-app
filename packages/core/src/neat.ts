@@ -10,12 +10,17 @@
 
 import type { Metrics } from './calc';
 import { DAILY, type GoalKey, NEAT_ACTIONS, NEAT_TIPS, SESSIONS } from './constants';
+import type { IconName } from './icons';
 
 export interface NeatItem {
   label: string;
   detail: string;
   /** dépense estimée pour le poids de la personne, arrondie au multiple de 5 */
   kcal: number;
+  icon: IconName;
+  /** ce qui se lit une fois la fiche ouverte : voir `NeatAction` */
+  pourquoi: string;
+  comment: string;
 }
 
 export interface NeatPlan {
@@ -30,6 +35,14 @@ export interface NeatPlan {
   tips: string[];
   lead: string;
   note: string;
+  /**
+   * Le poids qui a servi à chiffrer les gestes, en kilogrammes.
+   *
+   * Les kcal d'un geste dépendent de la masse déplacée : monter dix minutes d'escaliers ne coûte
+   * pas la même chose à 60 et à 100 kg. L'écran l'écrit sous la liste — « kcal par jour, pour
+   * 78 kg » — pour que le lecteur sache que ces chiffres sont les siens et non une moyenne.
+   */
+  poids: number;
 }
 
 /**
@@ -106,6 +119,9 @@ export function buildNeat(m: Metrics, daily: number, goal: GoalKey): NeatPlan {
     detail: a.detail,
     // MET × kg × heures : la dépense d'un même geste monte avec le poids porté.
     kcal: Math.round((a.met * m.poids * a.min) / 60 / 5) * 5,
+    icon: a.icon,
+    pourquoi: a.pourquoi,
+    comment: a.comment,
   }));
 
   return {
@@ -117,5 +133,6 @@ export function buildNeat(m: Metrics, daily: number, goal: GoalKey): NeatPlan {
     tips: NEAT_TIPS[daily] ?? NEAT_TIPS[3],
     lead: lead(daily, goal),
     note: note(m, daily, goal, headroom),
+    poids: m.poids,
   };
 }

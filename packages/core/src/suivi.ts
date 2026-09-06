@@ -15,6 +15,7 @@
  */
 
 import { CHART } from './calc';
+import { todayISO } from './date';
 import { dec } from './format';
 
 /** Une pesée : un jour, un poids. Rien d'autre — l'heure ne dit rien de plus sur une balance. */
@@ -83,6 +84,47 @@ export function retirerPesee(historique: Pesee[], date: string): Pesee[] {
 /** La pesée la plus récente, ou `null` si l'historique est vide. */
 export function dernierePesee(historique: Pesee[]): Pesee | null {
   return historique.length ? historique[historique.length - 1] : null;
+}
+
+/**
+ * Depuis quand date une pesée, en toutes lettres : « aujourd'hui », « hier », « il y a 5 jours ».
+ *
+ * L'unité du cadran de l'écran « Mon poids » est « kg · il y a 2 jours » : la fraîcheur de la
+ * mesure appartient à la mesure. Une date absolue y demanderait un calcul mental à chaque
+ * consultation, alors que la seule question posée est « est-ce que je me suis pesé récemment ».
+ *
+ * Chaîne vide plutôt que `null` quand la date est illisible : l'appelant la concatène, et une
+ * pesée sans âge affichable vaut mieux qu'une unité qui disparaît.
+ */
+export function depuisEnClair(date: string, aujourdhui: string = todayISO()): string {
+  const jours = joursEntre(date, aujourdhui);
+  if (jours === null || jours < 0) return '';
+  if (jours === 0) return 'aujourd’hui';
+  if (jours === 1) return 'hier';
+  return `il y a ${jours} jours`;
+}
+
+/**
+ * La part du chemin faite entre le poids de départ et la cible, entre 0 et 1.
+ *
+ * C'est ce que mesure l'arc de l'écran « Mon poids », et c'est la seule des quatre parts qui ne
+ * soit pas un rapport entre deux dépenses : elle avance à mesure que la balance descend (ou
+ * monte), quel que soit le sens du plan. D'où la valeur absolue — un objectif de prise de masse
+ * doit remplir son arc comme une sèche.
+ *
+ * `null` quand il manque une des trois valeurs, ou quand départ et cible se confondent : il n'y a
+ * alors pas de chemin, et en dessiner un donnerait à voir un progrès inventé. Le résultat est borné
+ * à 1 : dépasser sa cible remplit l'arc, il ne le fait pas repartir.
+ */
+export function cheminParcouru(
+  depart: number | null,
+  actuel: number | null,
+  cible: number | null,
+): number | null {
+  if (depart === null || actuel === null || cible === null) return null;
+  const total = cible - depart;
+  if (Math.abs(total) < 0.05) return null;
+  return Math.max(0, Math.min(1, (actuel - depart) / total));
 }
 
 /**

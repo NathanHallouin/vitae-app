@@ -55,14 +55,14 @@ export default function Repliable({
 
   // `taille` : c'est la hauteur de la carte qui change quand on déplie, pas son contenu.
   return (
-    <Card taille className={cx('px-6', ouvert ? 'pt-6 pb-6' : 'py-2')}>
+    <Card taille className={cx('px-[18px]', ouvert ? 'pb-4' : 'py-1')}>
       <Pressable
         accessibilityRole="button"
         accessibilityState={{ expanded: ouvert }}
         accessibilityLabel={`${titre}. ${resume}`}
         accessibilityHint={ouvert ? 'Replier' : 'Déplier'}
         onPress={() => setOuvert((o) => !o)}
-        className="flex-row items-center gap-4 py-4 active:opacity-70"
+        className="flex-row items-center gap-4 py-[14px] active:opacity-70"
       >
         <View className="min-w-0 flex-1">
           <Text className="font-display text-stat3 leading-[24px] text-ink">{titre}</Text>

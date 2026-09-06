@@ -2,9 +2,11 @@ import { describe, expect, test } from 'bun:test';
 import { fmtKgParSemaine } from './format';
 import {
   ajouterPesee,
+  cheminParcouru,
   comparerAuPlan,
   construireCourbe,
   construireSuivi,
+  depuisEnClair,
   dernierePesee,
   ECART_REEVALUATION,
   joursEntre,
@@ -274,5 +276,52 @@ describe('fmtKgParSemaine', () => {
 
   test('ne fait pas passer un bruit de balance pour un rythme', () => {
     expect(fmtKgParSemaine(0.004)).toBe('poids stable');
+  });
+});
+
+describe('depuisEnClair', () => {
+  test('nomme le jour même et la veille plutôt que de les compter', () => {
+    expect(depuisEnClair('2026-09-06', '2026-09-06')).toBe('aujourd’hui');
+    expect(depuisEnClair('2026-09-05', '2026-09-06')).toBe('hier');
+  });
+
+  test('compte les jours au-delà', () => {
+    expect(depuisEnClair('2026-09-04', '2026-09-06')).toBe('il y a 2 jours');
+  });
+
+  test('se tait plutôt que d’inventer un âge', () => {
+    expect(depuisEnClair('pas une date', '2026-09-06')).toBe('');
+    // Une pesée datée de demain : la balance ne prédit pas l'avenir, on n'affiche rien.
+    expect(depuisEnClair('2026-09-07', '2026-09-06')).toBe('');
+  });
+});
+
+describe('cheminParcouru', () => {
+  test('mesure la part du trajet faite, dans le sens de la perte', () => {
+    expect(cheminParcouru(82, 78.4, 69.7)).toBeCloseTo(0.29, 2);
+  });
+
+  test('compte de la même façon une prise de masse', () => {
+    // Le sens du plan ne change rien : c'est le rapport au trajet total qui est mesuré.
+    expect(cheminParcouru(70, 74, 78)).toBeCloseTo(0.5, 5);
+  });
+
+  test('vaut zéro au départ et un à l’arrivée', () => {
+    expect(cheminParcouru(82, 82, 70)).toBe(0);
+    expect(cheminParcouru(82, 70, 70)).toBe(1);
+  });
+
+  test('borne le dépassement plutôt que de repartir en arrière', () => {
+    expect(cheminParcouru(82, 65, 70)).toBe(1);
+    // Reprendre du poids ne rend pas le chemin négatif : l'arc se vide, il ne s'inverse pas.
+    expect(cheminParcouru(82, 84, 70)).toBe(0);
+  });
+
+  test('ne rend rien quand il n’y a pas de trajet à mesurer', () => {
+    expect(cheminParcouru(null, 78, 70)).toBeNull();
+    expect(cheminParcouru(82, null, 70)).toBeNull();
+    expect(cheminParcouru(82, 78, null)).toBeNull();
+    // Départ et cible confondus : le rapport diviserait par zéro.
+    expect(cheminParcouru(70, 68, 70)).toBeNull();
   });
 });

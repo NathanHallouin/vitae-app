@@ -45,7 +45,7 @@ export default function IllustrationCalcul() {
             r={7}
             strokeWidth={2.5}
             fill={repondu ? palette.primary : palette.surface}
-            stroke={repondu ? palette.primary : palette.divider}
+            stroke={repondu ? palette.primary : palette.gaugeTrack}
           />
         );
       })}

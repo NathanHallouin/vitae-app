@@ -1,9 +1,22 @@
 /**
- * Écrit les variables de thème de la feuille NativeWind, depuis `@vitae/core/tokens`.
+ * Écrit ce que Tailwind doit savoir des jetons, depuis `@vitae/core/tokens`.
  *
  * NativeWind compile la feuille avec le moteur de Tailwind 3, qui ne sait pas lire un module
- * TypeScript. Générer le CSS depuis `tokens.ts` plutôt que d'y recopier les valeurs garde une
- * source unique : le code natif lit les mêmes couleurs que la feuille de style.
+ * TypeScript. Générer plutôt que recopier garde une source unique : le code natif et la feuille de
+ * style lisent les mêmes valeurs.
+ *
+ * **Deux fichiers, parce que Tailwind lit deux choses de deux façons.** Les couleurs passent par
+ * des variables CSS, qu'un thème peut redéfinir à l'exécution ; l'échelle typographique et les
+ * rayons sont figés à la compilation et vont donc dans un module JavaScript que la configuration
+ * étend.
+ *
+ * — `apps/app/src/theme/tokens.generated.css` : les deux palettes en variables CSS
+ * — `apps/app/tailwind.generated.js` : `fontSize` et `borderRadius`
+ *
+ * Le second est né d'un défaut : l'échelle typographique était **recopiée à la main** dans
+ * `tailwind.config.js`, si bien que `FONT_SIZES` n'était importé par personne et que la vraie
+ * source était la copie. Deux tables qui pouvaient diverger sans qu'aucun contrôle ne s'en
+ * aperçoive — pendant que `tokens.ts` se déclarait, en tête de fichier, source unique des jetons.
  *
  * `bun run tokens`
  */
@@ -11,7 +24,7 @@
 import { writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { CSS_VARIABLES, DARK, LIGHT, type Palette } from '@vitae/core/tokens';
+import { CSS_VARIABLES, DARK, FONT_SIZES, LIGHT, type Palette, RADII } from '@vitae/core/tokens';
 
 const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -48,4 +61,40 @@ async function ecrire(): Promise<string> {
   return cible;
 }
 
-console.log(`écrit → ${path.relative(process.cwd(), await ecrire())}`);
+/**
+ * Le module que `tailwind.config.js` étend.
+ *
+ * `RADII.gauge` en est volontairement absent : ce n'est pas un rayon de coin mais l'épaisseur de
+ * l'arc du cadran, lue par `Cadran.tsx` seul. La verser dans `borderRadius` créerait une classe
+ * `rounded-gauge` de 22 px qui ne veut rien dire, et que quelqu'un finirait par employer.
+ */
+async function ecrireTailwind(): Promise<string> {
+  const cible = path.join(RACINE, 'apps/app/tailwind.generated.js');
+  const px = (table: Record<string, number>) =>
+    Object.entries(table)
+      .map(([cle, valeur]) => `  ${cle}: '${valeur}px',`)
+      .join('\n');
+
+  const contenu = [
+    '// Fichier généré par `bun run tokens`. Ne pas modifier à la main :',
+    '//   la source est `packages/core/src/tokens.ts`.',
+    '',
+    'const fontSize = {',
+    px(FONT_SIZES),
+    '};',
+    '',
+    'const borderRadius = {',
+    px({ card: RADII.card, control: RADII.control }),
+    '};',
+    '',
+    'module.exports = { fontSize, borderRadius };',
+    '',
+  ].join('\n');
+
+  await writeFile(cible, contenu, 'utf8');
+  return cible;
+}
+
+for (const cible of [await ecrire(), await ecrireTailwind()]) {
+  console.log(`écrit → ${path.relative(process.cwd(), cible)}`);
+}

@@ -12,7 +12,7 @@ export default function NotFound() {
           <IllustrationIntrouvable />
         </View>
         <Text className="font-display text-h3 text-ink">Cette page n’existe pas</Text>
-        <Link href="/" className="text-base font-sans-semibold text-primary-ink">
+        <Link href="/" className="text-base font-sans-medium text-primary-ink">
           Revenir à l’accueil
         </Link>
       </View>

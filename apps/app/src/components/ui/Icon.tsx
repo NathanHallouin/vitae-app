@@ -88,6 +88,38 @@ const PATHS: Record<IconName, ReactNode> = {
       <Path d="M10 7V4h4v3" />
     </>
   ),
+  // Trois marches montantes, et la rampe : la forme se reconnaît même à 16 px.
+  escalier: (
+    <>
+      <Path d="M3 19.5h4.5V15H12v-4.5h4.5V6H21" />
+      <Path d="M3 19.5h18" />
+    </>
+  ),
+  velo: (
+    <>
+      <Circle cx="5.5" cy="16.5" r="3.5" />
+      <Circle cx="18.5" cy="16.5" r="3.5" />
+      <Path d="M5.5 16.5 9 8h4" />
+      <Path d="m9 8 5 8.5h4.5" />
+      <Path d="M14.5 5h2.5l1.5 11.5" />
+    </>
+  ),
+  // Un balai : le manche et la brosse. Le geste couvre aussi les courses et le jardinage, mais
+  // c'est le ménage qui a la silhouette la plus lisible des trois.
+  menage: (
+    <>
+      <Path d="M17 3 9.5 10.5" />
+      <Path d="m7 12 5 5-3.5 3.5a2 2 0 0 1-2.8 0l-2.2-2.2a2 2 0 0 1 0-2.8Z" />
+      <Path d="m9.5 14.5 5-5" />
+    </>
+  ),
+  telephone: (
+    <>
+      <Rect x="7" y="2.5" width="10" height="19" rx="2.5" />
+      <Path d="M10.5 5.5h3" />
+      <Path d="M11 18.5h2" />
+    </>
+  ),
 
   // Entraînement
   haltere: (
@@ -169,6 +201,39 @@ const PATHS: Record<IconName, ReactNode> = {
     <>
       <Circle cx="12" cy="6" r="3.2" />
       <Path d="M5 20.5a7 7 0 0 1 14 0" />
+    </>
+  ),
+
+  // Réglages, et le motif « en savoir plus »
+  //
+  // La roue dentée est dessinée à huit dents plutôt qu'aux douze habituelles : à 18 px dans
+  // l'en-tête, douze dents se referment en un disque flou.
+  reglage: (
+    <>
+      <Circle cx="12" cy="12" r="3" />
+      <Path d="M12 2.5v2.2M12 19.3v2.2M21.5 12h-2.2M4.7 12H2.5M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6M18.7 18.7l-1.6-1.6M6.9 6.9 5.3 5.3" />
+    </>
+  ),
+  cloche: (
+    <>
+      <Path d="M6 17.5V11a6 6 0 0 1 12 0v6.5" />
+      <Path d="M4.5 17.5h15" />
+      <Path d="M10 20.5a2.2 2.2 0 0 0 4 0" />
+    </>
+  ),
+  bouclier: (
+    <>
+      <Path d="M12 3 5 5.5v6c0 4 3 7.5 7 9.5 4-2 7-5.5 7-9.5v-6Z" />
+      <Path d="m9 12 2.2 2.2L15.5 10" />
+    </>
+  ),
+  croix: <Path d="M6 6l12 12M18 6 6 18" />,
+  plus: <Path d="M12 5v14M5 12h14" />,
+  info: (
+    <>
+      <Circle cx="12" cy="12" r="8.5" />
+      <Path d="M12 11v5.5" />
+      <Path d="M12 7.6v.1" />
     </>
   ),
 };

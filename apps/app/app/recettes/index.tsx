@@ -96,7 +96,7 @@ export default function RecettesIndex() {
         />
 
         {recettes.length === 0 ? (
-          <Card className="items-start gap-4 p-6">
+          <Card className="items-start gap-4 px-[18px] py-5">
             <View className="w-full items-center">
               <IllustrationAucuneRecette />
             </View>
@@ -139,7 +139,7 @@ export default function RecettesIndex() {
                           repli={false}
                         />
                       ) : null}
-                      <View className="p-5">
+                      <View className="px-[18px] py-4">
                         {/* Le titre de la carte est celui de la recette : un niveau 2 sous le
                           « Recettes » de la page, ce qui donne un sommaire parcourable. */}
                         <Titre

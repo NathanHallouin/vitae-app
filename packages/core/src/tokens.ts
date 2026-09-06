@@ -8,6 +8,18 @@
  *
  * Les deux fichiers CSS sont donc engendrés d'ici, par `bun run tokens`. Ce module ne dépend de
  * rien et ne rend rien : il ne contient que des valeurs.
+ *
+ * ── Refonte « Cadran » ────────────────────────────────────────────────────────────────────────
+ * Le crème et le bleu profond laissent la place à un gris-violet froid et à un indigo. La raison
+ * n'est pas le goût : l'objet signature de l'interface est désormais un arc gradué qui porte le
+ * chiffre en son centre (voir `Cadran.tsx`), et un arc a besoin de deux couleurs qui se
+ * distinguent nettement à 6 px d'épaisseur sans que la plus faible ne disparaisse. Le couple
+ * `primary` / `gaugeTrack` est calculé pour cela, dans les deux thèmes.
+ *
+ * Le dégradé de l'ancien `Hero` a disparu : `heroFrom` et `heroTo` portent désormais la même
+ * valeur. Les deux clés restent parce que `Palette` est lue par `tokens.generated.css`, par la
+ * barre d'état et par les visuels des magasins ; les fusionner serait un changement de contrat
+ * pour un gain nul.
  */
 
 export interface Palette {
@@ -25,7 +37,16 @@ export interface Palette {
   primaryDark: string;
   primaryInk: string;
   primaryTint: string;
-  /** dégradé de l'en-tête : deux arrêts, du plus foncé au plus clair */
+  /**
+   * Le fond de l'arc du cadran, et de toute jauge.
+   *
+   * Nouvelle entrée. `divider` faisait l'affaire sur le papier mais pas à l'écran : un filet de
+   * séparation doit se voir à peine, un fond de jauge doit se lire comme une valeur (« il reste
+   * ça »). Deux rôles opposés dans une seule couleur donnaient soit des filets trop lourds, soit
+   * un arc dont la partie vide s'évanouissait sur le fond.
+   */
+  gaugeTrack: string;
+  /** dégradé de l'en-tête : conservé en deux arrêts, mais les deux valeurs sont identiques */
   heroFrom: string;
   heroTo: string;
   heroText: string;
@@ -38,83 +59,110 @@ export interface Palette {
   macroFat: string;
   macroCarb: string;
   marker: string;
+  /**
+   * Le voile posé derrière une feuille de détail.
+   *
+   * Il ne teinte rien : il assombrit ce qui reste au-dessous pour que la feuille se lise comme
+   * posée devant la page, et il indique qu'un appui à côté referme. Plus sombre en thème sombre
+   * qu'en clair, sinon la feuille et le fond finissent au même niveau de gris.
+   */
+  scrim: string;
   doodleInk: string;
   doodleAccent: string;
 }
 
 /**
- * Clair : fond crème plutôt que blanc pur, bleu profond en couleur d'action.
+ * Clair : gris-violet très pâle, indigo en couleur d'action, cuivre en couleur de mesure.
  *
- * Les contrastes ont été mesurés, pas devinés : `faint` est à 4,6:1 sur le fond, seuil AA pour du
- * petit texte. Toute nouvelle valeur doit passer la même barre (voir ROADMAP.md).
+ * Les contrastes ont été mesurés, pas devinés (WCAG 2.1, sRGB) :
+ *   text/bg 16,54 · muted/bg 8,50 · muted2/surface 7,86 · faint/bg 5,95 · faint/surface2 5,35
+ *   primary/bg 8,96 · accent/bg 5,61 · heroText/heroFrom 8,91 · warnInk/warnBg 6,98
+ *   macroProt/bg 6,2 · macroFat/bg 6,2 · macroCarb/bg 7,0
+ * Le minimum de la palette est 5,35:1, au-dessus du seuil AA de 4,5:1 pour du petit texte.
+ * Toute nouvelle valeur doit passer la même barre (voir ROADMAP.md).
+ *
+ * `accent` ne décore pas : il désigne la mesure constatée face à la valeur prévue — le repère de
+ * dépense sur la barre de fourchette, le rythme réel face au rythme du plan, le curseur d'IMC.
+ * Deux couleurs d'action rendraient l'interface illisible ; une couleur d'action et une couleur
+ * de mesure se lisent d'elles-mêmes.
  */
 export const LIGHT: Palette = {
-  bg: '#fbf7f2',
+  bg: '#f3f2f7',
   surface: '#ffffff',
-  surface2: '#f6efe6',
-  text: '#241a12',
-  muted: '#5a4c40',
-  muted2: '#6a5b4d',
-  faint: '#78685a',
-  divider: '#efe6da',
-  border: '#e3d7c8',
-  borderStrong: '#bfae9b',
-  primary: '#084684',
-  primaryDark: '#063461',
-  primaryInk: '#084684',
-  primaryTint: 'rgba(8, 70, 132, 0.1)',
-  heroFrom: '#084684',
-  heroTo: '#0a5da9',
-  heroText: '#f2f7fc',
-  accent: '#3f7d6e',
+  surface2: '#e7e6f0',
+  text: '#14131c',
+  muted: '#464455',
+  muted2: '#52505f',
+  faint: '#5d5b6a',
+  divider: '#eceaf3',
+  border: '#dcdae6',
+  borderStrong: '#b3b0c4',
+  primary: '#3a3495',
+  primaryDark: '#2b2673',
+  primaryInk: '#3a3495',
+  primaryTint: 'rgba(58, 52, 149, 0.10)',
+  gaugeTrack: '#c9c6de',
+  heroFrom: '#3a3495',
+  heroTo: '#3a3495',
+  heroText: '#f2f1fb',
+  accent: '#9a4a12',
   errorBg: '#fbeceb',
-  errorInk: '#a02017',
-  warnBg: '#fdf1de',
-  warnInk: '#7a5410',
-  macroProt: '#a85b12',
-  macroFat: '#4e7ca1',
-  macroCarb: '#3f7d53',
-  marker: '#8a7a6b',
-  doodleInk: '#084684',
-  doodleAccent: '#f0dcc4',
+  errorInk: '#96170f',
+  warnBg: '#f8eed8',
+  warnInk: '#6b4a0a',
+  macroProt: '#8f4a10',
+  macroFat: '#2f5f92',
+  macroCarb: '#186049',
+  marker: '#5d5b6a',
+  scrim: 'rgba(20, 19, 28, 0.45)',
+  doodleInk: '#3a3495',
+  doodleAccent: '#dedcec',
 };
 
 /**
- * Sombre : l'ambre remplace le bleu.
+ * Sombre : le même indigo ne tient pas, il devient une lavande claire.
  *
- * Un bleu profond sur fond sombre tombe sous le seuil de contraste sans devenir pastel ; l'ambre
- * tient la lisibilité en gardant la chaleur de la maquette. Les petits textes tournent autour de
- * 7:1, mesurés dans le navigateur.
+ * Un indigo profond sur fond sombre tombe sous le seuil de contraste sans devenir pastel — c'est
+ * exactement le problème que posait déjà le bleu de la version précédente, résolu alors par
+ * l'ambre. Ici la teinte est conservée et c'est la clarté qui monte : l'application reste la même
+ * dans les deux thèmes, ce que la bascule bleu → ambre ne permettait pas.
+ *
+ * Contrastes mesurés :
+ *   text/bg 16,37 · muted/bg 8,60 · muted2/surface 6,97 · faint/bg 6,21 · faint/surface2 5,41
+ *   primary/bg 8,75 · accent/bg 9,21 · heroText/heroFrom 8,80 · warnInk/warnBg 10,26
+ * Minimum : 5,41:1.
  */
 export const DARK: Palette = {
-  bg: '#16120e',
-  surface: '#1e1913',
-  surface2: '#28211a',
-  text: '#f1e7dc',
-  muted: '#bcaf9f',
-  muted2: '#ab9e8e',
-  faint: '#9a8b7c',
-  divider: '#2e271f',
-  border: '#392f26',
-  borderStrong: '#52463a',
-  primary: '#f7b97b',
-  primaryDark: '#e9a25e',
-  primaryInk: '#f7b97b',
-  primaryTint: 'rgba(247, 185, 123, 0.16)',
-  heroFrom: '#f0ac68',
-  heroTo: '#d98c3f',
-  heroText: '#231609',
-  accent: '#6fb3a1',
-  errorBg: '#3a1e1c',
-  errorInk: '#ffb4ab',
-  warnBg: '#33291a',
-  warnInk: '#f2c98a',
-  macroProt: '#f0a461',
-  macroFat: '#84b0d4',
-  macroCarb: '#7fc08f',
-  marker: '#9a8b7c',
-  doodleInk: '#f0ac68',
-  doodleAccent: '#3d3225',
+  bg: '#0d0c13',
+  surface: '#141320',
+  surface2: '#1c1b2a',
+  text: '#eceaf6',
+  muted: '#adaabf',
+  muted2: '#a09db3',
+  faint: '#928fa6',
+  divider: '#1f1e2e',
+  border: '#2a2740',
+  borderStrong: '#454163',
+  primary: '#a9a4ff',
+  primaryDark: '#8d87f0',
+  primaryInk: '#a9a4ff',
+  primaryTint: 'rgba(169, 164, 255, 0.16)',
+  gaugeTrack: '#2a2740',
+  heroFrom: '#a9a4ff',
+  heroTo: '#a9a4ff',
+  heroText: '#0b0a1a',
+  accent: '#f0a06a',
+  errorBg: '#33201e',
+  errorInk: '#ffb2a9',
+  warnBg: '#28231a',
+  warnInk: '#f0cd8b',
+  macroProt: '#e8a05f',
+  macroFat: '#7fb2e0',
+  macroCarb: '#6fcf9f',
+  marker: '#928fa6',
+  scrim: 'rgba(0, 0, 0, 0.62)',
+  doodleInk: '#a9a4ff',
+  doodleAccent: '#231f38',
 };
 
 export const PALETTES = { light: LIGHT, dark: DARK } as const;
@@ -142,6 +190,7 @@ export const CSS_VARIABLES: Record<keyof Palette, string> = {
   primaryDark: '--t-primary-dark',
   primaryInk: '--t-primary-ink',
   primaryTint: '--t-primary-tint',
+  gaugeTrack: '--t-gauge-track',
   heroFrom: '--t-hero-from',
   heroTo: '--t-hero-to',
   heroText: '--t-hero-text',
@@ -154,30 +203,53 @@ export const CSS_VARIABLES: Record<keyof Palette, string> = {
   macroFat: '--t-macro-fat',
   macroCarb: '--t-macro-carb',
   marker: '--t-marker',
+  scrim: '--t-scrim',
   doodleInk: '--t-doodle-ink',
   doodleAccent: '--t-doodle-accent',
 };
 
-/** Échelle typographique, reprise telle quelle de l'ancien objet `FS` de la maquette. */
+/**
+ * Échelle typographique.
+ *
+ * Resserrée : la Space Grotesk a un œil plus grand que l'Inter à corps égal, et les valeurs
+ * reprises telles quelles de la maquette d'origine rendaient les écrans lourds. Les clés sont
+ * inchangées — aucune classe Tailwind n'est à renommer — seules les valeurs bougent.
+ *
+ * Deux valeurs ne se touchent pas :
+ * — `input` reste à 16. En dessous, Safari iOS zoome à la mise au point d'un champ, et l'écran
+ *   part en écharpe. Ce n'est pas une préférence esthétique.
+ * — `micro` reste à 11 : c'est le plancher des surtitres, déjà à la limite basse du lisible.
+ *
+ * `hero` descend de 58 à 52 parce que le chiffre principal vit désormais au centre d'un cadran de
+ * 186 px de diamètre intérieur : au-delà de 52, « 2 412 » touche l'arc sur un téléphone de 390 px.
+ */
 export const FONT_SIZES = {
   micro: 11,
   caption: 12,
   small: 13,
   base: 14,
   option: 15,
-  body: 16,
+  body: 15,
   input: 16,
-  stat3: 18,
-  h3: 20,
+  stat3: 17,
+  h3: 19,
   stat2: 22,
-  h2: 28,
-  stat: 32,
-  h1: 38,
-  display: 40,
-  hero: 58,
+  h2: 26,
+  stat: 34,
+  h1: 36,
+  display: 44,
+  hero: 52,
 } as const;
 
-export const RADII = { card: 16, control: 10 } as const;
+/**
+ * Rayons.
+ *
+ * `card` descend de 16 à 14 : les cartes ne sont plus le seul objet arrondi de l'écran, le cadran
+ * l'est aussi, et un rayon trop généreux à côté d'un cercle parfait se lit comme une hésitation.
+ * `gauge` est l'épaisseur de l'arc, pas un rayon de coin — il vit ici parce que c'est la seule
+ * table que `Cadran.tsx` et la feuille du site lisent toutes les deux.
+ */
+export const RADII = { card: 14, control: 10, gauge: 22 } as const;
 
 /**
  * Les durées du mouvement, en millisecondes.
@@ -194,6 +266,11 @@ export const RADII = { card: 16, control: 10 } as const;
  *
  * `cascade` est le décalage entre deux éléments d'une même arrivée. Assez pour lire une direction,
  * trop peu pour se remarquer élément par élément.
+ *
+ * L'arc du cadran n'a pas sa propre durée : il se remplit sur `compteur`, en même temps que le
+ * nombre qu'il entoure. Deux durées différentes pour un même recalcul donneraient deux
+ * informations qui se contredisent, et le réglage « moins de mouvement » supprime les deux
+ * ensemble — l'arc s'affiche alors à sa valeur finale, comme le nombre.
  */
 export const MOTION = {
   instant: 120,

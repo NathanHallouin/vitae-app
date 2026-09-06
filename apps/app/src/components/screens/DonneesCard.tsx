@@ -16,15 +16,17 @@ import { usePalette } from '@/theme/palette';
  * filet, et c'est pourquoi elle est livrée en même temps que le suivi de poids — créer des données
  * auxquelles on tient sans porte de sortie serait leur tendre un piège.
  *
- * Sa place est ici, sur l'écran du profil, juste au-dessus de « Tout effacer » : c'est là qu'on
- * vient quand on s'interroge sur ce que devient ce qu'on a saisi.
+ * Sa place est dans les réglages. Elle était sous le formulaire du profil, ce qui se tenait — on
+ * s'interroge sur ce que deviennent ses informations juste après les avoir saisies — mais un écran
+ * de saisie ne doit pas porter l'export et l'import sous son bouton d'envoi, et surtout : on ne
+ * sauvegarde pas une fois, on y revient. Le profil garde un lien vers ici.
  *
  * **La restauration remplace, elle ne fusionne pas.** Fusionner deux historiques demanderait de
  * trancher les jours présents des deux côtés, sans que l'utilisateur puisse voir ce qui a été
  * choisi. Remplacer est brutal mais lisible, et le nombre de pesées est annoncé avant.
  */
 export default function DonneesCard() {
-  const { profile, suivi, restaurer } = useProfile();
+  const { profile, suivi, lu, restaurer } = useProfile();
   const palette = usePalette();
   const [colle, setColle] = useState('');
   const [collageOuvert, setCollageOuvert] = useState(false);
@@ -34,7 +36,7 @@ export default function DonneesCard() {
 
   const enregistrer = async () => {
     const aujourdhui = todayISO();
-    const contenu = construireSauvegarde(profile, suivi.historique, aujourdhui);
+    const contenu = construireSauvegarde(profile, suivi.historique, aujourdhui, lu);
     try {
       const fait = await exporter(contenu, nomDeFichier(aujourdhui));
       setMessage(fait ? { texte: 'Vos données sont sorties.', ok: true } : null);
@@ -61,7 +63,7 @@ export default function DonneesCard() {
   };
 
   return (
-    <Card taille className="mt-6 p-6">
+    <Card taille className="mt-4 px-[18px] py-4">
       <Overline niveau={2} className="mb-1">
         Mes données
       </Overline>
@@ -90,7 +92,7 @@ export default function DonneesCard() {
 
       {message ? (
         <View
-          className={`mt-4 rounded-xl p-[14px] ${message.ok ? 'bg-surface2' : 'bg-warn-bg'}`}
+          className={`mt-4 rounded-control p-[14px] ${message.ok ? 'bg-surface2' : 'bg-warn-bg'}`}
           accessibilityLiveRegion="polite"
         >
           <Text

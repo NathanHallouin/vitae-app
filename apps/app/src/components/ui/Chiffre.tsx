@@ -7,27 +7,36 @@ import { cx } from './primitives';
  * Le grand chiffre, élément signature de l'application.
  *
  * C'est une application de chiffres : le nombre est ce qu'on vient chercher, et il doit se lire à
- * bout de bras. Le traitement était pourtant réécrit dans huit fichiers, avec des tailles et des
- * interlignes qui divergeaient d'un écran à l'autre — la dépense en 46 px ici, les séances en 40,
- * l'IMC en 32, chacun avec son propre `leading`. Un seul composant remet tout d'aplomb.
+ * bout de bras. Le traitement était réécrit dans huit fichiers, avec des tailles et des
+ * interlignes qui divergeaient d'un écran à l'autre ; un seul composant les remet d'aplomb.
  *
  * Trois règles, et elles ne se négocient pas :
  *
- * — la Fraunces, jamais l'Inter. C'est la serif qui fait qu'un écran de cette application se
- *   reconnaît sur une capture ;
- * — des chiffres à chasse fixe, toujours. Sans cela, un nombre qui se met à jour fait sautiller la
- *   ligne entière, et l'effet est celui d'un défaut ;
- * — l'unité en Inter, plus petite, alignée sur la base. C'est le contraste entre les deux qui fait
+ * — une seule famille, la Space Grotesk en 700. La règle disait « la Fraunces, jamais l'Inter » —
+ *   elle avait pour objet d'imposer une coupe unique aux nombres, pas cette serif en
+ *   particulier. Depuis la refonte, la famille de titre et celle du corps sont la même, et c'est
+ *   la graisse qui distingue ;
+ * — des chiffres de largeur égale, toujours. Sans cela, un nombre qui se met à jour fait sautiller
+ *   la ligne entière, et l'effet est celui d'un défaut. La Space Grotesk dessine ses chiffres à
+ *   chasse constante par construction — elle descend de la Space Mono — mais `fontVariant` reste
+ *   posé : il ne coûte rien et couvre le cas d'un repli sur la police système, où les chiffres,
+ *   eux, ne le sont pas ;
+ * — l'unité plus petite et en 400, alignée sur la base. C'est le contraste entre les deux qui fait
  *   lire le nombre en premier.
+ *
+ * `ton="hero"` a disparu avec le fond coloré du `Hero` : le chiffre principal est désormais posé
+ * sur le fond de l'écran, au centre du cadran, et prend le ton `ink` comme les autres. Les deux
+ * tons restants suffisent — l'encre, et la couleur d'action quand le nombre est le résultat d'un
+ * choix de l'utilisateur.
  */
 
 const TAILLES = {
-  /** la réponse principale d'un écran : une seule par écran */
-  hero: { texte: 'text-[46px]', ligne: 48, unite: 'text-stat3' },
+  /** la réponse principale d'un écran, au centre du cadran : une seule par écran */
+  hero: { texte: 'text-hero', ligne: 56, unite: 'text-base' },
   /** un chiffre important, dans une carte */
-  grand: { texte: 'text-display', ligne: 42, unite: 'text-option' },
+  grand: { texte: 'text-display', ligne: 46, unite: 'text-option' },
   /** un chiffre dans une tuile ou une liste */
-  moyen: { texte: 'text-stat', ligne: 34, unite: 'text-base' },
+  moyen: { texte: 'text-stat', ligne: 36, unite: 'text-base' },
   petit: { texte: 'text-stat2', ligne: 26, unite: 'text-small' },
 } as const;
 
@@ -45,7 +54,7 @@ export default function Chiffre({
   valeur: number | string;
   unite?: string;
   taille?: TailleChiffre;
-  ton?: 'ink' | 'primary' | 'hero';
+  ton?: 'ink' | 'primary';
   /** fait monter le nombre depuis sa valeur précédente ; sans effet sur une chaîne */
   anime?: boolean;
   className?: string;
@@ -53,30 +62,19 @@ export default function Chiffre({
   const t = TAILLES[taille];
   const affiche = useCompteur(valeur, anime);
 
-  const couleur =
-    ton === 'primary' ? 'text-primary-ink' : ton === 'hero' ? 'text-hero-text' : 'text-ink';
+  const couleur = ton === 'primary' ? 'text-primary-ink' : 'text-ink';
 
   return (
     <View className={cx('flex-row items-baseline gap-2', className)}>
       <Text
         // La chasse fixe est portée par le style et non par une classe : `tabular-nums` n'a pas
         // d'équivalent NativeWind qui tienne sur les trois plateformes.
-        style={{ fontVariant: ['tabular-nums'], lineHeight: t.ligne }}
+        style={{ fontVariant: ['tabular-nums'], lineHeight: t.ligne, letterSpacing: -1 }}
         className={cx('font-display', t.texte, couleur)}
       >
         {affiche}
       </Text>
-      {unite ? (
-        <Text
-          className={cx(
-            'font-sans',
-            t.unite,
-            ton === 'hero' ? 'text-hero-text opacity-85' : 'text-muted',
-          )}
-        >
-          {unite}
-        </Text>
-      ) : null}
+      {unite ? <Text className={cx('font-sans', t.unite, 'text-muted')}>{unite}</Text> : null}
     </View>
   );
 }
@@ -86,7 +84,8 @@ export default function Chiffre({
  *
  * C'est la seule animation de l'application qui porte du sens plutôt que de l'agrément : quand on
  * corrige son poids et que la dépense passe de 2 400 à 2 350, voir le chiffre descendre dit que le
- * calcul vient d'être refait. Affiché sec, le même nombre passe inaperçu.
+ * calcul vient d'être refait. Affiché sec, le même nombre passe inaperçu. L'arc du cadran suit la
+ * même durée, pour la même raison — voir `Cadran.tsx`.
  *
  * Écrit à la main plutôt qu'avec Reanimated : animer du texte y demande de détourner un champ de
  * saisie, avec un comportement différent sur chaque plateforme, pour une boucle qui tient en dix
@@ -137,5 +136,5 @@ function useCompteur(valeur: number | string, anime: boolean): string {
 
   if (typeof valeur === 'string') return valeur;
   // Les milliers sont séparés d'une espace insécable, comme partout ailleurs dans l'application.
-  return courant.toLocaleString('fr-FR').replace(/ |\s/g, ' ');
+  return courant.toLocaleString('fr-FR').replace(/ |\s/g, ' ');
 }

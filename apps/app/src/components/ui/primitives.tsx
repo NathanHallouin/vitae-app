@@ -102,7 +102,7 @@ export function Button({
       )}
     >
       <Text
-        className={cx('font-sans-semibold', BUTTON_LABELS[variant], BUTTON_LABEL_SIZES[size])}
+        className={cx('font-sans-medium', BUTTON_LABELS[variant], BUTTON_LABEL_SIZES[size])}
         numberOfLines={1}
       >
         {children}
@@ -120,11 +120,13 @@ export function Button({
 }
 
 /**
- * Carte : bordure fine et fond plein, jamais d'ombre portée.
+ * Carte : fond plein, jamais d'ombre portée.
  *
- * L'absence d'ombre est un choix, pas un oubli : sur le fond crème, une carte bordée se lit comme
- * une feuille posée, une carte ombrée comme un composant flottant. C'est ce qui donne à
- * l'application son air de papier plutôt que d'interface.
+ * L'absence d'ombre est un choix, pas un oubli. Ce qui a changé avec la refonte, c'est ce qui
+ * détache la carte du fond : c'était une bordure sur un fond crème, c'est désormais le contraste
+ * entre `surface` et `bg`, qui suffit dans les deux thèmes. La bordure ne subsiste qu'en clair, où
+ * l'écart entre le blanc et le gris-violet est trop faible pour tenir seul — en sombre, elle
+ * redoublerait un contraste déjà lisible et alourdirait la pile.
  *
  * `taille` fait animer la carte quand sa hauteur change — le cas des cartes qui se replient. Une
  * propriété plutôt qu'un composant à substituer : le style de la carte reste écrit une seule fois,
@@ -142,7 +144,10 @@ export function Card({
   children?: ReactNode;
 } & ViewProps) {
   const reduite = useMotionReduite();
-  const style = cx('rounded-card border border-divider bg-surface', className);
+  const style = cx(
+    'rounded-card bg-surface border border-divider dark:border-transparent',
+    className,
+  );
 
   if (!taille || reduite) {
     return (
@@ -233,7 +238,7 @@ export function ProgressBar({ value, label }: { value: number; label: string }) 
       accessibilityRole="progressbar"
       accessibilityLabel={label}
       accessibilityValue={{ min: 0, max: 100, now: Math.round(value) }}
-      className="h-[6px] w-full overflow-hidden rounded-full bg-divider"
+      className="h-[6px] w-full overflow-hidden rounded-full bg-gauge-track"
     >
       <View className="h-full rounded-full bg-primary" style={{ width: `${value}%` }} />
     </View>
@@ -250,7 +255,7 @@ export function SplitBar({ pct }: { pct: number }) {
   return (
     <View aria-hidden className="mb-3 h-[10px] flex-row overflow-hidden rounded-[5px]">
       <View className="h-full bg-primary-ink" style={{ width: `${pct}%` }} />
-      <View className="h-full bg-divider" style={{ width: `${100 - pct}%` }} />
+      <View className="h-full bg-gauge-track" style={{ width: `${100 - pct}%` }} />
     </View>
   );
 }
@@ -263,7 +268,7 @@ export function SplitBar({ pct }: { pct: number }) {
  */
 export function Bullet({ children }: { children: ReactNode }) {
   return (
-    <View className="flex-row items-start gap-3 rounded-xl bg-surface2 p-[14px]">
+    <View className="flex-row items-start gap-3 rounded-control bg-surface2 p-[14px]">
       <View className="mt-[7px] size-[6px] flex-none rounded-full bg-primary-ink" />
       <Text className="font-sans flex-1 text-base leading-[22px] text-ink">{children}</Text>
     </View>

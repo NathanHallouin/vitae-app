@@ -120,7 +120,7 @@ export default function ProfilForm({
         </View>
       ) : null}
 
-      <Card className="p-6">
+      <Card className="px-[18px] py-5">
         {fields.sex ? (
           <View className="mb-6">
             <FieldLabel>Vous êtes</FieldLabel>
@@ -154,7 +154,7 @@ export default function ProfilForm({
         {fields.body && form.staleWeight ? (
           <View
             accessibilityLiveRegion="polite"
-            className="mb-5 rounded-xl bg-warn-bg px-[14px] py-3"
+            className="mb-5 rounded-control bg-warn-bg px-[14px] py-3"
           >
             <Text className="font-sans text-small leading-[20px] text-warn-ink">
               Votre dernier poids date du {formatLongDate(form.staleWeight.updatedAt)} (
@@ -287,7 +287,7 @@ export default function ProfilForm({
         {form.error ? (
           <View
             accessibilityLiveRegion="assertive"
-            className="mb-5 rounded-xl bg-error-bg px-4 py-3"
+            className="mb-5 rounded-control bg-error-bg px-4 py-3"
           >
             <Text className="font-sans text-base text-error-ink">{form.error}</Text>
           </View>
@@ -375,7 +375,11 @@ function ChoiceRow({
       </View>
       <Icon name={icon} size={22} color={selected ? palette.primaryInk : palette.muted2} />
       <View className="min-w-0 flex-1">
-        <Text className="text-option font-sans-medium text-ink">{label}</Text>
+        <Text
+          className={cx('text-option font-sans-medium', selected ? 'text-primary-ink' : 'text-ink')}
+        >
+          {label}
+        </Text>
         <Text className="font-sans mt-[2px] text-small text-muted">{desc}</Text>
       </View>
       <Text

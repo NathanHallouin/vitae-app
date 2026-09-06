@@ -2,9 +2,10 @@ import { computeMetrics } from '@vitae/core/calc';
 import { activityLabel, goalByKey } from '@vitae/core/constants';
 import { dec, kcal } from '@vitae/core/format';
 import type { FormState } from '@vitae/core/state';
-import { Text, View } from 'react-native';
+import { Text } from 'react-native';
+import { Ligne, Lignes } from '@/components/ui/Ligne';
 import Overline from '@/components/ui/Overline';
-import { Card, cx } from '@/components/ui/primitives';
+import { Card } from '@/components/ui/primitives';
 
 /**
  * Les chiffres se recalculent à chaque frappe.
@@ -25,25 +26,13 @@ export default function LivePreview({ form, age }: { form: FormState; age: numbe
   });
 
   const rows = [
-    {
-      label: 'Au repos, vous brûlez',
-      value: metrics ? `${kcal(metrics.bmr)} kcal` : '…',
-      accent: false,
-    },
-    {
-      label: 'Avec votre activité',
-      value: metrics ? `${kcal(metrics.tdee)} kcal` : '…',
-      accent: false,
-    },
-    {
-      label: 'À manger par jour',
-      value: metrics ? `${kcal(metrics.target)} kcal` : '…',
-      accent: true,
-    },
+    { label: 'Au repos, vous brûlez', value: metrics ? kcal(metrics.bmr) : '…', suffixe: 'kcal' },
+    { label: 'Avec votre activité', value: metrics ? kcal(metrics.tdee) : '…', suffixe: 'kcal' },
+    { label: 'À manger par jour', value: metrics ? kcal(metrics.target) : '…', suffixe: 'kcal' },
     {
       label: 'Corpulence (IMC)',
-      value: metrics ? `${dec(metrics.bmi)} · ${metrics.band.label}` : '…',
-      accent: false,
+      value: metrics ? dec(metrics.bmi) : '…',
+      suffixe: metrics ? metrics.band.label : undefined,
     },
   ];
 
@@ -51,31 +40,23 @@ export default function LivePreview({ form, age }: { form: FormState; age: numbe
     ? `Calculé pour « ${activityLabel(form.daily, form.sessions)} », objectif « ${goalByKey(form.goal).label.toLowerCase()} ». Tout se met à jour pendant que vous tapez.`
     : 'Répondez aux questions : les chiffres se calculent ici au fur et à mesure.';
 
+  // Sur `surface2` et sans bordure : l'aperçu n'est pas une carte de résultat, c'est un brouillon
+  // qui se met à jour pendant qu'on remplit le formulaire juste au-dessus. Le fond le range d'un
+  // cran en arrière, là où la même carte blanche l'aurait mis sur le même plan.
   return (
-    <Card accessibilityLiveRegion="polite" className="mt-6 p-5">
-      <Overline niveau={2} className="mb-[14px]">
-        Vos chiffres en direct
+    <Card
+      accessibilityLiveRegion="polite"
+      className="mt-4 border-transparent bg-surface2 px-4 py-4"
+    >
+      <Overline niveau={2} className="mb-2">
+        Déjà calculé
       </Overline>
-      <View>
+      <Lignes>
         {rows.map((row) => (
-          <View
-            key={row.label}
-            className="flex-row items-baseline justify-between gap-3 border-t border-divider py-[11px]"
-          >
-            <Text className="font-sans min-w-0 flex-1 text-small text-muted">{row.label}</Text>
-            <Text
-              style={{ fontVariant: ['tabular-nums'] }}
-              className={cx(
-                'flex-none text-right text-body font-sans-medium',
-                row.accent ? 'text-primary-ink' : 'text-ink',
-              )}
-            >
-              {row.value}
-            </Text>
-          </View>
+          <Ligne key={row.label} label={row.label} valeur={row.value} suffixe={row.suffixe} />
         ))}
-      </View>
-      <Text className="font-sans mt-[14px] text-caption leading-[19px] text-muted2">{hint}</Text>
+      </Lignes>
+      <Text className="font-sans mt-[10px] text-caption leading-[19px] text-muted2">{hint}</Text>
     </Card>
   );
 }

@@ -69,6 +69,23 @@ export interface NeatAction {
   min: number;
   /** indices de `DAILY` auxquels le conseil s'adresse : inutile de faire marcher un livreur */
   daily: number[];
+  /**
+   * Le pictogramme du geste.
+   *
+   * Il ne décore pas : dans une liste de sept lignes qui se ressemblent toutes, c'est lui qu'on
+   * retrouve du regard, avant d'avoir relu le libellé.
+   */
+  icon: IconName;
+  /**
+   * Pourquoi ce geste marche, en deux phrases.
+   *
+   * Séparé de `comment` parce que ce sont deux questions distinctes, et qu'on ne se les pose pas
+   * en même temps : la première décide d'essayer, la seconde se lit au moment de s'y mettre. Les
+   * deux vivent derrière « En savoir plus », le geste et son ordre de grandeur suffisant à décider.
+   */
+  pourquoi: string;
+  /** Comment s'y prendre, concrètement. */
+  comment: string;
 }
 
 /**
@@ -229,8 +246,16 @@ export const BMI_BANDS: BmiBand[] = [
   { max: 999, label: 'Obésité massive', color: '#7d2a1c' },
 ];
 
-/** Les 4 segments affichés sur la jauge (les bandes d'obésité sont regroupées en « > 30 »). */
-export const BMI_GAUGE_LABELS = ['< 18,5', '18,5 – 25', '25 – 30', '> 30'];
+/**
+ * Les graduations de l'axe d'IMC : les bornes des quatre segments de `bmiGaugePosition`.
+ *
+ * Des bornes et non des noms de bandes depuis la refonte. Les quatre libellés « < 18,5 » ·
+ * « 18,5 – 25 » · « 25 – 30 » · « > 30 » nommaient chacun un segment, ce qui obligeait à les
+ * centrer sous lui ; alignés aux extrémités, ils désignaient le mauvais. Cinq bornes se posent aux
+ * limites, là où l'axe change de sens, et la bande saine est marquée sur l'axe lui-même plutôt que
+ * répétée en toutes lettres.
+ */
+export const BMI_GAUGE_LABELS = ['15', '18,5', '25', '30', '40'];
 
 /**
  * Le catalogue NEAT. Aucun exercice ici : ce sont des gestes du quotidien, à répéter tous les
@@ -243,6 +268,11 @@ export const NEAT_ACTIONS: NeatAction[] = [
     met: 4.3,
     min: 30,
     daily: [0, 1, 2],
+    icon: 'marche',
+    pourquoi:
+      'La marche est le seul mouvement que le corps accepte tous les jours sans jamais réclamer de récupération. Trente minutes de plus, c’est aussi environ 3 000 pas — l’écart exact entre une journée assise et une journée ordinaire.',
+    comment:
+      'Ne cherchez pas un créneau : accrochez la marche à un trajet qui existe déjà. Descendre un arrêt plus tôt le matin et le soir suffit à faire les trente minutes, sans rien ajouter à l’emploi du temps. Le rythme importe peu, la régularité fait tout.',
   },
   {
     label: 'Se lever 3 min par heure',
@@ -250,6 +280,11 @@ export const NEAT_ACTIONS: NeatAction[] = [
     met: 2,
     min: 24,
     daily: [0, 1],
+    icon: 'debout',
+    pourquoi:
+      'Rester assis d’affilée fait chuter l’activité des enzymes qui traitent les graisses du sang, et la marche du soir ne rattrape pas complètement une journée immobile. Ce qui compte ici est le nombre de ruptures, pas leur durée.',
+    comment:
+      'Trois minutes suffisent : aller chercher un verre d’eau, faire un aller-retour dans le couloir, rester debout le temps d’un message. Un rappel discret y aide plus que la volonté — c’est exactement ce que règle « Me rappeler de bouger », dans les réglages.',
   },
   {
     label: 'Prendre les escaliers, 10 min cumulées',
@@ -257,6 +292,11 @@ export const NEAT_ACTIONS: NeatAction[] = [
     met: 8,
     min: 10,
     daily: [0, 1, 2],
+    icon: 'escalier',
+    pourquoi:
+      'C’est le geste le plus dense du quotidien : à intensité, monter des marches vaut presque le double de la marche rapide. Dix minutes cumulées pèsent donc autant qu’une demi-heure de marche, et sollicitent en plus les cuisses et les fessiers.',
+    comment:
+      'Inutile de tout monter à pied le premier jour : prenez l’ascenseur trois étages plus bas que votre destination, et montez le reste. La descente compte aussi, moins en dépense mais beaucoup pour les articulations, qui apprennent à encaisser.',
   },
   {
     label: 'Passer les appels debout ou en marchant',
@@ -264,6 +304,11 @@ export const NEAT_ACTIONS: NeatAction[] = [
     met: 2.5,
     min: 30,
     daily: [0, 1],
+    icon: 'telephone',
+    pourquoi:
+      'Debout, les grands muscles des jambes travaillent en continu pour vous tenir : la dépense monte d’environ la moitié sans que l’effort se ressente. Sur une journée d’appels, l’écart se compte en dizaines de kilocalories, tous les jours.',
+    comment:
+      'Levez-vous à la sonnerie, avant de décrocher : le geste se prend en trois jours s’il est lié au déclencheur. En visioconférence sans caméra, marchez ; caméra allumée, restez debout, ce qui améliore au passage le souffle et la voix.',
   },
   {
     label: 'Faire les trajets courts à vélo',
@@ -271,6 +316,11 @@ export const NEAT_ACTIONS: NeatAction[] = [
     met: 6.8,
     min: 20,
     daily: [0, 1, 2],
+    icon: 'velo',
+    pourquoi:
+      'Un trajet à vélo remplace un trajet immobile : la dépense n’est pas ajoutée à la journée, elle prend la place de zéro. Et sous trois kilomètres en ville, le temps de porte à porte est le même qu’en voiture, stationnement compris.',
+    comment:
+      'Commencez par le trajet que vous faites le plus souvent, pas par le plus long. Un vélo qui dort à la cave ne sert jamais : rangez-le là où vous passez, et laissez le casque avec.',
   },
   {
     label: 'Ménage, courses, jardinage',
@@ -278,6 +328,11 @@ export const NEAT_ACTIONS: NeatAction[] = [
     met: 3.5,
     min: 30,
     daily: [0, 1, 2, 3],
+    icon: 'menage',
+    pourquoi:
+      'Ce sont les heures que personne ne compte comme du mouvement, et elles pèsent pourtant autant qu’une marche soutenue. Porter et pousser y ajoutent une charge que la marche seule n’a pas.',
+    comment:
+      'Rien à ajouter à votre semaine : il s’agit de reconnaître ce qui s’y trouve déjà, et de ne pas l’optimiser. Faire deux voyages plutôt qu’un, étendre le linge plutôt que le sécher en machine, aller aux courses à pied.',
   },
   {
     label: 'Une marche de 15 min après le repas',
@@ -285,6 +340,11 @@ export const NEAT_ACTIONS: NeatAction[] = [
     met: 3.5,
     min: 15,
     daily: [1, 2, 3],
+    icon: 'assiette',
+    pourquoi:
+      'Les muscles qui travaillent captent le sucre du sang sans passer par l’insuline : quinze minutes de marche après un repas écrêtent nettement le pic de glycémie qui suit. C’est le même mouvement qu’ailleurs dans la journée, mais placé au moment où il rend le plus.',
+    comment:
+      'Dans l’heure qui suit le repas, pas avant. Une allure de promenade suffit — l’objectif n’est pas l’essoufflement. Le tour du quartier, le trajet vers le café d’après, ou le retour au bureau à pied font l’affaire.',
   },
 ];
 
@@ -350,6 +410,40 @@ export const BENEFITS = [
 ];
 
 export const STEP_TITLES = ['Vous êtes', 'Vos mesures', 'Vous bougez', 'Votre objectif'];
+
+/**
+ * Ce que dit l'écran quand aucun profil n'est enregistré.
+ *
+ * C'est le seul état vide de l'application, et il est le même sur les quatre écrans de résultats :
+ * `quoi` seul change, et vient de l'écran. Les trois autres phrases vivent ici plutôt que dans le
+ * composant, comme toute copie d'interface — c'est ce qui les rend corrigeables à un endroit.
+ *
+ * `surtitre` et `valeur` sont ce que porte le cadran vide. Un tiret plutôt qu'un zéro : zéro est
+ * une valeur, et celle-là serait fausse.
+ */
+export const ETAT_VIDE = {
+  surtitre: 'Rien à afficher',
+  valeur: '—',
+  action: 'Répondre aux 4 questions',
+  duree: 'Environ une minute.',
+  /** ce qui suit le `quoi` de l'écran, et qui ne dépend pas de lui */
+  suite:
+    'demande quatre réponses. Rien n’est envoyé nulle part, et vous pouvez tout effacer d’un bouton.',
+  /**
+   * Ce que chaque écran de résultats n'a pas pu calculer.
+   *
+   * Des groupes nominaux, et non des phrases : ils sont suivis de `suite`, et « Combien manger
+   * chaque jour demande quatre réponses » ne se dit pas. C'est aussi ce qui permet de les relire
+   * les uns à la suite des autres pour vérifier qu'ils annoncent bien quatre choses différentes.
+   */
+  quoi: {
+    metabolisme: 'Le calcul de votre métabolisme et de votre dépense sur une journée',
+    alimentation: 'Le calcul de ce que vous pouvez manger, et de la répartition de ces calories',
+    poids: 'Le calcul du poids que vous pourriez viser, et du temps qu’il demanderait',
+    bouger:
+      'Le calcul de la part de l’écart que le mouvement peut prendre en charge, et de votre programme',
+  },
+} as const;
 
 export function goalByKey(key: GoalKey): Goal {
   return GOALS.find((g) => g.key === key) ?? GOALS[3];

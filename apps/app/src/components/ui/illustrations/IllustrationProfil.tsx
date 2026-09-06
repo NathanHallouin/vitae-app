@@ -40,7 +40,7 @@ export default function IllustrationProfil() {
           width={i < REPONSES.length - 1 ? 74 : 44}
           height={10}
           rx={5}
-          fill={i < REPONSES.length - 1 ? palette.primary : palette.divider}
+          fill={i < REPONSES.length - 1 ? palette.primary : palette.gaugeTrack}
         />
       ))}
     </Illustration>
