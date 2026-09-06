@@ -26,11 +26,31 @@ import { usePalette } from '@/theme/palette';
  * Une seule par écran, comme le `Hero` qu'il remplace. Deux cadrans annuleraient ce qu'ils servent
  * à établir : lequel est la réponse, lequel est le détail.
  */
+/** La taille du cadran. Deux appelants, aucun ne la redéfinit : elle vaut donc pour la géométrie. */
+export const TAILLE_CADRAN = 230;
+
+/**
+ * Largeur sûre pour du texte posé **hors de l'axe horizontal** du cadran — un surtitre au-dessus
+ * du grand chiffre, typiquement.
+ *
+ * Le centre était borné au **diamètre** intérieur moins une marge, soit 170 px. C'est juste pour
+ * le chiffre, qui est sur l'axe : là, les 186 px du diamètre sont disponibles. Ça ne l'est pas
+ * pour ce qui est plus haut, parce que l'intérieur est un disque et non un carré — à 55 px du
+ * centre il ne reste que 150 px de corde. « Votre repère quotidien » tenait sur une ligne dans les
+ * 170 autorisés, donc ne passait pas à la ligne, donc touchait l'arc des deux côtés.
+ *
+ * Le plus grand carré inscrit règle le cas quelle que soit la hauteur et quelle que soit la
+ * longueur du libellé : `diamètre / √2`, soit 131 px ici. Un surtitre qui n'y tient pas passe à la
+ * ligne — ce que « Dépense sur une journée » fait déjà, et c'est la seule raison pour laquelle le
+ * défaut ne se voyait pas sur l'écran du métabolisme.
+ */
+export const LARGEUR_HORS_AXE = Math.floor((TAILLE_CADRAN - RADII.gauge * 2) / Math.SQRT2);
+
 export default function Cadran({
   /** la part, entre 0 et 1 ; au-delà, elle est bornée — un arc de plus d'un tour ne dit rien */
   part,
   /** diamètre extérieur, en points */
-  taille = 230,
+  taille = TAILLE_CADRAN,
   couleur,
   children,
   accessibilityLabel,

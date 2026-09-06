@@ -433,7 +433,7 @@ diagnostic.
 | Crochets git actifs | **1**, avec **deux** garde-fous : `.github/workflows/` et les versions de format persisté (0 avant) | `.githooks/pre-commit` |
 | Ternaires dont les deux branches sont identiques | **0** (1 avant) | balayage `apps/app/src` et `apps/app/app` |
 | Paires de glyphes indiscernables | **0** (1 avant) | balayage des 35 tracés de `Icon.tsx` ; les trois flèches sont un même tracé pivoté, à dessein |
-| Écrans regardés après les corrections | **10** (0 avant la cinquième passe) | captures + `--dump-dom` sur l'export |
+| Écrans regardés après les corrections | **16** (0 avant la cinquième passe) | captures + `--dump-dom` sur l'export |
 | Exports orphelins (valeurs) | **0** (14 avant) | balayage `export` vs usages |
 | Dépendances déclarées sans import | **0** (1 avant) | `expo-linear-gradient` retiré |
 | Règles du dépôt vérifiées en CI | **2** : pas de test de plateforme web/natif, `packages/core` sans import de plateforme (0 avant) | `.github/workflows/ci.yml` |
@@ -645,12 +645,120 @@ une seule variable qu'on fait bouger. Le tableau des quatre largeurs ci-dessus a
 minutes ; c'est lui qui a transformé « les couleurs sont fausses » en une cause exacte, et qui a
 montré que l'entrée de roadmap disait l'inverse de la vérité.
 
+### 6 septembre 2026 — septième passe, les quatre écrans de résultats
+
+La sixième passe avait regardé dix écrans. Elle n'avait pas regardé **les quatre écrans de
+résultats**, qui sont le produit : `ResultTabs` est leur second niveau, et tout le reste de
+l'application y mène. Cinq défauts, dont un de calcul.
+
+| Écran | Résultat |
+|---|---|
+| `/metabolisme` | **Deux défauts.** Voir `Nb1` et `Ar1` |
+| `/alimentation` | **Deux défauts.** Voir `Tr1` et `Gm1` |
+| `/poids` | **Un défaut.** Voir `Pr1` |
+| `/bouger` | Conforme. Les parts y font bien 100 %, et les 133 / 247 kcal se rapportent tous deux à l'écart de 380 kcal |
+| États vides (sans profil) | Conformes : cadran vide, « rien à afficher », et une seule action |
+
+#### `Nb1` 🔴 — la virgule décimale était tronquée en silence
+
+`parseFloat('78,4')` vaut **78**. Pas `NaN`, pas une erreur : soixante-dix-huit — une valeur assez
+plausible pour traverser toutes les validations de bornes. `computeMetrics` et `validate` lisaient
+le poids, la taille et l'âge avec `parseFloat` brut.
+
+Ce n'est pas une saisie exotique : `NumberField` déclare `keyboardType="decimal-pad"` **et son
+commentaire dit pourquoi** — « un poids se saisit avec une virgule, et le pavé `numeric` d'iOS ne
+la propose pas ». L'application choisissait donc le clavier qui offre la virgule, puis tronquait le
+caractère qu'elle venait d'inviter à taper.
+
+Mesuré sur le profil de démonstration : métabolisme 1 557 au lieu de 1 561, dépense 2 101 au lieu
+de 2 107, IMC 24,62 au lieu de 24,74. L'écart est petit ; **le fait que l'écran affiche un poids et
+que le calcul en utilise un autre ne l'est pas** — le bandeau de profil rend la chaîne telle que
+saisie, « Calculé pour 78,4 kg », pendant que le calcul travaillait sur 78.
+
+Et la règle n'était pas la même partout : `SuiviCard` faisait déjà `.replace(',', '.')` de son
+côté. Le même poids valait donc 78,4 dans l'historique des pesées et 78 dans le plan, et
+`ProfileProvider` comparait les deux pour dire si le plan était encore d'actualité.
+
+Corrigé par une seule règle, dans `format.ts` — le module qui fait déjà la frontière entre les
+nombres et le français, dans l'autre sens. `nombreSaisi()` est employée aux cinq endroits qui
+lisaient un décimal écrit par un humain, `quantites.ts` compris. Sept tests, dont la parité entre
+le suivi et le calcul.
+
+#### `Ar1` 🟠 — trois parts qui font 110 %
+
+« Fonctionnement du corps 74 % », « Mouvement 26 % », « Digestion 10 % », dans la même colonne,
+sous le même titre. Les deux premières partagent le total par construction ; la troisième le
+traverse — `calc.ts` le savait et le disait en commentaire, l'écran non.
+
+Pire, le « 10 % » était **écrit en dur dans le JSX** et ne se rapportait pas au même dénominateur
+que les deux autres : 10 % de ce qu'on **mange**, contre un pourcentage de ce qu'on **dépense**. Sur
+un profil en déficit — le cas nominal de cette application — les deux diffèrent : 173 kcal valent
+10 % de l'apport mais 8 % de la dépense.
+
+`digestionPct` calculé sur le même dénominateur, et une phrase qui dit que la digestion est déjà
+comprise dans les deux autres postes. Trois tests d'invariant, dont un qui échouerait si la valeur
+redevenait 10.
+
+#### `Pr1` 🟠 — la légende du graphique annonçait des poids inventés
+
+« Poids projeté, de 79,9 kg à 73,0 kg », pour quelqu'un qui pèse 78,4 et vise 74,5 — avec
+« Cible 74,5 kg » sur la même ligne, qui la contredisait. `loLabel` et `hiLabel` étaient les bornes
+de l'**axe vertical**, soit les poids réels élargis de 1,5 kg de chaque côté pour que la courbe ne
+colle pas au cadre. Une marge de dessin lue comme une prédiction — et qui annonçait 1,5 kg **sous**
+l'objectif choisi. Renommés `departLabel` / `arriveeLabel` et calculés sur les vrais bouts.
+
+#### `Tr1` 🟠 — trois explications coupées en plein mot
+
+« pour garder vos mus… », « pour les hormones et les… », « le carburant de la jour… ». Un
+`numberOfLines={1}` sur une ligne qui porte déjà un pictogramme, un libellé et « 153 g · 612 kcal » :
+il ne prévient pas le débordement, **il le garantit**. La plus courte des trois phrases fait
+vingt-trois caractères ; les trois étaient toujours tronquées, donc n'apprenaient jamais rien.
+Passées sur leur propre ligne.
+
+#### `Gm1` 🟡 — le surtitre du cadran touchait l'arc
+
+Le centre du cadran était borné au **diamètre** intérieur moins une marge — 170 px sur 186. C'est
+juste pour le grand chiffre, qui est sur l'axe. Ça ne l'est pas pour ce qui est plus haut :
+l'intérieur est un disque, et à 55 px du centre il ne reste que 150 px de corde. « Votre repère
+quotidien » tenait sur une ligne dans les 170 autorisés, donc ne passait pas à la ligne, donc
+touchait l'arc des deux côtés. Le défaut ne se voyait pas sur `/metabolisme` **par chance** :
+« Dépense sur une journée » est assez long pour se replier tout seul.
+
+Borné au plus grand carré inscrit — `diamètre / √2`, soit 131 px — ce qui règle le cas quelle que
+soit la longueur du libellé.
+
+#### `Ty1` 🟡 — une flèche qui était un guillemet
+
+`Lire (1 min) ›` employait U+203A, le **guillemet simple français**, comme chevron. Seul caractère-
+flèche de l'application : partout ailleurs la flèche est un `Icon`, qui suit la couleur et la
+taille du thème. Et le caractère entrait en collision avec les « » que toute la copie emploie comme
+vrais guillemets. Remplacé par `flecheDroite`.
+
+### Ce que la septième passe a appris
+
+**Les quatre écrans de résultats sont le produit, et ils étaient les derniers regardés.** Le
+balayage avait commencé par les pages de contenu — plus faciles à atteindre sans état — et les
+écrans qui demandent un profil amorcé sont restés pour la fin. C'est l'ordre inverse de l'enjeu.
+
+Trois des cinq défauts sont **des nombres justes présentés faux** : 110 % de parts, une marge de
+dessin annoncée comme prédiction, un pourcentage sur un autre dénominateur que ses voisins. Aucun
+n'est un bug de calcul — `calc.ts` avait raison à chaque fois, et le commentaire de
+`energyBreakdown` disait même explicitement ce que l'écran contredisait. **La frontière entre le
+métier juste et l'écran faux n'est vérifiée par rien**, et c'est là que cette passe a tout trouvé.
+
+Le quatrième, `Nb1`, est le seul vrai défaut de calcul de tout l'audit — et il vient du même
+endroit : une convention d'interface (le clavier à virgule) que le métier ignorait. Le
+commentaire qui justifie le clavier et le code qui tronque la virgule sont à deux modules l'un de
+l'autre, tous deux écrits ici, et aucun test ne les faisait se rencontrer.
+
 ### Ce qui reste ouvert, par ordre de coût
 
 **Cette phrase a été écrite deux fois — « la liste des constats corrigeables est épuisée » — et
-démentie deux fois**, par la cinquième passe puis par la sixième. Elle ne l'est pas ; elle l'est
+démentie trois fois**, par la cinquième passe, puis la sixième, puis la septième. Elle ne l'est pas ; elle l'est
 *pour la méthode employée jusque-là*. Chaque fois qu'on a changé d'angle — regarder les écrans, puis
-faire varier la largeur — de nouveaux défauts sont sortis, et de plus en plus graves. Ce qui suit
+faire varier la largeur, puis regarder les écrans qui demandent un profil — de nouveaux défauts
+sont sortis, et de plus en plus graves : la septième passe a trouvé le seul vrai défaut de calcul
+de tout l'audit. Ce qui suit
 est donc la liste de ce qui reste **connu** et non fermé, pas de ce qui reste.
 
 Les quatre entrées ci-dessous ne se ferment pas par du code écrit ici.

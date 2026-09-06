@@ -1,3 +1,4 @@
+import { nombreSaisi } from '@vitae/core/format';
 /**
  * Le profil, point de passage unique vers les données persistées.
  *
@@ -299,7 +300,7 @@ export default function ProfileProvider({ children }: { children: ReactNode }) {
   // Le poids du profil, et non la dernière pesée : c'est sur lui que le plan en cours a été
   // calculé, donc lui qui dit si ce plan est encore d'actualité.
   const suivi = useMemo(
-    () => construireSuivi(pesees, profile ? Number.parseFloat(profile.poids) : null),
+    () => construireSuivi(pesees, profile ? nombreSaisi(profile.poids) : null),
     [pesees, profile],
   );
 

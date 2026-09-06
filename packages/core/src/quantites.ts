@@ -9,6 +9,8 @@
  * mécaniquement.
  */
 
+import { nombreSaisi } from './format';
+
 /** Fractions courantes en cuisine, plus lisibles que « 0,5 courgette ». */
 const FRACTIONS: [number, string][] = [
   [0.25, '¼'],
@@ -115,7 +117,9 @@ export function scaleIngredient(ligne: string, facteur: number): string {
   const m = ligne.match(/^(\d+(?:[.,]\d+)?)(\s*)(.*)$/);
   if (!m) return ligne;
 
-  const quantite = Number.parseFloat(m[1].replace(',', '.'));
+  // La même règle que les champs de saisie : le Markdown des recettes écrit « 1,5 » comme un
+  // humain, et une seule fonction doit savoir le lire. Voir `format.ts`.
+  const quantite = nombreSaisi(m[1]);
   if (!Number.isFinite(quantite)) return ligne;
 
   const echelle = quantite * facteur;

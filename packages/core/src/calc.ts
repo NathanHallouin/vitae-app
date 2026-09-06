@@ -16,7 +16,7 @@ import {
   MOVE_SHARES,
   type Sexe,
 } from './constants';
-import { dec, kcal } from './format';
+import { dec, kcal, nombreSaisi } from './format';
 import type { IconName } from './icons';
 
 export interface Metrics {
@@ -61,9 +61,11 @@ export function computeMetrics(input: {
   sessions: number;
   goal: GoalKey;
 }): Metrics | null {
-  const p = parseFloat(input.poids);
-  const t = parseFloat(input.taille);
-  const a = parseFloat(input.age);
+  // `nombreSaisi` et non `parseFloat` : ces trois chaînes viennent d'un champ de saisie, et une
+  // virgule décimale y est non seulement possible mais encouragée. Voir `format.ts`.
+  const p = nombreSaisi(input.poids);
+  const t = nombreSaisi(input.taille);
+  const a = nombreSaisi(input.age);
   if (!p || !t || !a || !input.sexe) return null;
 
   const base = 10 * p + 6.25 * t - 5 * a + (input.sexe === 'homme' ? 5 : -161);
@@ -207,11 +209,24 @@ export function proteinBasisNote(m: Metrics): string {
   return `Calculé sur un poids de référence de ${Math.round(ref)} kg plutôt que sur vos ${Math.round(m.poids)} kg : au-delà d'un IMC de 30, appliquer les grammes par kilo au poids total gonfle inutilement la quantité de protéines.`;
 }
 
-/** Décomposition de la dépense quotidienne, pour rendre le chiffre concret. */
+/**
+ * Décomposition de la dépense quotidienne, pour rendre le chiffre concret.
+ *
+ * **Les deux premiers postes partagent le total ; le troisième le traverse.** Fonctionnement du
+ * corps et mouvement font 100 % à eux deux, par construction — le mouvement est ce qui reste une
+ * fois le métabolisme de base retiré. La thermogenèse alimentaire, elle, est déjà comprise dans
+ * les deux, via le facteur d'activité. On la montre parce qu'on l'oublie, pas parce qu'elle
+ * s'ajoute.
+ *
+ * D'où `digestionPct`, qui n'existait pas. L'écran écrivait « 10 % » en dur à côté des deux autres
+ * parts, et ces trois nombres se lisaient dans la même colonne sans dire le même dénominateur :
+ * 10 % de ce qu'on **mange** pour la digestion, contre un pourcentage de ce qu'on **dépense** pour
+ * les deux autres. Sur un profil en déficit les deux diffèrent — 173 kcal valent 10 % de l'apport
+ * mais 8 % de la dépense — et un lecteur qui additionnait la colonne trouvait 110 %.
+ */
 export function energyBreakdown(m: Metrics) {
   const movement = Math.max(0, m.tdee - m.bmr);
-  // Thermogenèse alimentaire : environ 10 % de ce qui est mangé, déjà compris dans la dépense
-  // totale via le facteur d'activité. Affiché à part parce que c'est contre-intuitif.
+  // Thermogenèse alimentaire : environ 10 % de ce qui est mangé.
   const digestion = Math.round(m.target * 0.1);
   return {
     bmr: m.bmr,
@@ -219,6 +234,8 @@ export function energyBreakdown(m: Metrics) {
     movement: Math.round(movement),
     movementPct: Math.round((movement / m.tdee) * 100),
     digestion,
+    /** part de la **dépense**, comme les deux autres : c'est ce qui rend la colonne lisible */
+    digestionPct: Math.round((digestion / m.tdee) * 100),
   };
 }
 
@@ -361,8 +378,18 @@ export interface Projection {
   ticks: ProjectionTick[];
   targetX: number;
   targetY: number;
-  loLabel: string;
-  hiLabel: string;
+  /**
+   * Les deux **bouts de la courbe** : le poids d'aujourd'hui et celui visé.
+   *
+   * Ils s'appelaient `loLabel` / `hiLabel` et valaient les bornes de l'**axe**, soit les poids
+   * réels élargis de 1,5 kg de chaque côté — une marge de dessin, pour que la courbe ne colle pas
+   * au bord du cadre. L'écran les affichait tels quels : « Poids projeté, de 79,9 kg à 73,0 kg »
+   * pour quelqu'un qui pèse 78,4 et vise 74,5. La marge de dessin était lue comme une prédiction,
+   * et elle annonçait 1,5 kg sous l'objectif choisi — sur la même ligne que « Cible 74,5 kg », qui
+   * la contredisait.
+   */
+  departLabel: string;
+  arriveeLabel: string;
   note: string;
 }
 
@@ -395,12 +422,15 @@ export function buildProjection(m: Metrics, goal: GoalKey, targetKey: CleCible |
       ticks: [],
       targetX: 0,
       targetY: 0,
-      loLabel: '',
-      hiLabel: '',
+      departLabel: '',
+      arriveeLabel: '',
     };
   }
 
   const horizon = Math.min(Math.max(weeks, 4), 78);
+  // Bornes de l'**axe vertical** seulement : 1,5 kg de marge de chaque côté pour que la courbe ne
+  // colle pas au cadre. Elles ne sortent pas d'ici — les afficher revenait à présenter une marge
+  // de dessin comme un poids prédit.
   const lo = Math.min(m.poids, selected.w) - 1.5;
   const hi = Math.max(m.poids, selected.w) + 1.5;
   const px = (t: number) => CHART.x0 + (t / horizon) * (CHART.x1 - CHART.x0);
@@ -428,8 +458,8 @@ export function buildProjection(m: Metrics, goal: GoalKey, targetKey: CleCible |
     ticks,
     targetX: px(Math.min(weeks, horizon)),
     targetY: py(selected.w),
-    loLabel: `${dec(Math.round(lo * 10) / 10)} kg`,
-    hiLabel: `${dec(Math.round(hi * 10) / 10)} kg`,
+    departLabel: `${dec(Math.round(m.poids * 10) / 10)} kg`,
+    arriveeLabel: `${dec(Math.round(selected.w * 10) / 10)} kg`,
   };
 }
 

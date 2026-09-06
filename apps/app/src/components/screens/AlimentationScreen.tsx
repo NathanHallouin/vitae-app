@@ -160,16 +160,10 @@ export default function AlimentationScreen() {
         <View className="gap-[14px]">
           {macros.map((m) => (
             <View key={m.label}>
-              <View className="mb-[5px] flex-row items-center justify-between gap-4">
+              <View className="mb-[3px] flex-row items-center justify-between gap-4">
                 <View className="min-w-0 flex-1 flex-row items-center gap-2">
                   <Icon name={m.icon} size={17} color={m.color} />
                   <Text className="text-base font-sans-medium text-ink">{m.label}</Text>
-                  <Text
-                    numberOfLines={1}
-                    className="font-sans min-w-0 flex-1 text-small text-muted"
-                  >
-                    {m.hint}
-                  </Text>
                 </View>
                 <Text
                   style={{ fontVariant: ['tabular-nums'] }}
@@ -178,6 +172,14 @@ export default function AlimentationScreen() {
                   {m.grams} g · {m.kcal} kcal
                 </Text>
               </View>
+              {/* Sur sa propre ligne, et non à la suite du libellé. Elle y tenait sur la maquette
+                  large ; sur un téléphone, les trois indications étaient coupées en plein mot —
+                  « pour garder vos mus… ». Un `numberOfLines={1}` ne prévient pas le débordement
+                  ici, il le garantit : la phrase la plus courte fait vingt-trois caractères, et
+                  la ligne porte déjà un pictogramme, un libellé et « 153 g · 612 kcal ». */}
+              <Text className="font-sans mb-[6px] text-small leading-[18px] text-muted">
+                {m.hint}
+              </Text>
               <View className="h-[6px] overflow-hidden rounded-[3px] bg-gauge-track">
                 <View
                   className="h-full rounded-[3px]"

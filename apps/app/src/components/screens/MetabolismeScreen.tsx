@@ -60,7 +60,11 @@ export default function MetabolismeScreen() {
             valeur={kcal(energie.movement)}
             suffixe={`kcal · ${energie.movementPct} %`}
           />
-          <Ligne label="Digestion" valeur={`≈ ${kcal(energie.digestion)}`} suffixe="kcal · 10 %" />
+          <Ligne
+            label="Digestion"
+            valeur={`≈ ${kcal(energie.digestion)}`}
+            suffixe={`kcal · ${energie.digestionPct} %`}
+          />
         </Lignes>
 
         {/* La barre reprend la part que l'arc du cadran affiche déjà, ce qui n'est pas une
@@ -72,8 +76,12 @@ export default function MetabolismeScreen() {
         >
           <View className="h-full bg-primary" style={{ width: `${energie.bmrPct}%` }} />
         </View>
+        {/* La digestion ne s'ajoute pas aux deux autres : elle les traverse. Sans cette phrase, la
+              colonne invite à additionner, et l'addition ne tombe pas sur le total affiché en
+              haut de l'écran — ce qui donne l'impression que les chiffres sont faux. */}
         <Text className="font-sans mt-[6px] text-caption text-muted2">
-          Cœur, cerveau, respiration, température · marche, ménage, escaliers, séances.
+          Cœur, cerveau, respiration, température · marche, ménage, escaliers, séances. La digestion
+          est déjà comprise dans ces deux postes : elle est montrée à part parce qu’on l’oublie.
         </Text>
       </Card>
 

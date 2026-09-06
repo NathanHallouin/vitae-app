@@ -1,5 +1,5 @@
 import { todayISO } from '@vitae/core/date';
-import { dec, fmtKg, fmtKgParSemaine } from '@vitae/core/format';
+import { dec, fmtKg, fmtKgParSemaine, nombreSaisi } from '@vitae/core/format';
 import {
   comparerAuPlan,
   construireCourbe,
@@ -50,7 +50,7 @@ export default function SuiviCard({ cible, vue }: { cible?: number; vue: VueSuiv
   const [saisie, setSaisie] = useState('');
   const [echec, setEchec] = useState(false);
 
-  const valeur = Number.parseFloat(saisie.replace(',', '.'));
+  const valeur = nombreSaisi(saisie);
   const valide = Number.isFinite(valeur) && valeur >= POIDS_MIN && valeur <= POIDS_MAX;
 
   const enregistrer = () => {

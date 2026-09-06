@@ -13,6 +13,36 @@ export function kcal(n: number): string {
     .replace(/\u202f/g, '\u00a0');
 }
 
+/**
+ * L'opération inverse : un nombre **saisi par un humain** en français, rendu exploitable.
+ *
+ * `parseFloat('78,4')` vaut **78**. Pas `NaN`, pas une erreur : soixante-dix-huit. La partie
+ * décimale disparaît sans bruit, et la valeur reste assez plausible pour passer toutes les
+ * validations de bornes.
+ *
+ * Ce n'est pas une hypothèse de laboratoire. `NumberField` déclare `keyboardType="decimal-pad"`
+ * **précisément pour offrir la virgule** — son commentaire le dit : « un poids se saisit avec une
+ * virgule, et le pavé `numeric` d'iOS ne la propose pas ». L'application invitait donc à taper le
+ * caractère qu'elle allait tronquer.
+ *
+ * Le défaut se voyait à l'écran sans se comprendre : le bandeau de profil affiche la chaîne telle
+ * que saisie — « Calculé pour 78,4 kg » — pendant que `computeMetrics` calculait sur 78. Mesuré :
+ * métabolisme 1 557 au lieu de 1 561, dépense 2 101 au lieu de 2 107, IMC 24,62 au lieu de 24,74.
+ * L'écart est petit ; le fait que l'affichage et le calcul ne parlent pas du même poids ne l'est
+ * pas.
+ *
+ * Pire, il n'était pas uniforme : la pesée du suivi faisait déjà `.replace(',', '.')` de son côté.
+ * Le même poids valait donc 78,4 dans l'historique et 78 dans le calcul, et `ProfileProvider`
+ * comparait les deux. **Cette fonction existe pour qu'il n'y ait plus qu'une règle**, et pour
+ * qu'elle soit à un seul endroit.
+ *
+ * Rend `NaN` sur une saisie vide ou illisible, comme `parseFloat` : les appelants testent déjà la
+ * valeur, et rendre `0` transformerait une absence en un nombre.
+ */
+export function nombreSaisi(texte: string): number {
+  return parseFloat(texte.replace(',', '.'));
+}
+
 export function dec(n: number, digits = 1): string {
   return n.toFixed(digits).replace('.', ',');
 }

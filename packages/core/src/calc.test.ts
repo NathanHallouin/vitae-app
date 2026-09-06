@@ -17,6 +17,7 @@ import {
   buildPlan,
   buildProjection,
   computeMetrics,
+  energyBreakdown,
   proteinReferenceWeight,
   rangeBar,
 } from './calc';
@@ -332,5 +333,70 @@ describe('formulaire et validation', () => {
       goal: 'seche',
       excluded: [],
     });
+  });
+});
+
+describe('décomposition de la dépense', () => {
+  // Le défaut réparé ici se voyait à l'écran et nulle part ailleurs : les trois parts se lisaient
+  // dans la même colonne, mais la digestion se rapportait à ce qu'on mange et les deux autres à
+  // ce qu'on dépense. Additionner la colonne donnait 110 %.
+  test('les deux postes qui partagent le total font bien 100 %', () => {
+    for (const profil of PROFILS_DE_REFERENCE) {
+      const m = computeMetrics(profil.entree);
+      if (!m) throw new Error(profil.couvre);
+      const e = energyBreakdown(m);
+      // Un point d'écart est admis : deux arrondis indépendants sur un même total.
+      expect(Math.abs(e.bmrPct + e.movementPct - 100)).toBeLessThanOrEqual(1);
+    }
+  });
+
+  test('la digestion se rapporte au même dénominateur que les deux autres', () => {
+    for (const profil of PROFILS_DE_REFERENCE) {
+      const m = computeMetrics(profil.entree);
+      if (!m) throw new Error(profil.couvre);
+      const e = energyBreakdown(m);
+      expect(e.digestionPct).toBe(Math.round((e.digestion / m.tdee) * 100));
+    }
+  });
+
+  test('et ce n’est pas la même chose que 10 %, ce que l’écran écrivait en dur', () => {
+    // Sur un profil en déficit, l'apport est sous la dépense : les deux pourcentages divergent, et
+    // c'est exactement le cas nominal de l'application. Un test qui passerait aussi avec « 10 »
+    // ne protégerait rien.
+    const m = computeMetrics(PROFILS_DE_REFERENCE[0].entree);
+    if (!m) throw new Error('profil nominal');
+    const e = energyBreakdown(m);
+    expect(m.target).toBeLessThan(m.tdee);
+    expect(e.digestionPct).toBeLessThan(10);
+  });
+});
+
+describe('légende de la courbe de projection', () => {
+  // Le défaut réparé ici tenait dans un nom : `loLabel` / `hiLabel` étaient les bornes de l'axe,
+  // marge de dessin comprise, et l'écran les annonçait comme des poids projetés.
+  const m = computeMetrics({
+    sexe: 'femme',
+    age: '35',
+    taille: '178',
+    poids: '78.4',
+    daily: 1,
+    sessions: 1,
+    goal: 'seche',
+  });
+
+  test('les deux bouts annoncés sont le poids d’aujourd’hui et la cible choisie', () => {
+    if (!m) throw new Error('profil');
+    const p = buildProjection(m, 'seche', 'cut');
+    expect(p.coherent).toBe(true);
+    expect(p.departLabel).toBe('78,4 kg');
+    // La cible « perdre un peu » vaut −5 % du poids, soit 74,5 kg.
+    expect(p.arriveeLabel).toBe('74,5 kg');
+  });
+
+  test('et jamais les bornes de l’axe, élargies de 1,5 kg de chaque côté', () => {
+    if (!m) throw new Error('profil');
+    const p = buildProjection(m, 'seche', 'cut');
+    expect(p.departLabel).not.toBe('79,9 kg');
+    expect(p.arriveeLabel).not.toBe('73,0 kg');
   });
 });

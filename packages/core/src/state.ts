@@ -5,6 +5,7 @@
 
 import type { GoalKey, Sexe } from './constants';
 import { ageFrom } from './date';
+import { nombreSaisi } from './format';
 import type { Exclusion } from './recipes';
 import type { ProfileInput, StoredProfile } from './storage';
 
@@ -137,8 +138,10 @@ export function validate(state: FormState, now: Date = new Date()): string {
   }
   if (f.body) {
     const age = ageFrom(state.naissance, now);
-    const taille = parseFloat(state.taille);
-    const poids = parseFloat(state.poids);
+    // Même règle que le calcul : sans elle, « 78,4 » passait les bornes en valant 78, et la
+    // validation déclarait bon un profil que `computeMetrics` allait tronquer.
+    const taille = nombreSaisi(state.taille);
+    const poids = nombreSaisi(state.poids);
     if (age === null || !taille || !poids) {
       return 'Renseignez la date de naissance, la taille et le poids.';
     }

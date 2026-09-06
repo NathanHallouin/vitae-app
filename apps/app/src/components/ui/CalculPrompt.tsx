@@ -1,7 +1,7 @@
 import { ETAT_VIDE } from '@vitae/core/constants';
 import { useRouter } from 'expo-router';
 import { Text, View } from 'react-native';
-import Cadran from './Cadran';
+import Cadran, { LARGEUR_HORS_AXE } from './Cadran';
 import Overline from './Overline';
 import { Button } from './primitives';
 
@@ -26,7 +26,11 @@ export default function CalculPrompt({ quoi }: { quoi: string }) {
   return (
     <View className="items-center px-2 pt-2 pb-2">
       <Cadran part={0} accessibilityLabel={`${ETAT_VIDE.surtitre}. ${quoi} ${ETAT_VIDE.suite}`}>
-        <Overline>{ETAT_VIDE.surtitre}</Overline>
+        {/* Même borne que `Hero` : hors de l’axe horizontal, la corde est plus courte que le
+            diamètre. Voir `LARGEUR_HORS_AXE`. */}
+        <View style={{ width: LARGEUR_HORS_AXE }}>
+          <Overline className="text-center">{ETAT_VIDE.surtitre}</Overline>
+        </View>
         {/* Le tiret prend la taille et l'interligne du grand chiffre, mais pas sa couleur : en
             `ink` il se lirait comme une valeur affichée, en `faint` comme une valeur absente. */}
         <Text

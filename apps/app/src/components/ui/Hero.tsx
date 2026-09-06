@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { Text, View } from 'react-native';
 import { usePalette } from '@/theme/palette';
-import Cadran from './Cadran';
+import Cadran, { LARGEUR_HORS_AXE } from './Cadran';
 import Chiffre from './Chiffre';
 import Overline from './Overline';
 
@@ -60,7 +60,11 @@ export default function Hero({
         part={part}
         accessibilityLabel={`${surtitre} : ${valeur}${unite ? ` ${unite}` : ''}. ${legende} : ${pourcent} %.`}
       >
-        <Overline className="text-center">{surtitre}</Overline>
+        {/* Borné au carré inscrit : le surtitre est au-dessus du centre, là où le disque est
+            plus étroit que son diamètre. Voir `LARGEUR_HORS_AXE`. */}
+        <View style={{ width: LARGEUR_HORS_AXE }}>
+          <Overline className="text-center">{surtitre}</Overline>
+        </View>
         <View className="mt-1">
           <Chiffre valeur={valeur} taille="hero" anime={anime} />
         </View>

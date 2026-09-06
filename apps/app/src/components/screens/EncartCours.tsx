@@ -3,6 +3,7 @@ import { type Drapeau, encartDeLEcran, routeNotion, TOTAL_NOTIONS } from '@vitae
 import { comparerAuPlan } from '@vitae/core/suivi';
 import { Link, usePathname } from 'expo-router';
 import { Pressable, Text, View } from 'react-native';
+import Icon from '@/components/ui/Icon';
 import Overline from '@/components/ui/Overline';
 import { Card } from '@/components/ui/primitives';
 import { versRoute } from '@/lib/route';
@@ -91,8 +92,17 @@ export default function EncartCours() {
             className="rounded-control border border-line px-4 py-[10px] active:bg-primary-tint"
           >
             {/* La durée est dans le bouton, pas au-dessus : c'est ce qui décide d'ouvrir ou non,
-                et une minute annoncée vaut mieux qu'un pavé découvert après le clic. */}
-            <Text className="text-base font-sans-medium text-primary-ink">Lire (1 min) ›</Text>
+                et une minute annoncée vaut mieux qu'un pavé découvert après le clic.
+
+                La flèche est un `Icon` et non le caractère « › ». C'en était un — U+203A, qui est
+                un **guillemet simple français**, pas un chevron. Seul endroit de l'application où
+                une flèche était une lettre : elle ne prenait donc ni la couleur ni la taille du
+                système d'icônes, et elle entrait en collision avec les « » que toute la copie
+                emploie comme vrais guillemets. */}
+            <View className="flex-row items-center gap-[6px]">
+              <Text className="text-base font-sans-medium text-primary-ink">Lire (1 min)</Text>
+              <Icon name="flecheDroite" size={15} color={palette.primaryInk} />
+            </View>
           </Pressable>
         </Link>
 

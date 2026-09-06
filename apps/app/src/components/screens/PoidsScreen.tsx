@@ -154,7 +154,7 @@ export default function PoidsScreen() {
 
             <View className="mb-1 flex-row items-baseline justify-between gap-2">
               <Text className="font-sans min-w-0 flex-1 text-caption text-muted2">
-                Poids projeté, de {projection.hiLabel} à {projection.loLabel}
+                Poids projeté, de {projection.departLabel} à {projection.arriveeLabel}
               </Text>
               <Text className="font-sans flex-none text-caption text-muted2">Cible {cible}</Text>
             </View>
