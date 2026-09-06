@@ -265,7 +265,27 @@ jobs:
             exit 1
           fi
 
-          # 2. Le métier ne connaît aucune plateforme. Sans cela, il cesse d'être testable sans
+          # 2. Un champ qui retire le contour du navigateur en dessine un autre.
+          #    `outline: 'none'` supprime l'unique indication de focus au clavier. C'est légitime
+          #    quand le composant la remplace — `NumberField` épaissit sa bordure — et c'est une
+          #    faute d'accessibilité quand il l'oublie. Le motif avait été copié sans sa
+          #    contrepartie dans deux composants sur quatre : la recherche de recettes et la zone
+          #    de restauration. Au clavier, plus rien n'y disait où l'on était.
+          #
+          #    La règle : tout fichier qui écrit `outline: 'none'` doit aussi porter un état de
+          #    focus. `onFocus` est le marqueur le plus sûr — sans lui, aucune bordière ne peut
+          #    changer à la focalisation.
+          sans_relais=""
+          for f in $(grep -rl "outline: 'none'" apps/app/src apps/app/app || true); do
+            grep -q "onFocus" "$f" || sans_relais="$sans_relais $f"
+          done
+          if [ -n "$sans_relais" ]; then
+            echo "Contour de focus retiré sans remplacement :"
+            for f in $sans_relais; do echo "  $f"; done
+            exit 1
+          fi
+
+          # 3. Le métier ne connaît aucune plateforme. Sans cela, il cesse d'être testable sans
           #    environnement de rendu — et c'est ce qui fait tourner les 270 tests en 160 ms.
           interdits=$(grep -rnE "from '(react|react-native|node:)" packages/core/src || true)
           if [ -n "$interdits" ]; then

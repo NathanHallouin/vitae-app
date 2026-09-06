@@ -40,6 +40,7 @@ export default function FiltresRecettes({
   const palette = usePalette();
   const large = useLarge();
   const [deplie, setDeplie] = useState(false);
+  const [focalise, setFocalise] = useState(false);
   const ouvert = large || deplie;
 
   const modifier = (partiel: Partial<Criteres>) => onChange({ ...criteres, ...partiel });
@@ -56,7 +57,16 @@ export default function FiltresRecettes({
 
   return (
     <View className="mb-6 gap-4">
-      <View className="flex-row items-center gap-3 rounded-control border border-line bg-surface2 px-[14px]">
+      {/* La bordure prend le relais du contour que le navigateur dessinerait, retiré plus bas.
+          Elle avait été oubliée ici : le contour partait et rien ne le remplaçait, donc au clavier
+          plus rien n'indiquait que le champ était actif. Le motif vient de `NumberField`, où il est
+          complet — il a été copié sans sa contrepartie. */}
+      <View
+        className={cx(
+          'flex-row items-center gap-3 rounded-control bg-surface2 px-[14px]',
+          focalise ? 'border-2 border-primary m-[-1px]' : 'border border-line',
+        )}
+      >
         <Icon name="assiette" size={18} color={palette.muted2} />
         <TextInput
           accessibilityLabel="Chercher une recette, un ingrédient"
@@ -68,6 +78,8 @@ export default function FiltresRecettes({
           // ligne, et affiche « Rechercher » sur iOS.
           returnKeyType="search"
           autoCorrect={false}
+          onFocus={() => setFocalise(true)}
+          onBlur={() => setFocalise(false)}
           className="flex-1 py-[14px] text-input text-ink"
           style={{ outline: 'none' }}
         />

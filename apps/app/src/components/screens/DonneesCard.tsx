@@ -3,7 +3,7 @@ import { construireSauvegarde, lireSauvegarde, nomDeFichier } from '@vitae/core/
 import { useState } from 'react';
 import { Text, TextInput, View } from 'react-native';
 import Overline from '@/components/ui/Overline';
-import { Button, Card } from '@/components/ui/primitives';
+import { Button, Card, cx } from '@/components/ui/primitives';
 import { exporter, ouvrirUnFichier, PEUT_OUVRIR_UN_FICHIER } from '@/lib/sauvegarde';
 import { useProfile } from '@/state/ProfileProvider';
 import { usePalette } from '@/theme/palette';
@@ -31,6 +31,7 @@ export default function DonneesCard() {
   const [colle, setColle] = useState('');
   const [collageOuvert, setCollageOuvert] = useState(false);
   const [message, setMessage] = useState<{ texte: string; ok: boolean } | null>(null);
+  const [focalise, setFocalise] = useState(false);
 
   const rien = !profile && suivi.historique.length === 0;
 
@@ -127,7 +128,14 @@ export default function DonneesCard() {
             placeholder='{ "v": 1, … }'
             placeholderTextColor={palette.faint}
             accessibilityLabel="Contenu de la sauvegarde à restaurer"
-            className="font-sans min-h-[110px] rounded-control border border-line bg-surface2 p-3 text-small text-ink"
+            onFocus={() => setFocalise(true)}
+            onBlur={() => setFocalise(false)}
+            // Même relais que `NumberField` : le contour du navigateur est retiré juste en dessous,
+            // et sans cette bordure épaissie le clavier ne dirait plus où il est.
+            className={cx(
+              'font-sans min-h-[110px] rounded-control bg-surface2 p-3 text-small text-ink',
+              focalise ? 'border-2 border-primary m-[-1px]' : 'border border-line',
+            )}
             style={{ outline: 'none', textAlignVertical: 'top' }}
           />
           <View className="mt-3 items-start">

@@ -1015,6 +1015,71 @@ Et la leçon de la dixième passe s'est vérifiée une seconde fois : **la liste
 raison. Chercher « où d'autre a-t-on énuméré ? » a coûté dix minutes et trouvé une section entière
 absente du cache.
 
+### 6 septembre 2026 — douzième passe, l'accessibilité au-delà du contraste
+
+La huitième passe avait mesuré les contrastes et rien d'autre. L'accessibilité est plus large que
+ça, et la roadmap désigne elle-même le risque propre à ce dépôt : « `react-native-web` sait rendre
+un balisage sémantique, mais seulement là où un rôle le demande — et il **échoue en silence** ».
+
+#### Six catégories mesurées sur les 94 pages livrées
+
+| Contrôle | Matière rencontrée | Résultat |
+|---|---|---|
+| `<html lang>` | 94 pages | ✅ |
+| `<img>` sans `alt` | **0 image** — le site n'en livre aucune | ✅ sans objet |
+| `<a>` sans texte discernable | 757 liens | ✅ aucun |
+| Champ sans nom accessible | 2 champs | ✅ tous deux nommés |
+| Saut de niveau de titre | 94 `<h1>`, 185 `<h2>`, 0 `<h3>` | ✅ aucun saut |
+| `<svg>` ni masqué ni nommé | 510 SVG | ⚠️ 8 signalés, **tous faux positifs** |
+
+Les huit signalements sont le SVG intérieur du cadran, dont le parent porte `role="img"` et un
+libellé — ce qui rend déjà ses descendants présentationnels. Le contrôle avait tort, pas le code.
+
+**Le décompte de matière est ce qui rend ce tableau lisible.** Un contrôle qui ne rencontre rien
+rend « aucun problème » et ne prouve rien : c'est le piège relevé à la neuvième passe, et il vaut
+autant pour un audit que pour un test.
+
+#### `Fc1` 🟠 — deux champs sur quatre retiraient l'indication de focus sans la remplacer
+
+`outline: 'none'` supprime la seule chose qui, au clavier, dit où l'on est. Le dépôt le fait à
+quatre endroits, et il avait raison de le faire : `NumberField` épaissit sa bordure à la
+focalisation, et son commentaire l'explique — « retire le contour par défaut du navigateur, dont la
+bordure ci-dessus prend le relais ».
+
+Le motif a été copié deux fois **sans sa contrepartie** :
+
+| Composant | Contour retiré | Remplacement |
+|---|---|---|
+| `NumberField` | oui | ✅ bordure épaissie |
+| `DateField.web` | oui | ✅ bordure épaissie |
+| `FiltresRecettes` — recherche | oui | ❌ **aucun** |
+| `DonneesCard` — restauration | oui | ❌ **aucun** |
+
+Au clavier, sur `/recettes` et sur `/reglages`, rien n'indiquait que le champ était actif. Les deux
+portent désormais le même relais que `NumberField`, avec les mêmes classes.
+
+**Et la règle est devenue exécutable** : tout fichier qui écrit `outline: 'none'` doit aussi porter
+un `onFocus` — sans lui, aucune bordure ne peut changer à la focalisation. Vérifié par injection.
+
+#### Une vérification qui n'a rien trouvé, et c'est un résultat
+
+Le formulaire de `/profil` n'est pré-rendu qu'à sa première étape. C'est ce qu'il doit livrer : un
+assistant commence au pas 0, et les pas suivants ne sont pas du contenu à indexer mais des états
+d'interaction. La règle du dépôt sur le rendu conditionnel vise le contenu replié, pas les étapes
+d'un formulaire — la distinction est réelle et le code est du bon côté.
+
+### Ce que la douzième passe a appris
+
+**Un motif juste se copie mal.** Les quatre champs viennent du même geste — retirer un contour laid
+et le remplacer par une bordure au ton du thème — et la moitié n'a gardé que la première moitié du
+geste. Ce n'est ni une inattention isolée ni un défaut de conception : c'est ce que produit un motif
+qui tient en deux morceaux dont **un seul est visible à l'écran**. Le contour retiré se voit tout de
+suite ; le relais absent ne se voit qu'à la touche Tab, que personne n'appuie en relisant.
+
+D'où la règle plutôt que les deux corrections. Elle tient en trois lignes de shell et elle dit
+exactement ce que le commentaire de `NumberField` disait déjà en français depuis le début — la
+différence étant qu'elle, on l'exécute.
+
 ### Ce qui reste ouvert, par ordre de coût
 
 **Cette phrase a été écrite deux fois — « la liste des constats corrigeables est épuisée » — et
