@@ -1,7 +1,7 @@
 ---
 titre: Soupe thaï au poulet et aux nouilles
 categorie: Plat principal
-description: Un bouillon parfumé au lait de coco et au gingembre, prêt en vingt-cinq minutes. Trente-quatre grammes de protéines dans un bol.
+description: Un bouillon parfumé au lait de coco et au gingembre, prêt en trente minutes. Trente-quatre grammes de protéines dans un bol.
 moment: plat
 base: volaille
 publiee: 2026-08-14

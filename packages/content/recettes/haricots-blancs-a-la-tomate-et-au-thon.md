@@ -1,7 +1,7 @@
 ---
 titre: Haricots blancs à la tomate et au thon
 categorie: Plat principal
-description: Un plat de placard prêt en vingt minutes, à trente-huit grammes de protéines. Deux conserves et un oignon.
+description: Un plat de placard prêt en vingt-trois minutes, à trente-huit grammes de protéines. Deux conserves et un oignon.
 moment: plat
 base: legumineuse
 publiee: 2026-08-14

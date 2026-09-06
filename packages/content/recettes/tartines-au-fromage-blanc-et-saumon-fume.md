@@ -1,7 +1,7 @@
 ---
 titre: Tartines au fromage blanc et saumon fumé
 categorie: Petit-déjeuner
-description: Deux tartines à trente grammes de protéines, montées en cinq minutes sans cuisson. Le petit-déjeuner salé le plus rapide qui soit.
+description: Deux tartines à trente grammes de protéines, montées en sept minutes, le temps de griller le pain. Le petit-déjeuner salé le plus rapide qui soit.
 moment: matin
 base: poisson
 publiee: 2026-08-14

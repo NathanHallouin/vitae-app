@@ -1,6 +1,6 @@
 ---
 titre: Tofu sauté aux légumes et au sésame
-description: Un sauté végétarien à 35 g de protéines, à condition de presser le tofu et de le saisir à feu vif. Vingt minutes en tout.
+description: Un sauté végétarien à 35 g de protéines, à condition de presser le tofu et de le saisir à feu vif. Vingt-cinq minutes en tout.
 categorie: Plat principal
 moment: plat
 base: soja

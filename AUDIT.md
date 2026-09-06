@@ -815,6 +815,70 @@ cités et les confronter au code. Trente lignes de script, une fois — et le r�
 seulement « un défaut corrigé », c'est **« il n'y en a pas d'autre »**, ce qu'aucune relecture ne
 peut affirmer.
 
+### 6 septembre 2026 — neuvième passe, le contenu
+
+Huit passes sur le code et les écrans. Aucune sur **les soixante-deux recettes**, qui sont pourtant
+du contenu de santé et la moitié de ce que le site publie.
+
+Premier constat, et c'est une limite plutôt qu'un défaut : **les calories et les protéines sont
+écrites à la main**, recette par recette, sans source dans le dépôt. Rien ici ne peut les
+recalculer — il faudrait une base nutritionnelle. C'est consigné comme tel plutôt que passé sous
+silence.
+
+Mais chaque recette porte la même information **deux fois** : en données (`preparation`, `cuisson`)
+et en toutes lettres dans sa description. Et la carte de l'index affiche les deux côte à côte. Cette
+frontière-là se vérifie.
+
+#### `Ct1` 🟠 — huit recettes sur soixante-deux se contredisaient elles-mêmes
+
+| Recette | La description disait | Les données disent |
+|---|---|---|
+| `boeuf-saute-aux-brocolis` | « Quinze minutes **en tout** » | 15 + 8 = **23** |
+| `haricots-blancs-a-la-tomate-et-au-thon` | « **prêt en** vingt minutes » | 8 + 15 = **23** |
+| `pates-completes-au-thon-et-au-citron` | « **en** quinze **minutes** » | 5 + 12 = **17** |
+| `salade-de-thon-et-haricots-verts` | « à monter **en** quinze **minutes** » | 15 + 10 = **25** |
+| `saute-de-porc-aux-champignons` | « **en** vingt **minutes** » | 12 + 15 = **27** |
+| `soupe-thai-au-poulet-et-aux-nouilles` | « **prêt en** vingt-cinq minutes » | 15 + 15 = **30** |
+| `tartines-au-fromage-blanc-et-saumon-fume` | « en cinq minutes **sans cuisson** » | 5 + **2** = 7 |
+| `tofu-saute-aux-legumes-et-au-sesame` | « Vingt minutes **en tout** » | 15 + 10 = **25** |
+
+Les tartines sont le cas le plus net : elles annoncent « sans cuisson » alors que leur **première
+étape** est « Faites griller le pain ». Les données ont donc raison, et c'est la prose qui a été
+corrigée — d'autant que `preparation` et `cuisson` pilotent le filtre « moins de 30 minutes » et le
+JSON-LD livré aux moteurs.
+
+Aucune relecture n'attrape ça : la description et l'en-tête YAML sont à vingt lignes l'une de
+l'autre, et il faut poser une addition pour voir la faute.
+
+**Le remède est le test, pas les huit corrections.** `descriptions.test.ts` extrait les annonces de
+durée totale — « en tout », « au total », « prêt en N » — et les confronte à `preparation + cuisson`.
+Vérifié par injection : une faute délibérée le fait échouer, en nommant la recette et l'écart.
+
+Deux précautions qui font la différence entre un garde-fou et un test vert qui ne garde rien :
+
+— **Il ne teste que les annonces de total.** « saisi une minute par face », « les lentilles corail
+  cuisent en quinze minutes » parlent d'un geste ou d'un ingrédient. Sans cette distinction, le test
+  crierait sur la moitié du catalogue et finirait désactivé.
+— **Il vérifie qu'il trouve encore quelque chose.** Une expression rationnelle qui ne correspond
+  plus à rien rend un test vert — le pire des deux mondes. Un second test exige au moins huit
+  annonces détectées.
+
+L'unique exception — le dahl, dont la phrase porte sur les lentilles et non sur le plat — est
+déclarée avec sa raison, et **la liste d'exceptions est elle-même sous test** : au-delà de trois
+entrées, l'échec dit que l'heuristique ne tient plus. Une liste qu'on rallonge sans la lire est un
+test désactivé qui n'ose pas dire son nom.
+
+### Ce que la neuvième passe a appris
+
+**Le contenu est du code qui n'a pas de compilateur.** Soixante-deux fichiers Markdown, relus par
+la même personne qui les a écrits, dont personne ne vérifiait la cohérence interne — et 13 % se
+contredisaient. Le dépôt a un `typecheck` sur quatre périmètres, une CI qui compte les `<h1>` du
+HTML livré, un crochet de pré-commit ; il n'avait rien du tout sur ce que l'application **dit**.
+
+Et la faute était structurellement invisible : elle n'apparaît qu'en additionnant deux champs
+YAML pour les comparer à un nombre écrit en toutes lettres vingt lignes plus haut. C'est
+exactement le genre de vérification qu'une machine fait bien et qu'un lecteur ne fait jamais.
+
 ### Ce qui reste ouvert, par ordre de coût
 
 **Cette phrase a été écrite deux fois — « la liste des constats corrigeables est épuisée » — et
@@ -832,6 +896,7 @@ Les quatre entrées ci-dessous ne se ferment pas par du code écrit ici.
 | B1 🟡 | Aucun test de composant ni de bout en bout | **À ne pas faire**, et c'est dans les anti-recommandations : écrits par le même agent que le code, ils seraient circulaires eux aussi. Le manque se compense par les assertions sur le HTML livré, qui vérifient un artefact et non une intention |
 | V5 ⚖️ | `noUncheckedIndexedAccess` | Évalué, mesuré, écarté, décision dans `tsconfig.base.json`. À rouvrir si le dépôt se met à indexer des tableaux dont la taille dépend de données persistées |
 | Cp2 ⚖️ | Le plafond iOS de `rappels.ts` | Documenté chiffres à l'appui, non vérifié : cela demande un appareil. `bun test` contrôle que la génération s'arrête à 60, rien de plus |
+| Ct2 🟡 | Les calories et protéines des recettes | **Non vérifiable depuis ce dépôt.** Elles sont écrites à la main, recette par recette, sans source : il faudrait une base nutritionnelle pour les recalculer. Les invariants internes sont désormais tenus (`descriptions.test.ts`), les valeurs absolues ne le sont pas |
 | Vr1 ⚖️ | Le verrou sur la date de naissance | La raison n'est écrite nulle part et le coût de la sortie est tout l'historique de pesées. Lever le verrou est une ligne ; décider s'il doit l'être est un arbitrage de produit, pas une correction. Ce qui est su, ce qui ne l'est pas et ce que ça coûte sont désormais dans `state.ts` |
 | Hy2 ⚖️ | La moitié **largeur** de l'échec d'hydratation | `useWindowDimensions()` vaut 0 sous Node : `useLarge`, `useColumns` et le `<nav>` divergent encore entre le HTML livré et le premier rendu du navigateur. La brancher sur `useHydrate()` coûte une peinture en mise en page mobile avant bascule sur grand écran. **C'est un arbitrage de produit, pas une dette technique** — et le prix est écrit dans `ROADMAP.md` |
 | **Gv2 🔴** | **Aucune revue** | **Non corrigeable par du code, et non entamé par six passes.** Toutes les corrections ont été produites par l'agent qui a écrit le code qu'elles corrigent — y compris les quatre qui corrigent l'audit lui-même. C'est la définition du constat |

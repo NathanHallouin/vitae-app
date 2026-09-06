@@ -1,7 +1,7 @@
 ---
 titre: Sauté de porc aux champignons
 categorie: Plat principal
-description: Du filet mignon en lanières et des champignons bien dorés, en vingt minutes. Quarante grammes de protéines pour 430 kcal.
+description: Du filet mignon en lanières et des champignons bien dorés, en vingt-sept minutes. Quarante grammes de protéines pour 430 kcal.
 moment: plat
 base: porc
 publiee: 2026-08-14

@@ -1,7 +1,7 @@
 ---
 titre: Salade de thon et haricots verts
 categorie: Plat principal
-description: Une salade complète au thon en boîte, à monter en quinze minutes. Trente-trois grammes de protéines, à emporter ou à manger froide.
+description: Une salade complète au thon en boîte, à monter en vingt-cinq minutes. Trente-trois grammes de protéines, à emporter ou à manger froide.
 moment: plat
 base: poisson
 publiee: 2026-08-14

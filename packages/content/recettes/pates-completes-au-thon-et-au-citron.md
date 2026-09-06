@@ -1,7 +1,7 @@
 ---
 titre: Pâtes complètes au thon et au citron
 categorie: Plat principal
-description: Un plat de placard en quinze minutes, lié à l'eau de cuisson plutôt qu'à la crème. Trente-quatre grammes de protéines.
+description: Un plat de placard en dix-sept minutes, lié à l'eau de cuisson plutôt qu'à la crème. Trente-quatre grammes de protéines.
 moment: plat
 base: cereale
 publiee: 2026-08-14

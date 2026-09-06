@@ -1,6 +1,6 @@
 ---
 titre: Bœuf sauté aux brocolis
-description: Un sauté minute au wok, très riche en protéines et en fer. Quinze minutes en tout, à condition d'avoir tout coupé avant d'allumer le feu.
+description: Un sauté minute au wok, très riche en protéines et en fer. Huit minutes de cuisson, à condition d'avoir tout coupé avant d'allumer le feu.
 categorie: Plat principal
 moment: plat
 base: boeuf

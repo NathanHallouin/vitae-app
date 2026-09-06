@@ -157,7 +157,7 @@ export const RECETTES: Recipe[] = [
   {
     "slug": "boeuf-saute-aux-brocolis",
     "titre": "Bœuf sauté aux brocolis",
-    "description": "Un sauté minute au wok, très riche en protéines et en fer. Quinze minutes en tout, à condition d'avoir tout coupé avant d'allumer le feu.",
+    "description": "Un sauté minute au wok, très riche en protéines et en fer. Huit minutes de cuisson, à condition d'avoir tout coupé avant d'allumer le feu.",
     "categorie": "Plat principal",
     "moment": "plat",
     "base": "boeuf",
@@ -1080,7 +1080,7 @@ export const RECETTES: Recipe[] = [
   {
     "slug": "haricots-blancs-a-la-tomate-et-au-thon",
     "titre": "Haricots blancs à la tomate et au thon",
-    "description": "Un plat de placard prêt en vingt minutes, à trente-huit grammes de protéines. Deux conserves et un oignon.",
+    "description": "Un plat de placard prêt en vingt-trois minutes, à trente-huit grammes de protéines. Deux conserves et un oignon.",
     "categorie": "Plat principal",
     "moment": "plat",
     "base": "legumineuse",
@@ -1581,7 +1581,7 @@ export const RECETTES: Recipe[] = [
   {
     "slug": "pates-completes-au-thon-et-au-citron",
     "titre": "Pâtes complètes au thon et au citron",
-    "description": "Un plat de placard en quinze minutes, lié à l'eau de cuisson plutôt qu'à la crème. Trente-quatre grammes de protéines.",
+    "description": "Un plat de placard en dix-sept minutes, lié à l'eau de cuisson plutôt qu'à la crème. Trente-quatre grammes de protéines.",
     "categorie": "Plat principal",
     "moment": "plat",
     "base": "cereale",
@@ -2033,7 +2033,7 @@ export const RECETTES: Recipe[] = [
   {
     "slug": "salade-de-thon-et-haricots-verts",
     "titre": "Salade de thon et haricots verts",
-    "description": "Une salade complète au thon en boîte, à monter en quinze minutes. Trente-trois grammes de protéines, à emporter ou à manger froide.",
+    "description": "Une salade complète au thon en boîte, à monter en vingt-cinq minutes. Trente-trois grammes de protéines, à emporter ou à manger froide.",
     "categorie": "Plat principal",
     "moment": "plat",
     "base": "poisson",
@@ -2187,7 +2187,7 @@ export const RECETTES: Recipe[] = [
   {
     "slug": "saute-de-porc-aux-champignons",
     "titre": "Sauté de porc aux champignons",
-    "description": "Du filet mignon en lanières et des champignons bien dorés, en vingt minutes. Quarante grammes de protéines pour 430 kcal.",
+    "description": "Du filet mignon en lanières et des champignons bien dorés, en vingt-sept minutes. Quarante grammes de protéines pour 430 kcal.",
     "categorie": "Plat principal",
     "moment": "plat",
     "base": "porc",
@@ -2489,7 +2489,7 @@ export const RECETTES: Recipe[] = [
   {
     "slug": "soupe-thai-au-poulet-et-aux-nouilles",
     "titre": "Soupe thaï au poulet et aux nouilles",
-    "description": "Un bouillon parfumé au lait de coco et au gingembre, prêt en vingt-cinq minutes. Trente-quatre grammes de protéines dans un bol.",
+    "description": "Un bouillon parfumé au lait de coco et au gingembre, prêt en trente minutes. Trente-quatre grammes de protéines dans un bol.",
     "categorie": "Plat principal",
     "moment": "plat",
     "base": "volaille",
@@ -2641,7 +2641,7 @@ export const RECETTES: Recipe[] = [
   {
     "slug": "tartines-au-fromage-blanc-et-saumon-fume",
     "titre": "Tartines au fromage blanc et saumon fumé",
-    "description": "Deux tartines à trente grammes de protéines, montées en cinq minutes sans cuisson. Le petit-déjeuner salé le plus rapide qui soit.",
+    "description": "Deux tartines à trente grammes de protéines, montées en sept minutes, le temps de griller le pain. Le petit-déjeuner salé le plus rapide qui soit.",
     "categorie": "Petit-déjeuner",
     "moment": "matin",
     "base": "poisson",
@@ -2838,7 +2838,7 @@ export const RECETTES: Recipe[] = [
   {
     "slug": "tofu-saute-aux-legumes-et-au-sesame",
     "titre": "Tofu sauté aux légumes et au sésame",
-    "description": "Un sauté végétarien à 35 g de protéines, à condition de presser le tofu et de le saisir à feu vif. Vingt minutes en tout.",
+    "description": "Un sauté végétarien à 35 g de protéines, à condition de presser le tofu et de le saisir à feu vif. Vingt-cinq minutes en tout.",
     "categorie": "Plat principal",
     "moment": "plat",
     "base": "soja",
