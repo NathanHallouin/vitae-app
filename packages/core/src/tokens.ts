@@ -59,14 +59,6 @@ export interface Palette {
   macroFat: string;
   macroCarb: string;
   marker: string;
-  /**
-   * Le voile posé derrière une feuille de détail.
-   *
-   * Il ne teinte rien : il assombrit ce qui reste au-dessous pour que la feuille se lise comme
-   * posée devant la page, et il indique qu'un appui à côté referme. Plus sombre en thème sombre
-   * qu'en clair, sinon la feuille et le fond finissent au même niveau de gris.
-   */
-  scrim: string;
   doodleInk: string;
   doodleAccent: string;
 }
@@ -114,7 +106,6 @@ export const LIGHT: Palette = {
   macroFat: '#2f5f92',
   macroCarb: '#186049',
   marker: '#5d5b6a',
-  scrim: 'rgba(20, 19, 28, 0.45)',
   doodleInk: '#3a3495',
   doodleAccent: '#dedcec',
 };
@@ -160,11 +151,19 @@ export const DARK: Palette = {
   macroFat: '#7fb2e0',
   macroCarb: '#6fcf9f',
   marker: '#928fa6',
-  scrim: 'rgba(0, 0, 0, 0.62)',
   doodleInk: '#a9a4ff',
   doodleAccent: '#231f38',
 };
 
+/**
+ * Ce que la palette ne porte plus : `scrim`, le voile d'une feuille modale.
+ *
+ * Son unique consommateur était `Fiche.tsx`, qui ouvrait une feuille en natif ; la fiche déplie
+ * désormais sur place, comme partout ailleurs. Le garder « au cas où » laisserait une couleur que
+ * rien n'exerce et dont personne ne vérifierait le contraste — c'est l'argument qui a déjà fait
+ * retirer `onDark` d'`Overline`. Le jour où une superposition revient, elle revient avec sa
+ * couleur, mesurée à ce moment-là.
+ */
 export const PALETTES = { light: LIGHT, dark: DARK } as const;
 
 export type ColorMode = keyof typeof PALETTES;
@@ -203,7 +202,6 @@ export const CSS_VARIABLES: Record<keyof Palette, string> = {
   macroFat: '--t-macro-fat',
   macroCarb: '--t-macro-carb',
   marker: '--t-marker',
-  scrim: '--t-scrim',
   doodleInk: '--t-doodle-ink',
   doodleAccent: '--t-doodle-accent',
 };

@@ -417,6 +417,32 @@ solution.
 Le défaut ne se voyait pas en lisant le code — il s'est révélé en ajoutant une courbe qui sortait
 dans la couleur du thème sombre sur une page claire.
 
+### Les avis de sécurité sur les dépendances
+
+`bun run audit`. Relevé du 6 septembre 2026 : **quatre avis**, tous portés par des dépendances
+transitives d'Expo, aucun corrigeable sans forker la chaîne d'outils — `bun audit fix` en a déjà
+résolu deux, les quatre restants sont bloqués par les fourchettes de version de leurs parents.
+
+Ce qui compte n'est pas leur nombre mais **ce qui part réellement dans le paquet livré**. Vérifié
+sur l'export :
+
+| Paquet | Avis | Atteint le paquet livré ? |
+|---|---|---|
+| `decode-uri-component` | déni de service par décodage exponentiel | **oui** — `expo-router` > `query-string` |
+| `image-size` | deux dénis de service (ICNS, JXL/HEIF) | non — Metro, à la compilation |
+| `uuid` | dépassement de tampon en v3/v5/v6 | non — `xcode`, génération du projet iOS |
+| `@xmldom/xmldom` | injection de fragment XML | non — écriture des plists au `prebuild` |
+
+Le seul qui embarque, `decode-uri-component`, se déclenche sur une adresse malformée : sur une
+application sans serveur, l'adresse vient de la barre du navigateur du visiteur, et le déni de
+service est le sien. Les trois autres s'exécutent sur la machine qui compile.
+
+**Pas de barrière en intégration continue, et c'est un choix.** Les quatre sont figés par les
+fourchettes d'Expo : une étape bloquante rendrait la CI rouge en permanence pour des correctifs que
+le dépôt ne peut pas appliquer, et une CI rouge en permanence est une CI qu'on cesse de lire. Le
+relevé se refait à la main, et à chaque montée de version d'Expo — qui est de toute façon le seul
+moment où ces quatre-là peuvent bouger.
+
 ### Le site s'installe, et fonctionne hors ligne
 
 C'est le cas type : aucun compte, aucune requête, tout est calculé sur l'appareil et les recettes

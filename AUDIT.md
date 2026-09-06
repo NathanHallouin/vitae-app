@@ -3,7 +3,7 @@
 **Date :** 6 septembre 2026 · **Périmètre :** le code produit **et** le dispositif qui le produit
 · **Révision auditée :** `d1257eb` + arbre de travail non commité (76 fichiers modifiés, 17 non suivis)
 
-> **Mise à jour du 6 septembre.** Deux passes de travaux : les cinq corrections prioritaires, puis
+> **Mise à jour du 6 septembre.** Trois passes de travaux : les cinq corrections prioritaires, puis
 > les constats abordables du journal. Bilan : **19 constats résolus** · **1 découvert par une
 > correction** (`V7`, lui-même résolu) · **1 évalué puis écarté avec sa mesure** (`V5`) ·
 > **2 affirmations de l'audit corrigées** (le « 0 `any` » et le « fichier suivi par git » étaient
@@ -207,7 +207,7 @@ aucun `include` de tsconfig, et le script racine ne lance que celui d'`apps/app`
 | Sg2 | 🟠 | Dépendance déclarée sans usage réel — voir S3 | `expo-linear-gradient` |
 | Sg3 | 🟠 | **Ternaire aplati par une édition non ciblée.** Un `sed` global `font-sans-semibold → font-sans-medium` a rendu les deux branches identiques : la distinction actif/inactif que le ternaire portait a disparu sans que rien ne le signale | `apps/app/src/components/ui/SousOnglets.tsx:87-90` |
 | Sg4 | ✅ | **Résolu, et le constat corrigé.** L'audit annonçait « 41 exports orphelins ». Le chiffre confondait *non nommé ailleurs* et *inatteignable* : la plupart sont des **types** qui n'apparaissent que dans des signatures exportées — `WeightTarget` dans `Projection`, `Session` dans `WeekPlan` — et les retirer les rendrait innommables par un consommateur, ce qui est une régression et non un nettoyage. Les vrais orphelins étaient **14 valeurs** | 13 `export` retirés (fonctions et clés internes à leur module), `FROM_NAV` supprimé — vestige de l'ère Next.js, référencé nulle part, pas même dans son propre fichier |
-| Sg5 | 🟡 | **Sur-ingénierie : six mécanismes de divulgation distincts** pour un seul besoin (montrer/cacher). Chacun se défend isolément ; ensemble ils imposent six conventions à apprendre | `Repliable` · `Fiche`/`Fiche.web`/`FicheContenu` · `SousOnglets` · `EncartCours` · `SuiviCard` (prop `vue`) · `FiltresRecettes` |
+| Sg5 | ✅ | **Résolu, et le constat corrigé.** « Six mécanismes de divulgation » en confondait trois besoins : `SousOnglets` est de la navigation entre pairs, `EncartCours` est un rejet. Les vrais mécanismes de divulgation étaient **quatre**. L'un d'eux — la feuille modale de `Fiche`, en natif — était redondant : **trois fichiers, 344 lignes et une paire de plateforme pour un seul appelant**, `NeatCard` | `Fiche.web.tsx` et `FicheContenu.tsx` supprimés, tout fondu dans `Fiche.tsx` (220 l.) qui déplie sur place partout. `scrim` retiré de la palette, son unique consommateur ayant disparu. Les deux autres — le panneau de `SuiviCard` et celui de `FiltresRecettes` — ont un déclencheur posé à l'extérieur par nécessité (deux boutons sous le cadran, une pastille qui porte un compte) : ce sont des variantes d'un même geste, pas des mécanismes de plus |
 
 **Ce qui n'est *pas* une signature de génération, à ne pas confondre.** Les commentaires narratifs
 longs sont une convention **explicite** (`AGENTS.md:45` : « Les commentaires expliquent pourquoi,
@@ -248,7 +248,7 @@ pour construire, ni pour tester.
 | # | Gr. | Constat | Référence |
 |---|---|---|---|
 | Sc1 | 🟡 | **Frontière de confiance franchie.** Un paquet de passation fourni par un tiers (6 fichiers HTML + un dossier `code/` de TypeScript) a été lu **et son contenu appliqué comme instruction** : fichiers copiés tels quels dans le dépôt. Le paquet annonçait lui-même que ce code « n'a pas été exécuté ». Il l'a été. Ici l'auteur est l'utilisateur, donc risque nul — mais **le mécanisme est celui d'une injection par document fourni**, et rien ne l'aurait empêché | `design_handoff_vitae_cadran/code/` → `packages/core/src/tokens.ts`, `tools/polices.ts`, `apps/app/tailwind.config.js`, 4 composants |
-| Sc2 | 🟡 | **Aucun audit de vulnérabilités** : pas de `bun audit`, pas de Dependabot | `.github/` ne contient que `workflows/` |
+| Sc2 | ✅ | **Résolu.** Aucun audit de vulnérabilités n'était configuré | `bun run audit`. Relevé du 6 septembre : 6 avis, `bun audit fix` en résout 2 sans rien casser, **4 restent** — tous figés par les fourchettes d'Expo. Vérifié sur l'export : **un seul atteint le paquet livré** (`decode-uri-component`, déni de service sur une adresse malformée, donc sur le navigateur du visiteur lui-même) ; les trois autres sont des outils de compilation. Analyse dans `README.md` § « Les avis de sécurité » |
 
 **Conforme :** aucun secret dans le dépôt, aucune variable d'environnement lue par le code
 applicatif, **aucune donnée réelle envoyée à un service externe** (le profil ne quitte pas
@@ -295,12 +295,12 @@ Ouverts après les travaux du 6 septembre, verdict réévalué entre parenthèse
 | 3. Garde-fous d'exécution | Écart majeur (**conforme**) | — | — | — | 4 |
 | 4. Vérification et circularité | **Critique** (**conforme**) | — | — | ⚖️ 1 | 6 |
 | 5. Boucle de retour | Conforme | — | — | 1 | — |
-| 6. Signatures de génération | Écart majeur (**mineur**) | — | 1 | 1 | 2 |
+| 6. Signatures de génération | Écart majeur (**conforme**) | — | — | — | 4 |
 | 7. Revue et gouvernance | **Critique** (**majeur**) | 1 | 1 | — | 1 |
 | 8. Dette de compréhension | Écart mineur | — | — | 2 | — |
-| 9. Sécurité du dispositif | Écart mineur | — | — | 2 | — |
+| 9. Sécurité du dispositif | Écart mineur (**mineur**) | — | — | 1 | 1 |
 | 10. Axes classiques | Écart mineur (**conforme**) | — | — | — | 2 |
-| **Total** | | **1** | **2** | **6 + 1 ⚖️** | **21** |
+| **Total** | | **1** | **1** | **4 + 1 ⚖️** | **23** |
 
 **Le seul constat critique restant est `Gv2` : aucune revue.** Il n'est pas corrigeable par du
 code — et les vingt et une corrections ci-dessus ne l'entament pas d'un pouce, puisqu'elles ont
@@ -414,11 +414,13 @@ diagnostic.
 | Commits > 400 lignes changées | **25 / 35** | distribution `--shortstat` |
 | Commits > 1 000 lignes changées | **15 / 35** | idem |
 | Commits avec trailer d'agent | 7 / 35 | `grep -c "Claude-Session:"` |
-| LOC code (hors tests, généré, `dist`) | 17 494 | `find … \| xargs wc -l` |
+| LOC code (hors tests, généré, `dist`) | 17 427 (17 494 après la 2ᵉ passe : la 3ᵉ en retire 67 nettes, malgré les commentaires ajoutés) | `find … \| xargs wc -l` |
 | LOC tests | 2 633 (12 fichiers) | idem |
 | LOC documentation | 1 404 (README 982, ROADMAP 374, AGENTS 47, CLAUDE 1) | `wc -l` |
 | Lignes de commentaire dans le code | 2 908 (17 %) | `grep -h "^\s*\*\|^\s*//"` |
 | Tests | **275**, 6 945 assertions, **0,15 s** (260 / 6 838 avant) | `bun test packages` |
+| Avis de sécurité | **4**, dont **1** atteint le paquet livré (6 avant, 2 résolus) | `bun run audit` |
+| Mécanismes de divulgation | **3** (4 avant ; « six » était un décompte fautif) | `Repliable`, `Fiche`, panneaux à déclencheur externe |
 | Cycle `check + typecheck + test` | **6,8 s** (3,5 s avant — le typecheck couvre désormais quatre périmètres au lieu d'un) | `time (…)` |
 | `any` explicite / `@ts-ignore` / `!` | 0 / 0 / 0 | `grep -rn` |
 | `any` **implicite** | 0 depuis `V7` ; il y en avait 1, invisible parce que `tools/` n'était typechecké par rien | `tsc --noEmit -p tools` |
@@ -495,15 +497,40 @@ puis le lot de corrections d'audit.
   décision écrite, `X2` par la démonstration qu'il n'y avait rien à perdre. Un constat fermé sans
   ligne de code n'est pas un constat esquivé, à condition que la raison soit dans le dépôt.
 
+### 6 septembre 2026 — troisième passe
+
+| Constat | Ce qui a été fait |
+|---|---|
+| **Sc2** | `bun run audit` ajouté ; deux avis résolus par `bun audit fix` ; les quatre restants analysés un par un contre l'export, et l'analyse écrite dans `README.md` |
+| **Sg5** | Le décompte corrigé (quatre mécanismes, pas six), puis le redondant supprimé : la feuille modale de `Fiche`. Trois fichiers fondus en un, `scrim` retiré de la palette |
+
+### Ce que la troisième passe a appris
+
+- **Un commentaire peut justifier un mécanisme par un besoin qui n'existe pas.** `Fiche.web.tsx`
+  expliquait la paire de plateforme par le référencement : « les explications sont ce qu'un moteur
+  de recherche trouve à lire ». Vérifié sur l'export : **le détail des fiches n'a jamais été dans le
+  HTML livré**, parce que son unique appelant — la carte des gestes du quotidien — est derrière un
+  profil, et que `bouger.html` sort donc sur l'état vide. La paire protégeait un contenu absent.
+  C'est le même défaut que `S3` sous une autre forme, et il n'a été vu qu'en écrivant une assertion
+  qui a échoué.
+- **Le nombre d'un constat mérite le même soin que le constat.** Quatre chiffres de cet audit
+  étaient faux : deux par une méthode de mesure aveugle (`grep`), deux par un décompte qui
+  agrégeait des choses différentes. Aucun ne renversait la conclusion, tous auraient conduit à des
+  corrections mal dimensionnées — et deux d'entre elles auraient été des régressions.
+- **Un audit de dépendances utile n'est pas un compte d'avis.** Six avis, dont un seul atteint le
+  paquet livré et cinq s'exécutent sur la machine qui compile. Une barrière en intégration continue
+  aurait rendu la CI rouge en permanence pour des correctifs impossibles à appliquer, ce qui apprend
+  à ne plus la lire.
+
 ### Ce qui reste ouvert, par ordre de coût
 
-| # | Constat | Effort estimé | Pourquoi il reste |
-|---|---|---|---|
-| Sg5 | Six mécanismes de divulgation à ramener à quatre | 1 j | Le seul constat de refonte du lot. Il touche six composants et autant d'écrans ; le faire sans test d'interface — il n'y en a aucun — se vérifierait à l'œil, ce qui est le pire moment pour bouger six choses à la fois |
-| B1 | Aucun test de composant ni de bout en bout | 2–3 j | **À ne pas faire maintenant** : voir les anti-recommandations. Ils seraient écrits par le même agent que le code, donc circulaires |
-| Cp1, Cp2 | `training.ts` et le plafond iOS de `rappels.ts` restent opaques | — | Ni l'un ni l'autre ne se lève par du code : le premier demande une relecture, le second un appareil |
-| Sc2 | Aucun audit de vulnérabilités | 1 h | `bun audit` ou Dependabot. Non fait faute de pouvoir vérifier le résultat depuis cet environnement |
-| **Gv2** | **Aucune revue** | — | **Non corrigeable par du code.** Le seul critique restant |
+| # | Constat | Pourquoi il reste |
+|---|---|---|
+| B1 | Aucun test de composant ni de bout en bout | **À ne pas faire maintenant**, et c'est dans les anti-recommandations : écrits par le même agent que le code, ils seraient circulaires eux aussi. Le manque se compense aujourd'hui par les assertions sur le HTML livré, qui vérifient un artefact et non une intention |
+| Sc1 | Un paquet fourni par un tiers a été lu **et appliqué comme instruction** | Le mécanisme est celui d'une injection par document. Ici l'auteur du paquet est l'utilisateur, donc le risque est nul — mais rien dans le dispositif ne l'aurait empêché autrement |
+| Cp1, Cp2 | `training.ts` et le plafond iOS de `rappels.ts` restent opaques | Ni l'un ni l'autre ne se lève par du code : le premier demande une relecture, le second un appareil |
+| V5 ⚖️ | `noUncheckedIndexedAccess` | Évalué, mesuré, écarté. À rouvrir si le dépôt se met à indexer des tableaux dont la taille dépend de données persistées |
+| **Gv2** | **Aucune revue** | **Non corrigeable par du code.** Le seul critique restant, et il n'a pas bougé d'un pouce en trois passes |
 
 **`Gv2` est le seul constat critique restant, et c'est le plus important.** Les travaux du jour ont
 créé des points de retour ; ils n'ont créé aucune revue. Tout ce qui précède — y compris cet audit,

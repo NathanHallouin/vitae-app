@@ -29,7 +29,6 @@
   --t-macro-fat: #2f5f92;
   --t-macro-carb: #186049;
   --t-marker: #5d5b6a;
-  --t-scrim: rgba(20, 19, 28, 0.45);
   --t-doodle-ink: #3a3495;
   --t-doodle-accent: #dedcec;
 }
@@ -62,7 +61,6 @@
   --t-macro-fat: #7fb2e0;
   --t-macro-carb: #6fcf9f;
   --t-marker: #928fa6;
-  --t-scrim: rgba(0, 0, 0, 0.62);
   --t-doodle-ink: #a9a4ff;
   --t-doodle-accent: #231f38;
 }

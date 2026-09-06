@@ -1,9 +1,9 @@
 /**
  * Ce que `Seo` reçoit, dans les deux versions.
  *
- * Extrait pour la même raison que `FicheContenu` : deux fichiers `.tsx` que Metro choisit selon la
- * plateforme finissent par diverger si rien ne les tient ensemble. Ici c'est le type qui les tient
- * — ajouter une balise sur le web sans l'accepter en natif casse la compilation.
+ * Extrait parce que deux fichiers `.tsx` que Metro choisit selon la plateforme finissent par
+ * diverger si rien ne les tient ensemble. Ici c'est le type qui les tient : ajouter une balise sur
+ * le web sans l'accepter en natif casse la compilation.
  */
 export interface SeoProps {
   title: string;
