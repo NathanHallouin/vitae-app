@@ -28,6 +28,7 @@
 import { readdir, rm, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { SECTIONS } from '@vitae/core/nav';
 import { POLICES } from './polices';
 
 const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -63,15 +64,25 @@ const adresse = (f: string) => `/${path.relative(DIST, f).split(path.sep).join('
  * Les soixante-deux recettes n'y sont pas — deux mégaoctets de HTML pour un catalogue qu'on ne
  * parcourt pas forcément. Elles se mettent en cache à la visite, comme le reste.
  */
+/**
+ * Les pages gardées hors ligne, **déduites de la navigation** et non réécrites ici.
+ *
+ * La liste était écrite à la main, et elle avait pris du retard : `/comprendre` — l'une des quatre
+ * sections de la barre du bas, et le seul chemin de l'accueil qui n'exige rien du visiteur — n'y
+ * figurait pas, quand `/confidentialite` y était. La refonte a créé le cours ; personne n'a pensé
+ * à revenir ici, et rien ne pouvait le signaler.
+ *
+ * `SECTIONS.prefixes` donne exactement ce qu'il faut : les quatre écrans de résultats, les
+ * recettes, le cours, le profil et ses deux sous-pages. Une section ajoutée demain entre toute
+ * seule — c'est la même raison qui fait venir les polices depuis `build-fonts.ts` deux lignes plus
+ * bas.
+ *
+ * L'accueil s'ajoute à part : ce n'est pas une section, c'est la porte.
+ */
+const PAGES = ['/', ...new Set(SECTIONS.flatMap((s) => s.prefixes))];
+
 const PRECACHE = [
-  '/',
-  '/metabolisme',
-  '/alimentation',
-  '/poids',
-  '/bouger',
-  '/profil',
-  '/recettes',
-  '/confidentialite',
+  ...PAGES,
   '/manifest.json',
   '/favicon.ico',
   '/icone-192.png',

@@ -201,6 +201,17 @@ jobs:
           grep -q "$paquet" apps/app/dist/sw.js \
             || { echo "sw.js ne précache pas le paquet $paquet"; exit 1; }
 
+      - name: L'export tient ses règles de référencement
+        # Deux propriétés que la CI ne pouvait pas exprimer en `grep`, parce qu'elles comparent des
+        # ensembles : chaque page se canonise elle-même, et le sitemap correspond exactement aux
+        # pages indexables livrées.
+        #
+        # Elles tenaient déjà quand ce contrôle a été écrit. Il ne corrige rien — il empêche une
+        # régression qui ne se manifesterait que dans les statistiques de référencement, des mois
+        # plus tard : deux pages qui revendiquent la même adresse en font disparaître une des
+        # résultats, sans erreur et sans alerte.
+        run: bun run verifie:export
+
       - name: Seules les polices utilisées sont livrées
         # Importer une coupe de `@expo-google-fonts` enregistre la famille entière : trente-six
         # fichiers et 7,7 Mo partaient dans l'export pour les coupes affichées. Le jour où un

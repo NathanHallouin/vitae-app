@@ -963,6 +963,58 @@ C'est la troisième fois que l'audit trouve un défaut **dans son propre disposi
 une assertion visant la mauvaise page (sixième passe), une entrée de roadmap disant l'inverse de la
 vérité (sixième passe), et maintenant une liste qui ne couvrait que 13 % de son objet.
 
+### 6 septembre 2026 — onzième passe, les autres listes écrites à la main
+
+La dixième passe s'était terminée sur une phrase : « une vérification qui énumère ne protège que ce
+qu'on a pensé à y mettre ». Cette passe l'applique aux **autres** énumérations du dépôt.
+
+#### Trois propriétés vérifiées, aucune ne protégeait rien
+
+La CI vérifiait la **présence** de `rel="canonical"` sur douze pages. Personne ne vérifiait qu'elle
+pointe la bonne adresse — or deux pages qui revendiquent la même en font disparaître une des
+résultats, **sans erreur et sans alerte**. Mesuré sur les 94 pages livrées :
+
+| Propriété | Résultat |
+|---|---|
+| Chaque page se canonise elle-même | ✅ 94 / 94, **zéro** fautive |
+| Le sitemap correspond aux pages indexables | ✅ 88 = 88, aucune manquante, aucun fantôme |
+| Les cinq doublons `(tabs)/` pointent la page propre | ✅ c'est **leur canonique** qui les rend inoffensifs, pas le `Disallow` de `robots.txt` — une page interdite au robot est une page dont il ne peut pas lire la canonique |
+
+Rien à corriger, donc — et c'est justement le moment de le figer. `tools/verifie-export.ts` porte
+les trois règles, parce qu'elles comparent des **ensembles**, ce qu'un `grep` ne sait pas faire sans
+devenir illisible. Chacune vérifiée par injection : canonique détournée, page retirée du sitemap,
+entrée de précache sans page.
+
+#### `Sw1` 🟠 — une section entière manquait au cache hors ligne
+
+`tools/build-sw.ts` énumérait huit pages à précacher, à la main. **`/comprendre` n'y était pas** —
+l'une des quatre sections de la barre du bas, et le seul chemin de l'accueil qui n'exige rien du
+visiteur. `/confidentialite`, page légale ouverte trois fois par an, y était.
+
+La cause est la même que celle du 404 : la refonte a créé le cours, personne n'est revenu mettre à
+jour la liste, et rien ne pouvait le signaler. Le précache est **tolérant à dessein** — une adresse
+en échec ne fait pas échouer l'installation — donc l'absence ne coûte que cette page hors ligne, et
+ne se voit qu'en coupant le réseau.
+
+La liste se déduit désormais de `SECTIONS.prefixes` : les quatre écrans de résultats, les recettes,
+le cours, le profil et ses deux sous-pages. Dix-neuf entrées au lieu de dix-sept ; une section
+ajoutée demain entre toute seule. C'est exactement le mécanisme qui fait déjà venir les polices
+depuis `build-fonts.ts`, deux lignes plus bas — il existait dans le même fichier, et n'avait pas été
+appliqué aux pages.
+
+### Ce que la onzième passe a appris
+
+**Une propriété vraie et non protégée est une régression en attente.** Les trois règles de
+référencement tenaient toutes les trois quand je les ai mesurées ; aucune n'aurait résisté à un
+changement, et aucune n'aurait fait de bruit en cédant. Le référencement est le seul domaine de ce
+projet où une faute ne produit ni exception, ni page cassée, ni test rouge — seulement une courbe
+qui baisse trois mois plus tard.
+
+Et la leçon de la dixième passe s'est vérifiée une seconde fois : **la liste écrite à la main dans
+`build-sw.ts` avait exactement le même défaut que celle de la CI**, dans le même dépôt, pour la même
+raison. Chercher « où d'autre a-t-on énuméré ? » a coûté dix minutes et trouvé une section entière
+absente du cache.
+
 ### Ce qui reste ouvert, par ordre de coût
 
 **Cette phrase a été écrite deux fois — « la liste des constats corrigeables est épuisée » — et
