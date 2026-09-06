@@ -28,6 +28,8 @@
     "sw": "bun run tools/build-sw.ts",
     "verifie:export": "bun run tools/verifie-export.ts",
     "verifie:paires": "bun run tools/verifie-paires.ts",
+    "verifie:theme": "bun run tools/verifie-theme.ts",
+    "photos:fetch": "bun run tools/fetch-photos.ts",
     "photos": "bun run tools/build-photos.ts"
   },
   "devDependencies": {

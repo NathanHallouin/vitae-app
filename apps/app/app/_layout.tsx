@@ -34,6 +34,7 @@ import ColorModeProvider, { useColorMode } from '@/theme/ColorMode';
 import { MOTION, useMotionReduite } from '@/theme/motion';
 import { usePalette } from '@/theme/palette';
 import '../global.css';
+import PleinEcran from '@/components/layout/PleinEcran';
 
 enableFreeze(true);
 
@@ -113,6 +114,8 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
+      {/* Plein écran sur Android : les boutons de navigation sont masqués. Sans effet ailleurs. */}
+      <PleinEcran />
       <SafeAreaProvider>
         <ColorModeProvider>
           <ProfileProvider>

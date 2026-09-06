@@ -42,18 +42,43 @@ function bloc(palette: Palette, indent = '  '): string {
 /**
  * NativeWind résout les variables à la racine du document : c'est `.dark:root` qu'il faut écrire,
  * et non `.dark`, qui n'y désignerait aucun élément.
+ *
+ * ## Pourquoi `@layer base`, et non deux règles nues
+ *
+ * **Sans lui, le thème sombre n'existe pas en natif.** Ce n'est pas une précaution de style : les
+ * variables sombres étaient purement et simplement absentes du paquet Android.
+ *
+ * Le compilateur de NativeWind lit la feuille **dans l'ordre**. Pour reconnaître `.dark:root`
+ * comme « les variables du thème sombre », il lui faut savoir que « dark » est une classe — et il
+ * l'apprend d'une règle `@cssInterop set darkMode class dark` que NativeWind injecte dans la couche
+ * `base`, donc à l'emplacement de `@tailwind base`. Or `global.css` importe ce fichier **avant**
+ * les directives, comme la spécification CSS l'exige d'un `@import`.
+ *
+ * Résultat, mesuré en exécutant le compilateur sur la feuille produite :
+ *
+ *     règles nues       →  --t-bg : { light: '#f3f2f7' }
+ *     dans @layer base  →  --t-bg : { light: '#f3f2f7', dark: '#0d0c13' }
+ *
+ * Vingt et une variables sur vingt et une n'avaient que leur valeur claire. Sur le web rien ne
+ * paraissait — le navigateur applique le CSS tel quel, sans passer par ce compilateur — et la
+ * bascule de thème restait donc sans effet sur téléphone, et sur téléphone seulement.
+ *
+ * `@layer base` range ces variables là où Tailwind range les styles de base d'un projet, c'est-à-dire
+ * **après** ceux des greffons. Le drapeau est lu en premier, et les deux palettes arrivent entières.
  */
 async function ecrire(): Promise<string> {
   const cible = path.join(RACINE, 'apps/app/src/theme/tokens.generated.css');
   const contenu = [
     AVERTISSEMENT,
     '',
-    ':root {',
-    bloc(LIGHT),
-    '}',
+    '@layer base {',
+    '  :root {',
+    bloc(LIGHT, '    '),
+    '  }',
     '',
-    '.dark:root {',
-    bloc(DARK),
+    '  .dark:root {',
+    bloc(DARK, '    '),
+    '  }',
     '}',
     '',
   ].join('\n');

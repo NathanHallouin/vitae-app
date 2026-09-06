@@ -44,3 +44,12 @@ design_handoff_*/
 
 # Export natif de vérification (CI et local)
 apps/app/.export-natif/
+
+# Planche-contact des photos : artefact de tri, pas une source
+photos/planche.html
+
+# Les originaux des photos de recettes : 161 Mo qui se re-téléchargent à
+# lidentique depuis photos/sources.json. Le choix est versionné, pas les octets.
+photos/*.jpg
+photos/*.jpeg
+photos/*.png

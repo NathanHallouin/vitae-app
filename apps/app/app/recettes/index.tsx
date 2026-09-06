@@ -125,8 +125,15 @@ export default function RecettesIndex() {
                 style={{ width: `${100 / colonnes}%`, paddingHorizontal: 8, paddingBottom: 16 }}
               >
                 <Link href={`/recettes/${r.slug}`} asChild>
-                  <Pressable accessibilityRole="link" className="h-full">
-                    <Card className="h-full overflow-hidden">
+                  {/* `flex-1` et non `h-full`. Les deux visent la même chose — la carte remplit sa
+                      case pour que deux voisines s'alignent en bas — mais `height: '100%'` exige
+                      une hauteur de parent **définie**. Sur le web, la case est un élément flex
+                      étiré par sa ligne, donc sa hauteur est connue et la règle marche. En natif,
+                      dans une liste qui défile, elle ne l'est pas : la carte se résolvait alors
+                      contre la hauteur de l'écran, et une seule remplissait toute la vue.
+                      `flex-1` demande la même chose sans la supposer connue. */}
+                  <Pressable accessibilityRole="link" className="flex-1">
+                    <Card className="flex-1 overflow-hidden">
                       {/* `sizes` suit la grille : une colonne sous 680 points, deux jusqu'à
                           1000, trois au-delà — la carte fait donc environ un tiers de la colonne
                           de contenu, bornée à 1120. */}

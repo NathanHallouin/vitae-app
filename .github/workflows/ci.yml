@@ -52,6 +52,16 @@ jobs:
       - name: Export du site
         run: bun run --cwd apps/app export:web
 
+      - name: Le thème sombre survit à la compilation native
+        # Les variables sombres étaient absentes du paquet Android — pas fausses, absentes — parce
+        # que le compilateur de NativeWind lit la feuille dans l'ordre et rencontrait `.dark:root`
+        # avant d'avoir appris que « dark » est une classe. Le site marchait, un navigateur
+        # n'utilisant pas ce compilateur : typage, tests, CI, export web, tout était vert.
+        #
+        # C'est le seul défaut de l'audit qu'aucune vérification existante ne pouvait voir, et il
+        # rendait la bascule de thème sans effet sur téléphone.
+        run: bun run verifie:theme
+
       - name: Le paquet natif se construit
         # La CI ne prouvait que le site. L'application iOS et Android est l'autre moitié du produit,
         # et rien ne vérifiait qu'elle **compile** — un import qui n'existe que sur le web, une
