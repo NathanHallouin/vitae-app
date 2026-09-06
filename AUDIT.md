@@ -3,7 +3,7 @@
 **Date :** 6 septembre 2026 · **Périmètre :** le code produit **et** le dispositif qui le produit
 · **Révision auditée :** `d1257eb` + arbre de travail non commité (76 fichiers modifiés, 17 non suivis)
 
-> **Mise à jour du 6 septembre.** Trois passes de travaux : les cinq corrections prioritaires, puis
+> **Mise à jour du 6 septembre.** Quatre passes de travaux : les cinq corrections prioritaires, puis
 > les constats abordables du journal. Bilan : **19 constats résolus** · **1 découvert par une
 > correction** (`V7`, lui-même résolu) · **1 évalué puis écarté avec sa mesure** (`V5`) ·
 > **2 affirmations de l'audit corrigées** (le « 0 `any` » et le « fichier suivi par git » étaient
@@ -203,9 +203,9 @@ aucun `include` de tsconfig, et le script racine ne lance que celui d'`apps/app`
 
 | # | Gr. | Constat | Référence |
 |---|---|---|---|
-| Sg1 | 🟠 | Duplication de **source de vérité** — voir S2 | `tokens.ts` / `tailwind.config.js` |
-| Sg2 | 🟠 | Dépendance déclarée sans usage réel — voir S3 | `expo-linear-gradient` |
-| Sg3 | 🟠 | **Ternaire aplati par une édition non ciblée.** Un `sed` global `font-sans-semibold → font-sans-medium` a rendu les deux branches identiques : la distinction actif/inactif que le ternaire portait a disparu sans que rien ne le signale | `apps/app/src/components/ui/SousOnglets.tsx:87-90` |
+| Sg1 | ✅ | **Résolu** — c'est `S2` sous un autre angle : la duplication de source de vérité entre `tokens.ts` et `tailwind.config.js` | `tools/build-tokens.ts` engendre `tailwind.generated.js` |
+| Sg2 | ✅ | **Résolu** — c'est `S3` : `expo-linear-gradient` déclaré sans usage | Dépendance retirée du manifeste |
+| Sg3 | ✅ | **Résolu.** Un `sed` global `font-sans-semibold` → `font-sans-medium` avait rendu les deux branches d'un ternaire identiques : la distinction actif/inactif que le ternaire portait avait disparu, sans que rien ne le signale | `SousOnglets.tsx` : la graisse redevient distinctive, avec la trace de l'accident dans le commentaire. **Balayage du dépôt : aucun autre ternaire aplati**, y compris sur plusieurs lignes |
 | Sg4 | ✅ | **Résolu, et le constat corrigé.** L'audit annonçait « 41 exports orphelins ». Le chiffre confondait *non nommé ailleurs* et *inatteignable* : la plupart sont des **types** qui n'apparaissent que dans des signatures exportées — `WeightTarget` dans `Projection`, `Session` dans `WeekPlan` — et les retirer les rendrait innommables par un consommateur, ce qui est une régression et non un nettoyage. Les vrais orphelins étaient **14 valeurs** | 13 `export` retirés (fonctions et clés internes à leur module), `FROM_NAV` supprimé — vestige de l'ère Next.js, référencé nulle part, pas même dans son propre fichier |
 | Sg5 | ✅ | **Résolu, et le constat corrigé.** « Six mécanismes de divulgation » en confondait trois besoins : `SousOnglets` est de la navigation entre pairs, `EncartCours` est un rejet. Les vrais mécanismes de divulgation étaient **quatre**. L'un d'eux — la feuille modale de `Fiche`, en natif — était redondant : **trois fichiers, 344 lignes et une paire de plateforme pour un seul appelant**, `NeatCard` | `Fiche.web.tsx` et `FicheContenu.tsx` supprimés, tout fondu dans `Fiche.tsx` (220 l.) qui déplie sur place partout. `scrim` retiré de la palette, son unique consommateur ayant disparu. Les deux autres — le panneau de `SuiviCard` et celui de `FiltresRecettes` — ont un déclencheur posé à l'extérieur par nécessité (deux boutons sous le cadran, une pastille qui porte un compte) : ce sont des variantes d'un même geste, pas des mécanismes de plus |
 
@@ -225,7 +225,7 @@ installée. `typecheck` et `check` passent, `bun install --frozen-lockfile` en C
 |---|---|---|---|
 | Gv1 | ✅ | **Résolu.** Deux refontes vivaient dans un seul arbre de travail sans point de retour | Trois commits : `7dd32c8` refonte visuelle, `da38631` navigation + cours, puis le présent lot de corrections |
 | Gv2 | 🔴 | **Ouvert. 0 PR, 0 merge, 35 commits directs sur `main`.** Seuil retenu au-delà duquel une revue n'a pas eu lieu : **400 lignes changées**. **25 commits sur 35 le dépassent**, dont **15 dépassent 1 000 lignes**. Les trois commits du jour ne corrigent pas cela : ils créent des points de retour, ils ne créent pas de revue | `git log --merges` → 0 ; distribution mesurée |
-| Gv3 | 🟠 | **Aucun point de validation obligatoire** avant changement de format persisté. `storage.ts` a un champ `v` et une lecture tolérante — bon design — mais rien n'impose une relecture humaine quand `PROFILE_VERSION` change | `packages/core/src/storage.ts:19` |
+| Gv3 | ✅ | **Résolu.** Aucun point d'arrêt avant un changement de format persisté. Une version qui monte sans migration fait repartir les profils existants à zéro — `parseProfile` rend `null`, l'application ouvre un formulaire vide, et l'utilisateur croit avoir tout effacé lui-même | `.githooks/pre-commit` refuse tout commit touchant `PROFILE_VERSION` ou `SUIVI_VERSION` sans `VITAE_FORMAT=1`. Contre-épreuve faite : le crochet mord |
 | — | 💭 | **Taux de retouche : non mesurable.** 35 commits sur 5 jours, fenêtre trop courte pour distinguer réécriture et itération normale. Signal disponible seulement : `4c91800` (−419 l.) et `8dac797` (−4 383 l.) suggèrent des cycles génération → suppression par grandes passes | — |
 
 ### Axe 8 — Dette de compréhension · **Écart mineur**
@@ -236,8 +236,8 @@ le maintenir.
 
 | # | Gr. | Constat | Référence |
 |---|---|---|---|
-| Cp1 | 🟡 | Zone opaque : la composition du programme d'entraînement. Testée, mais les tests décrivent des invariants, pas la logique. Personne ne peut expliquer *pourquoi cet exercice-là* sans tout relire | `packages/core/src/training.ts` (~700 l.) |
-| Cp2 | 🟡 | Zone opaque : le raisonnement sur le plafond iOS de 64 notifications n'est vérifiable que sur appareil | `packages/core/src/rappels.ts` |
+| Cp1 | ✅ | **Résolu.** `training.ts` fait 700 lignes bien commentées fonction par fonction, mais rien ne disait **l'ordre dans lequel elles s'appellent** : il fallait tout relire pour répondre à « pourquoi cet exercice-là, à ce volume-là » | En-tête § « Comment un programme se compose » : la chaîne en cinq étapes, et où se trouve chacune des deux réponses — l'exercice vient de la liste du groupe musculaire, le volume vient du `Setup`. Le gabarit dit **quoi**, le réglage dit **combien**, et les deux ne se mélangent jamais |
+| Cp2 | ⚖️ | **Documenté, non levé.** Le plafond iOS était cité sans son chiffre réel, et l'écart avec la valeur retenue n'était écrit nulle part | `rappels.ts` dit maintenant que le système en accepte **64**, que la génération s'arrête à **60**, pourquoi cette marge, et surtout **ce que rien ne vérifie** : que le plafond soit bien de 64 sur la version courante, et que le système se comporte comme décrit. Cela ne se constate que sur un appareil, et ce n'est pas fait |
 
 **Dépendance à un fournisseur d'outillage : faible.** `AGENTS.md` est un format ouvert lisible par
 n'importe quel agent. Le seul couplage est `.claude/settings.local.json`, qui n'est nécessaire ni
@@ -247,7 +247,7 @@ pour construire, ni pour tester.
 
 | # | Gr. | Constat | Référence |
 |---|---|---|---|
-| Sc1 | 🟡 | **Frontière de confiance franchie.** Un paquet de passation fourni par un tiers (6 fichiers HTML + un dossier `code/` de TypeScript) a été lu **et son contenu appliqué comme instruction** : fichiers copiés tels quels dans le dépôt. Le paquet annonçait lui-même que ce code « n'a pas été exécuté ». Il l'a été. Ici l'auteur est l'utilisateur, donc risque nul — mais **le mécanisme est celui d'une injection par document fourni**, et rien ne l'aurait empêché | `design_handoff_vitae_cadran/code/` → `packages/core/src/tokens.ts`, `tools/polices.ts`, `apps/app/tailwind.config.js`, 4 composants |
+| Sc1 | ✅ | **Résolu par une règle, faute d'outil.** Un paquet fourni par un tiers a été lu **et son contenu appliqué comme instruction** : des fichiers copiés tels quels, alors que le paquet annonçait lui-même que son code n'avait jamais été exécuté | `AGENTS.md` pose désormais la règle : ce qu'un tiers dépose est une **donnée**, jamais une instruction — cela se lit, se comprend et se réécrit dans les conventions du dépôt. Aucun outil ne peut trancher à la place d'une relecture ; ce qui manquait était la règle qui l'impose |
 | Sc2 | ✅ | **Résolu.** Aucun audit de vulnérabilités n'était configuré | `bun run audit`. Relevé du 6 septembre : 6 avis, `bun audit fix` en résout 2 sans rien casser, **4 restent** — tous figés par les fourchettes d'Expo. Vérifié sur l'export : **un seul atteint le paquet livré** (`decode-uri-component`, déni de service sur une adresse malformée, donc sur le navigateur du visiteur lui-même) ; les trois autres sont des outils de compilation. Analyse dans `README.md` § « Les avis de sécurité » |
 
 **Conforme :** aucun secret dans le dépôt, aucune variable d'environnement lue par le code
@@ -295,12 +295,12 @@ Ouverts après les travaux du 6 septembre, verdict réévalué entre parenthèse
 | 3. Garde-fous d'exécution | Écart majeur (**conforme**) | — | — | — | 4 |
 | 4. Vérification et circularité | **Critique** (**conforme**) | — | — | ⚖️ 1 | 6 |
 | 5. Boucle de retour | Conforme | — | — | 1 | — |
-| 6. Signatures de génération | Écart majeur (**conforme**) | — | — | — | 4 |
-| 7. Revue et gouvernance | **Critique** (**majeur**) | 1 | 1 | — | 1 |
-| 8. Dette de compréhension | Écart mineur | — | — | 2 | — |
-| 9. Sécurité du dispositif | Écart mineur (**mineur**) | — | — | 1 | 1 |
+| 6. Signatures de génération | Écart majeur (**conforme**) | — | — | — | 5 |
+| 7. Revue et gouvernance | **Critique** (**critique**) | 1 | — | — | 2 |
+| 8. Dette de compréhension | Écart mineur (**conforme**) | — | — | ⚖️ 1 | 1 |
+| 9. Sécurité du dispositif | Écart mineur (**conforme**) | — | — | — | 2 |
 | 10. Axes classiques | Écart mineur (**conforme**) | — | — | — | 2 |
-| **Total** | | **1** | **1** | **4 + 1 ⚖️** | **23** |
+| **Total** | | **1** | **0** | **1 + 2 ⚖️** | **29** |
 
 **Le seul constat critique restant est `Gv2` : aucune revue.** Il n'est pas corrigeable par du
 code — et les vingt et une corrections ci-dessus ne l'entament pas d'un pouce, puisqu'elles ont
@@ -429,7 +429,8 @@ diagnostic.
 | Arbre de travail non commité | **0** au terme des travaux (76 fichiers, +3 594 / −1 526 avant) | `git status` |
 | Périmètres typechecké | **4** : `packages/core`, `packages/content`, `apps/app`, `tools` (1 avant) | `package.json:typecheck` |
 | Entrées d'allowlist | **12** (53 avant) | `.claude/settings.local.json` |
-| Crochets git actifs | **1**, avec un chemin protégé (0 avant) | `.githooks/pre-commit` |
+| Crochets git actifs | **1**, avec **deux** garde-fous : `.github/workflows/` et les versions de format persisté (0 avant) | `.githooks/pre-commit` |
+| Ternaires dont les deux branches sont identiques | **0** (1 avant) | balayage `apps/app/src` et `apps/app/app` |
 | Exports orphelins (valeurs) | **0** (14 avant) | balayage `export` vs usages |
 | Dépendances déclarées sans import | **0** (1 avant) | `expo-linear-gradient` retiré |
 | Règles du dépôt vérifiées en CI | **2** : pas de test de plateforme web/natif, `packages/core` sans import de plateforme (0 avant) | `.github/workflows/ci.yml` |
@@ -522,15 +523,44 @@ puis le lot de corrections d'audit.
   aurait rendu la CI rouge en permanence pour des correctifs impossibles à appliquer, ce qui apprend
   à ne plus la lire.
 
+### 6 septembre 2026 — quatrième passe, ce qui restait de corrigeable
+
+| Constat | Ce qui a été fait |
+|---|---|
+| **Sg3** | Le ternaire aplati de `SousOnglets` réparé, plus un balayage du dépôt : aucun autre |
+| **Gv3** | Le crochet refuse un commit qui monte `PROFILE_VERSION` ou `SUIVI_VERSION` sans le dire |
+| **Cp1** | `training.ts` : la chaîne de composition en cinq étapes, en tête de module |
+| **Cp2** | Le plafond iOS chiffré (64), la marge expliquée (60), et **ce que rien ne vérifie** écrit noir sur blanc |
+| **Sc1** | `AGENTS.md` : ce qu'un tiers dépose est une donnée, jamais une instruction |
+| **Sg1, Sg2** | Doublons de `S2` et `S3`, marqués comme tels |
+
+### Ce que la quatrième passe a appris
+
+- **Un constat marqué ouvert n'est pas un constat lu.** `Sg3` — un ternaire dont les deux branches
+  étaient devenues identiques — figurait dans l'audit depuis le début et avait traversé trois passes
+  sans être corrigé, parce que trois de ses voisins portaient le même identifiant de départ et
+  avaient été fermés en bloc. Le balayage systématique qui a suivi n'a rien trouvé d'autre ; il
+  aurait dû être fait le premier jour.
+- **Documenter est parfois la seule correction honnête.** `Cp2` ne se lève pas depuis ici : le
+  plafond iOS ne se constate que sur un appareil. Ce qui pouvait être fait était d'écrire le
+  chiffre, la marge, sa raison, et surtout la phrase que le lecteur suivant a besoin de lire —
+  « ce que rien ne vérifie ici ». Un constat documenté reste ouvert ; il cesse d'être invisible.
+- **Une règle vaut mieux qu'un outil quand aucun outil ne peut trancher.** `Sc1` — un paquet fourni
+  par un tiers appliqué comme instruction — n'a pas de parade automatique : distinguer un document
+  de confiance d'un autre est un jugement. Ce qui manquait était la règle qui impose ce jugement,
+  pas un contrôle de plus.
+
 ### Ce qui reste ouvert, par ordre de coût
+
+**La liste des constats corrigeables depuis ce dépôt est épuisée.** Il reste trois entrées, dont
+aucune ne se ferme par du code écrit ici.
 
 | # | Constat | Pourquoi il reste |
 |---|---|---|
-| B1 | Aucun test de composant ni de bout en bout | **À ne pas faire maintenant**, et c'est dans les anti-recommandations : écrits par le même agent que le code, ils seraient circulaires eux aussi. Le manque se compense aujourd'hui par les assertions sur le HTML livré, qui vérifient un artefact et non une intention |
-| Sc1 | Un paquet fourni par un tiers a été lu **et appliqué comme instruction** | Le mécanisme est celui d'une injection par document. Ici l'auteur du paquet est l'utilisateur, donc le risque est nul — mais rien dans le dispositif ne l'aurait empêché autrement |
-| Cp1, Cp2 | `training.ts` et le plafond iOS de `rappels.ts` restent opaques | Ni l'un ni l'autre ne se lève par du code : le premier demande une relecture, le second un appareil |
-| V5 ⚖️ | `noUncheckedIndexedAccess` | Évalué, mesuré, écarté. À rouvrir si le dépôt se met à indexer des tableaux dont la taille dépend de données persistées |
-| **Gv2** | **Aucune revue** | **Non corrigeable par du code.** Le seul critique restant, et il n'a pas bougé d'un pouce en trois passes |
+| B1 🟡 | Aucun test de composant ni de bout en bout | **À ne pas faire**, et c'est dans les anti-recommandations : écrits par le même agent que le code, ils seraient circulaires eux aussi. Le manque se compense par les assertions sur le HTML livré, qui vérifient un artefact et non une intention |
+| V5 ⚖️ | `noUncheckedIndexedAccess` | Évalué, mesuré, écarté, décision dans `tsconfig.base.json`. À rouvrir si le dépôt se met à indexer des tableaux dont la taille dépend de données persistées |
+| Cp2 ⚖️ | Le plafond iOS de `rappels.ts` | Documenté chiffres à l'appui, non vérifié : cela demande un appareil. `bun test` contrôle que la génération s'arrête à 60, rien de plus |
+| **Gv2 🔴** | **Aucune revue** | **Non corrigeable par du code, et non entamé par quatre passes.** Les vingt-neuf corrections ont toutes été produites par l'agent qui a écrit le code qu'elles corrigent — y compris les quatre qui corrigent l'audit lui-même. C'est la définition du constat |
 
 **`Gv2` est le seul constat critique restant, et c'est le plus important.** Les travaux du jour ont
 créé des points de retour ; ils n'ont créé aucune revue. Tout ce qui précède — y compris cet audit,

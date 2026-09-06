@@ -115,10 +115,21 @@ export const RAPPELS_DEFAUT: RappelsConfig = {
 export const INTERVALLES = [30, 45, 60, 90] as const;
 
 /**
- * Plafond d'iOS sur les notifications locales en attente.
+ * Ce que la génération s'autorise à programmer, et pourquoi ce n'est pas le plafond du système.
  *
- * Au-delà, le système jette silencieusement les suivantes — donc en pratique la fin de journée ne
- * sonnerait plus, sans le moindre message d'erreur. La génération s'arrête d'elle-même avant.
+ * **iOS en accepte 64** en attente. Au-delà, il jette silencieusement les suivantes : en pratique,
+ * la fin de journée ne sonnerait plus, sans le moindre message d'erreur — c'est le pire mode de
+ * défaillance, parce qu'il ressemble à un réglage qui marche.
+ *
+ * On s'arrête à 60. Les quatre places gardées ne servent rien aujourd'hui : elles existent pour que
+ * la première notification ajoutée ailleurs dans l'application — un rappel de pesée, par exemple —
+ * ne pousse pas les derniers rappels du jour hors de la file sans que personne ne s'en aperçoive.
+ * Le coût de cette marge est nul, celui de son absence est invisible.
+ *
+ * **Ce que rien ne vérifie ici** : que le plafond soit bien de 64 sur la version d'iOS courante, et
+ * que le système se comporte comme décrit. Les tests contrôlent que la génération s'arrête à 60 —
+ * ils ne peuvent rien dire de ce qui se passe ensuite. Cela ne se constate que sur un appareil, et
+ * ce n'est pas fait.
  */
 export const MAX_RAPPELS = 60;
 

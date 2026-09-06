@@ -39,6 +39,31 @@ if [ -n "$protege" ] && [ "${VITAE_CI:-}" != "1" ]; then
   exit 1
 fi
 
+# ── Formats persistés ───────────────────────────────────────────────────────────────────────────
+#
+# `PROFILE_VERSION` et `SUIVI_VERSION` décident si un profil enregistré il y a six mois se relit ou
+# se perd. La lecture est tolérante et versionnée — c'est le bon design — mais rien n'obligeait à
+# s'arrêter avant de monter un numéro, et une migration oubliée ne se voit pas : `parseProfile`
+# rend `null`, l'application repart sur un formulaire vide, et l'utilisateur croit avoir tout effacé
+# lui-même.
+#
+# Le changement reste possible ; il demande de le dire :
+#
+#     VITAE_FORMAT=1 git commit …
+#
+version=$(git diff --cached -U0 -- packages/core/src/storage.ts \
+  | grep -E '^\+(export )?const (PROFILE|SUIVI)_VERSION' || true)
+if [ -n "$version" ] && [ "${VITAE_FORMAT:-}" != "1" ]; then
+  echo "✗ Ce commit change un format de données persistées :"
+  echo "$version" | sed 's/^/    /'
+  echo
+  echo "  Une version qui monte sans migration fait repartir les profils existants à zéro,"
+  echo "  sans erreur et sans que personne ne s'en aperçoive."
+  echo
+  echo "  Si la migration est écrite et testée :  VITAE_FORMAT=1 git commit …"
+  exit 1
+fi
+
 # ── La boucle de vérification ───────────────────────────────────────────────────────────────────
 #
 # Sur l'arbre de travail et non sur l'index : le dépôt n'a pas d'usage du commit partiel, et

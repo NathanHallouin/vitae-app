@@ -9,6 +9,34 @@
  * Repères suivis : au moins deux séances de renforcement par semaine (recommandation OMS pour
  * les adultes), 48 h entre deux séances sollicitant les mêmes muscles, progression par
  * répétitions avant progression par difficulté, et arrêt des séries avant l'échec.
+ *
+ * ## Comment un programme se compose
+ *
+ * Ce module fait sept cents lignes, et chaque fonction dit pourquoi elle fait ce qu'elle fait.
+ * Ce qu'aucune ne disait, c'est **l'ordre dans lequel elles s'appellent** : il fallait tout relire
+ * pour répondre à « pourquoi cet exercice-là, à ce volume-là ». La chaîne tient en cinq étapes.
+ *
+ * 1. **Combien de séances** — `strengthCount(metrics, goal, sessions)`. Le volume déjà en place
+ *    décide, l'âge plafonne. Un métier physique n'entre pas dans le compte : il fatigue, il ne
+ *    remplace pas le renforcement.
+ * 2. **Les réglages, une fois pour toutes** — `buildSetup(…)` rend un `Setup` : séries,
+ *    fourchette de répétitions, durée des tenues, repos, faible impact, travail d'équilibre. Ils
+ *    s'appliquent **à tous** les exercices de la semaine, et chacun est justifié dans
+ *    `setup.adaptations`, que l'écran affiche. **C'est là que se trouve la réponse à « pourquoi ce
+ *    volume-là »** : jamais dans l'exercice, toujours dans le réglage.
+ * 3. **La rotation des groupes musculaires** — quatre séances alternent bas et haut du corps,
+ *    trois y ajoutent un corps entier, deux se limitent à bas et haut. C'est la contrainte des 48 h
+ *    qui dicte l'alternance, pas une préférence.
+ * 4. **Les gabarits du groupe** — chaque groupe porte une liste fixe de `Template`, les onze
+ *    définis plus bas. **C'est là que se trouve la réponse à « pourquoi cet exercice-là »** : il est
+ *    dans la liste du groupe que la rotation a placé ce jour-là. Une seule substitution existe, et
+ *    elle est écrite à son endroit : après 60 ans, la chaise contre le mur cède la place au lever
+ *    de chaise — mêmes muscles, mais c'est le geste qui décide du maintien de l'autonomie.
+ * 5. **Le gabarit rencontre le réglage** — `buildExercise(tpl, setup)` produit l'exercice concret :
+ *    volume, repos, consigne, variante plus facile, variante plus difficile.
+ *
+ * Autrement dit : **le gabarit dit quoi faire, le réglage dit combien.** Les deux ne se mélangent
+ * jamais, et c'est ce qui permet de changer l'un sans relire l'autre.
  */
 
 import type { Metrics } from './calc';

@@ -80,13 +80,16 @@ export default function SousOnglets({
                   color={selectionne ? palette.primaryInk : palette.muted2}
                 />
               ) : null}
+              {/* La graisse distingue autant que la couleur, et c'est voulu : sur un segment posé
+                  dans un fond gris, l'onglet actif se reconnaît de loin à son poids avant de se
+                  reconnaître à sa teinte. Les deux branches ont un temps porté la même graisse —
+                  séquelle d'un remplacement en masse de `font-sans-semibold` qui avait aplati le
+                  ternaire sans que rien ne le signale. */}
               <Text
                 numberOfLines={1}
                 className={cx(
                   'text-base',
-                  selectionne
-                    ? 'font-sans-medium text-primary-ink'
-                    : 'font-sans-medium text-muted2',
+                  selectionne ? 'font-sans-medium text-primary-ink' : 'font-sans text-muted2',
                 )}
               >
                 {onglet.label}
