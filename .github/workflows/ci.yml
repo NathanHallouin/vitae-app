@@ -113,13 +113,31 @@ jobs:
             n=$(grep -o '<h1[ >]' "$page" | wc -l)
             [ "$n" = "1" ] || { echo "$page : $n <h1>, il en faut exactement un"; exit 1; }
             grep -q '<main[ >]' "$page" || { echo "$page : pas de <main>"; exit 1; }
+            # Un titre **non vide** : `<title data-rh="true">` suivi de rien passait tous les
+            # contrôles précédents, et c'est exactement ce que livrait la page introuvable.
+            grep -q '<title[^>]*>[^<]' "$page" || { echo "$page : <title> vide"; exit 1; }
           }
-          for page in index.html metabolisme.html alimentation.html poids.html bouger.html \
-                      profil.html reglages.html confidentialite.html recettes/index.html \
-                      recettes/omelette-aux-champignons.html comprendre/index.html \
-                      comprendre/pourquoi-une-fourchette.html; do
-            structure "$page"
-          done
+          # **Toutes** les pages livrées, et non une liste écrite à la main. La liste avait douze
+          # entrées et laissait passer la page introuvable, exportée sans `<title>`, sans `<h1>`,
+          # sans `<main>` et sans consigne d'indexation — c'est-à-dire une page indexable au titre
+          # vide, sur la seule adresse qu'un robot finit toujours par visiter. Une vérification qui
+          # énumère ne protège que ce qu'on a pensé à y mettre.
+          #
+          # `find` et non un glob : les recettes et les notions sont dans des sous-dossiers, et
+          # leur nombre change à chaque ajout de contenu.
+          while IFS= read -r page; do
+            structure "${page#apps/app/dist/}"
+          done < <(find apps/app/dist -name '*.html' | sort)
+
+          # Les gabarits de routes dynamiques ne se livrent pas : `tools/build-sw.ts` les retire, et
+          # ce contrôle est ce qui garantit qu'il l'a fait. Sans lui, une mise à jour d'Expo Router
+          # qui renommerait ces fichiers les remettrait en ligne sans que rien ne le dise.
+          restants=$(find apps/app/dist -name '*[[]*[]]*' -o -name '_sitemap.html' || true)
+          if [ -n "$restants" ]; then
+            echo "gabarits non résolus livrés :"
+            echo "$restants"
+            exit 1
+          fi
 
           # L'accueil doit mener quelque part : le catalogue de recettes est la porte que
           # l'acquisition emprunte, le cours celle qui n'exige rien du visiteur.

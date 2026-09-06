@@ -19,4 +19,11 @@ export interface SeoProps {
   image?: string;
   /** données structurées schema.org, sérialisées telles quelles */
   jsonLd?: Record<string, unknown>;
+  /**
+   * Tenir la page hors des index.
+   *
+   * Une seule route s'en sert, et c'est la bonne : la page introuvable. Elle était livrée sans
+   * titre, sans canonique et sans consigne — donc indexable, avec un titre vide dans les résultats.
+   */
+  noindex?: boolean;
 }

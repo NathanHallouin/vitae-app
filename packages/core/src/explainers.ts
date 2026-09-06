@@ -75,9 +75,9 @@ export const METABOLISME_EXPLAINER: Explainer = {
     {
       slug: 'metabolisme-de-base',
       titre: 'Le métabolisme de base, c’est quoi ?',
-      resume: 'L’énergie que vous dépensez sans rien faire : 60 à 70 % du total.',
+      resume: 'L’énergie que vous dépensez sans rien faire : la plus grosse part du total.',
       texte:
-        'C’est l’énergie que votre corps consomme sans rien faire : faire battre le cœur, respirer, maintenir la température, renouveler les cellules. Même immobile une journée entière, vous en dépensez l’essentiel. Il représente en général 60 à 70 % de la dépense totale d’une personne peu sportive.',
+        'C’est l’énergie que votre corps consomme sans rien faire : faire battre le cœur, respirer, maintenir la température, renouveler les cellules. Même immobile une journée entière, vous en dépensez l’essentiel. Sa part de la dépense totale va d’environ 55 % chez quelqu’un de très actif à près de 80 % chez quelqu’un d’assis toute la journée : moins on bouge, plus elle pèse lourd. Votre chiffre à vous est sur l’écran « Mon métabolisme ».',
     },
     {
       slug: 'comment-il-est-calcule',

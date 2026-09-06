@@ -879,6 +879,90 @@ Et la faute était structurellement invisible : elle n'apparaît qu'en additionn
 YAML pour les comparer à un nombre écrit en toutes lettres vingt lignes plus haut. C'est
 exactement le genre de vérification qu'une machine fait bien et qu'un lecteur ne fait jamais.
 
+### 6 septembre 2026 — dixième passe, le cours et ce que l'export livre vraiment
+
+La neuvième passe avait confronté les recettes à leurs propres données. Restaient **les seize
+notions du cours**, qui expliquent les chiffres des écrans sans que rien ne les relie aux formules
+— et l'encart pédagogique s'affiche **sur l'écran même** qui montre le chiffre personnel du lecteur.
+
+#### `Cr1` 🟠 — le cours enseignait un chiffre que le modèle ne produit jamais
+
+La notion « Le métabolisme de base, c'est quoi ? » annonçait « 60 à 70 % de la dépense totale d'une
+personne **peu sportive** ». Elle s'affiche dans l'encart de `/metabolisme`, sous un écran qui
+indiquait 74 % pour le profil de démonstration.
+
+Le modèle, tous profils confondus :
+
+| Profil | Part du métabolisme de base |
+|---|---|
+| Travail physique + 7 séances ou plus | **54 %** |
+| Assis toute la journée, jamais de sport | **83 %** |
+
+Donc non seulement le chiffre est faux, mais **le sens est inversé** : moins on bouge, plus la part
+du métabolisme de base est grande. La notion attribuait la part la plus basse au profil le moins
+actif. Le 60-70 % vient de la littérature générale, où il désigne une personne *moyenne* ; le
+qualificatif a été attaché au mauvais bout.
+
+Réécrite pour dire l'intervalle réel et le bon sens de variation, et pour renvoyer au chiffre
+personnel plutôt que d'en réciter un.
+
+Les quatre autres notions chiffrées **tiennent exactement**, et c'est vérifié désormais :
+
+| Notion | Annonce | Le code |
+|---|---|---|
+| `les-proteines-d-abord` | 1,8 à 2 g/kg en perte, 1,4 en maintien | `seche` 2 · `recomp` 1,8 · `maintien` 1,4 |
+| `lipides-et-glucides` | jamais sous 0,6 g/kg | `calc.ts:164` — `0.6 * refWeight` |
+| `refaire-le-calcul` | ~10 kcal par kilo perdu | premier terme de Mifflin : `10 × poids` |
+| `pourquoi-une-fourchette` | 10 % de marge | la mention légale de l'écran dit la même chose |
+
+`explainers.test.ts` les épingle au modèle, et vérifie **le sens** en plus des nombres. Testé par
+injection : réintroduire « 60 à 70 % » le fait échouer.
+
+Les repères extérieurs — 13 kcal par kilo de muscle, les 150 à 300 minutes de l'OMS, 25 à 30 g de
+fibres — ne se dérivent d'aucune formule d'ici. Ils sont justes ; aucun test ne peut le refaire, et
+le fichier le dit plutôt que de le laisser croire.
+
+#### `Ex1` 🟠 — la page introuvable était livrée sans titre, et indexable
+
+Découvert en listant ce que l'export contient vraiment, plutôt que ce qu'on croit qu'il contient.
+Sur 97 fichiers HTML livrés, **quatre** ne tenaient pas la règle structurelle du dépôt :
+
+| Fichier | |
+|---|---|
+| `+not-found.html` | `<title>` **vide**, pas de `<h1>`, pas de `<main>`, pas de canonique, **pas de `noindex`** |
+| `comprendre/[slug].html` | gabarit non résolu, 23 Ko, vide |
+| `recettes/[slug].html` | idem |
+| `_sitemap.html` | l'index de développement d'Expo Router |
+
+La page introuvable était **la seule route à n'employer ni `Seo`, ni `Titre`, ni `role="main"`**. Son
+titre passait par `Stack.Screen options={{ title }}`, qui nomme un écran de navigation et n'écrit
+rien dans le document — la confusion est facile et muette, les deux s'appellent « title ». Résultat :
+une page indexable au titre vide, sur la seule adresse qu'un robot finit toujours par visiter.
+
+Corrigée avec `Seo` (titre, description, canonique, `noindex, follow` — la page ne doit pas être
+listée, mais son lien vers l'accueil reste un chemin utile), `Titre niveau={1}` et `role="main"`.
+`noindex` a été ajouté au contrat partagé `SeoProps`, donc les deux versions plateforme restent
+d'accord par le compilateur.
+
+Les trois gabarits ne sont plus livrés : `tools/build-sw.ts` les retire, et la CI vérifie qu'ils ne
+reviennent pas.
+
+**Mais le vrai défaut était dans la vérification.** La CI contrôlait la structure sur une liste de
+douze pages **écrite à la main**, où la page introuvable ne figurait pas. Elle porte désormais sur
+les 94 pages livrées, et exige en plus un `<title>` **non vide** — le cas exact qui passait. Vérifié
+par injection.
+
+### Ce que la dixième passe a appris
+
+**Une vérification qui énumère ne protège que ce qu'on a pensé à y mettre.** La liste de douze pages
+avait été écrite quand le site en comptait douze ; il en compte 94, et les 82 ajoutées n'ont jamais
+été contrôlées. Le défaut n'est pas d'avoir oublié une page, c'est d'avoir écrit une liste là où une
+règle était possible — et la règle tenait en un `find`.
+
+C'est la troisième fois que l'audit trouve un défaut **dans son propre dispositif de vérification** :
+une assertion visant la mauvaise page (sixième passe), une entrée de roadmap disant l'inverse de la
+vérité (sixième passe), et maintenant une liste qui ne couvrait que 13 % de son objet.
+
 ### Ce qui reste ouvert, par ordre de coût
 
 **Cette phrase a été écrite deux fois — « la liste des constats corrigeables est épuisée » — et

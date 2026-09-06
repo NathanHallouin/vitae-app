@@ -25,7 +25,7 @@
  * `bun run sw`, et c'est enchaîné par `bun run build:web`.
  */
 
-import { readdir, stat, writeFile } from 'node:fs/promises';
+import { readdir, rm, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { POLICES } from './polices';
@@ -189,10 +189,33 @@ self.addEventListener('fetch', (e) => {
 });
 `;
 
+/**
+ * Les pages qu'Expo Router produit et que le site n'a pas à livrer.
+ *
+ * `comprendre/[slug].html` et `recettes/[slug].html` sont les **gabarits** des routes dynamiques,
+ * exportés non résolus : 23 Ko chacun, sans titre, sans `<h1>`, sans `<main>` et sans canonique.
+ * Toutes les valeurs réelles sont pré-rendues à côté — les soixante-deux recettes, les seize
+ * notions — donc rien ne s'y réfère : ni le paquet, ni le service worker, ni le sitemap. Ce sont
+ * des pages vides que seul un robot curieux trouverait.
+ *
+ * `_sitemap.html` est l'index de développement d'Expo Router. `robots.txt` l'écarte déjà ; ne pas
+ * le livrer du tout est plus simple qu'une consigne à respecter.
+ *
+ * Le vrai garde-fou est dans la CI, qui vérifie désormais la structure de **toutes** les pages
+ * livrées et non d'une liste écrite à la main — c'est cette liste qui avait laissé passer la page
+ * introuvable, livrée sans titre.
+ */
+const NON_LIVREES = ['comprendre/[slug].html', 'recettes/[slug].html', '_sitemap.html'];
+
+for (const page of NON_LIVREES) {
+  await rm(path.join(DIST, page), { force: true });
+}
+
 await writeFile(path.join(DIST, 'sw.js'), source, 'utf8');
 
 const poids = await Promise.all(
   [paquet, style].map(async (f) => Math.round((await stat(f)).size / 1024)),
 );
 console.log(`sw.js écrit · version ${VERSION.slice(0, 8)} · ${PRECACHE.length} entrées précachées`);
+console.log(`  ${NON_LIVREES.length} gabarits retirés de l'export`);
 console.log(`  paquet ${poids[0]} Ko, style ${poids[1]} Ko`);

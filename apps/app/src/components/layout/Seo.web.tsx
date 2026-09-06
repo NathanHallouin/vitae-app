@@ -16,12 +16,13 @@ import { SITE_NAME, SITE_URL } from '@vitae/core/site';
 import Head from 'expo-router/head';
 import type { SeoProps } from './SeoProps';
 
-export default function Seo({ title, description, canonical, image, jsonLd }: SeoProps) {
+export default function Seo({ title, description, canonical, image, jsonLd, noindex }: SeoProps) {
   return (
     <Head>
       <title>{title}</title>
       <meta name="description" content={description} />
       <link rel="canonical" href={canonical} />
+      {noindex ? <meta name="robots" content="noindex, follow" /> : null}
       <meta property="og:type" content="website" />
       <meta property="og:title" content={title} />
       <meta property="og:description" content={description} />
