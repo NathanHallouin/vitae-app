@@ -47,7 +47,7 @@ export const CONFIDENTIALITE: Section[] = [
     titre: 'Les rappels de mouvement',
     paragraphes: [
       'Si vous activez les rappels qui invitent à vous lever, ils sont programmés sur votre téléphone, par votre téléphone. Aucun serveur ne nous prévient, et aucun identifiant d’appareil n’est créé : ce sont des notifications locales, pas des notifications poussées.',
-      'Nous ne savons donc ni que vous les avez activés, ni à quelle heure ils sonnent, ni si vous les ouvrez. Les désactiver se fait au même endroit, sur l’écran « Bouger ».',
+      'Nous ne savons donc ni que vous les avez activés, ni à quelle heure ils sonnent, ni si vous les ouvrez. Les désactiver se fait au même endroit que les activer : dans les réglages, accessibles depuis votre profil.',
     ],
   },
   {

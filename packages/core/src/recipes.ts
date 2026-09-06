@@ -947,6 +947,23 @@ function maisonEnDernier(list: Recipe[], reservees: Set<Base>): Recipe[] {
 }
 
 /**
+ * Le compte de résultats de l'index, en toutes lettres.
+ *
+ * Il vivait dans `FiltresRecettes.tsx`, écrit deux fois — une fois pour la barre étroite, une fois
+ * pour la colonne large — et les deux formulations avaient divergé : « 8 sur 62 » d'un côté,
+ * « 8 recettes sur 62 » de l'autre. Le même état se lisait différemment selon la largeur de la
+ * fenêtre, ce qui n'a aucune raison d'être ; et une copie dupliquée finit toujours par diverger.
+ *
+ * Le pluriel est calculé, pas supposé. `${total} recettes` en dur donnait « 1 recettes » le jour
+ * où le catalogue n'en compte qu'une — improbable ici, mais c'est le genre de faute qu'on écrit
+ * une fois et qu'on ne relit jamais. En français, zéro prend le singulier : « 0 recette ».
+ */
+export function compteurRecettes(resultats: number, total: number): string {
+  const accord = (n: number) => `${n} recette${n > 1 ? 's' : ''}`;
+  return resultats === total ? accord(total) : `${accord(resultats)} sur ${total}`;
+}
+
+/**
  * Une liste d'ingrédients passe-t-elle les filtres cochés ?
  *
  * Exportée parce que deux écrans en ont besoin et doivent répondre pareil : les suggestions de

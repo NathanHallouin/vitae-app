@@ -345,15 +345,30 @@ JSON du v2 doit donc être pensé comme un futur format d'import serveur.
     `<nav>`, que le navigateur rend au-delà de `NAV_BREAKPOINT`. Même mécanisme pour `useLarge` et
     `useColumns`.
 
-  Conséquence : React jette l'arbre servi et refait tout côté client. Le référencement n'en souffre
-  pas — les moteurs lisent le HTML livré, la CI le vérifie — mais la peinture pré-rendue est perdue,
-  ce qui est précisément ce que le pré-rendu devait éviter.
+  Conséquence, **et elle dépend de la largeur** — la première rédaction de cette entrée ne le disait
+  pas, et se trompait donc sur le cas qui compte le plus :
+
+  - **Au-dessus de `NAV_BREAKPOINT`**, l'écart est franc : React jette l'arbre servi et refait tout
+    côté client. Le référencement n'en souffre pas — les moteurs lisent le HTML livré, la CI le
+    vérifie — mais la peinture pré-rendue est perdue, ce qui est précisément ce que le pré-rendu
+    devait éviter.
+  - **En dessous**, c'est-à-dire sur téléphone, l'arbre servi correspond et l'hydratation
+    **réussit**. React 18 ne répare alors pas les attributs divergents : les couleurs que
+    `usePalette` a cuites dans le HTML restent celles du pré-rendu. Mesuré sur l'export, préférence
+    enregistrée « sombre » : le disque du cadran d'accueil sort en `#e7e6f0` à 390 et 430 px, en
+    `#1c1b2a` à 700 px et au-delà. La page était donc à moitié sombre — fonds et textes par le CSS,
+    tracés SVG et icônes restés clairs — de façon durable, pas le temps d'une peinture.
 
   Le remède tient en un point de passage : un `useHydrate()` qui rend `false` au premier rendu web
   et `true` ensuite (toujours `true` en natif), dont dépendraient le thème et les trois mesures de
-  largeur. **Le prix est visible et se choisit** : sur un écran large, une peinture en mise en page
-  mobile avant bascule. À arbitrer avant de le faire — le mouvement compte autant que la vitesse
-  dans ce projet.
+  largeur.
+
+  **La moitié thème est appliquée** (`apps/app/src/theme/hydrate.web.ts`) : elle ne coûte rien, la
+  classe CSS étant déjà posée dans un effet, donc après le premier rendu. Aligner `usePalette`
+  dessus ne fait que remettre les deux moitiés du thème d'accord.
+
+  **La moitié largeur reste à arbitrer, et le prix est visible** : sur un écran large, une peinture
+  en mise en page mobile avant bascule. Le mouvement compte autant que la vitesse dans ce projet.
 - `react-native-web` sait rendre un balisage sémantique, mais seulement là où un rôle le demande —
   et il échoue en silence : la page reste identique à l'œil. Un `Pressable` qui appelle le routeur
   sort en `<div>` au lieu de `<a>`, un `accessibilityRole="header"` sans `aria-level` sort en

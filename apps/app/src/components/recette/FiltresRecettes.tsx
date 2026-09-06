@@ -1,5 +1,5 @@
 import { type Criteres, DUREES, MOMENTS, TRIS } from '@vitae/content';
-import { EXCLUSIONS } from '@vitae/core/recipes';
+import { compteurRecettes, EXCLUSIONS } from '@vitae/core/recipes';
 import { type ReactNode, useState } from 'react';
 import { Pressable, Text, TextInput, View } from 'react-native';
 import Icon from '@/components/ui/Icon';
@@ -111,7 +111,7 @@ export default function FiltresRecettes({
           </Pressable>
 
           <Text accessibilityLiveRegion="polite" className="font-sans text-small text-muted2">
-            {resultats === total ? `${total} recettes` : `${resultats} sur ${total}`}
+            {compteurRecettes(resultats, total)}
           </Text>
         </View>
       )}
@@ -164,9 +164,7 @@ export default function FiltresRecettes({
 
       {large ? (
         <Text accessibilityLiveRegion="polite" className="font-sans text-small text-muted2">
-          {resultats === total
-            ? `${total} recettes`
-            : `${resultats} recette${resultats > 1 ? 's' : ''} sur ${total}`}
+          {compteurRecettes(resultats, total)}
         </Text>
       ) : null}
     </View>

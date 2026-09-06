@@ -433,7 +433,7 @@ diagnostic.
 | Crochets git actifs | **1**, avec **deux** garde-fous : `.github/workflows/` et les versions de format persisté (0 avant) | `.githooks/pre-commit` |
 | Ternaires dont les deux branches sont identiques | **0** (1 avant) | balayage `apps/app/src` et `apps/app/app` |
 | Paires de glyphes indiscernables | **0** (1 avant) | balayage des 35 tracés de `Icon.tsx` ; les trois flèches sont un même tracé pivoté, à dessein |
-| Écrans regardés après les corrections | **3** (0 avant les cinq passes) | captures + `--dump-dom` sur l'export |
+| Écrans regardés après les corrections | **10** (0 avant la cinquième passe) | captures + `--dump-dom` sur l'export |
 | Exports orphelins (valeurs) | **0** (14 avant) | balayage `export` vs usages |
 | Dépendances déclarées sans import | **0** (1 avant) | `expo-linear-gradient` retiré |
 | Règles du dépôt vérifiées en CI | **2** : pas de test de plateforme web/natif, `packages/core` sans import de plateforme (0 avant) | `.github/workflows/ci.yml` |
@@ -571,17 +571,97 @@ défaut d'interface posé au milieu d'un écran y a survécu quatre passes. Le `
 sont des outils d'audit au même titre que le compilateur ; ils n'avaient simplement pas été
 employés.
 
+### 6 septembre 2026 — sixième passe, le balayage visuel
+
+La cinquième passe avait payé en changeant de méthode : regarder au lieu de `grep`. Elle n'avait
+regardé que trois écrans, et l'annexe le disait. Cette passe termine le balayage — et quatre
+défauts sont sortis, dont un que quatre passes de `grep` et cinq de relecture n'avaient pas vu.
+
+| Vérifié | Résultat |
+|---|---|
+| `/confidentialite` | **Défaut** : la politique disait que les rappels se désactivent « sur l'écran Bouger ». Ils ont déménagé dans `/reglages` pendant la refonte. Une erreur de fait dans un document exigé par les deux magasins. Corrigé dans `legal.ts:50`, puis balayage de toute la copie de `packages/core` — aucune autre |
+| `/comprendre/[slug]` | Conforme |
+| `/recettes` | **Défaut** : le compte de résultats était écrit deux fois dans `FiltresRecettes.tsx`, une par largeur, et les deux avaient divergé — « 8 sur 62 » d'un côté, « 8 recettes sur 62 » de l'autre. La copie vivait de surcroît dans le composant, ce que `AGENTS.md` interdit. `compteurRecettes()` posé dans `recipes.ts`, avec quatre tests dont le pluriel de zéro et de un |
+| `/+not-found` | **Défaut** : le « cercle creux » du dessin était un disque **plein**, rempli de blanc sur un fond lavande. Il se lisait comme une tache. Rendu creux, et son pointillé recalculé pour boucler sur la circonférence (2π × 18 = 113,097, dix périodes de 11,3097 ; « 5 7 » tombait à 9,42 période et coupait le dernier tiret) |
+| `/recettes/[slug]` | **Même défaut, généralisé** : `Illustration.tsx` prescrivait `divider` pour « ce qui est inerte », dans les sept illustrations. Mesuré : `divider` contraste à **1,07:1** avec le fond en clair. Le bol de l'en-tête et le chemin du 404 étaient des fantômes. Convention changée pour `borderStrong` — 1,90:1 en clair, 2,03:1 en sombre, le seul jeton symétrique entre les deux thèmes |
+| **Thème sombre, `/`** | **Défaut majeur : `Hy1`**. Voir ci-dessous |
+| Grand écran (1280 px) | Conforme |
+
+#### `Hy1` 🔴 — le thème sombre à moitié appliqué sur téléphone
+
+Capture en sombre : le disque du cadran d'accueil ressort **clair** sur une page sombre, et les
+pictogrammes des quatre repères sont indigo foncé sur une carte foncée. Mesure au DOM :
+`--t-bg` vaut `#0d0c13` — le CSS est bien en sombre — pendant que le `fill` du disque vaut
+`#e7e6f0`, la valeur **claire**. Toutes les couleurs venues de JavaScript étaient dans ce cas.
+
+La cause tient en une variable, isolée en ne faisant varier que la largeur :
+
+| Largeur | `fill` du disque | |
+|---|---|---|
+| 390 px | `#e7e6f0` | palette claire, faux |
+| 430 px | `#e7e6f0` | palette claire, faux |
+| 700 px | `#1c1b2a` | palette sombre, juste |
+| 1280 px | `#1c1b2a` | palette sombre, juste |
+
+Le seuil est exactement `NAV_BREAKPOINT`. Au-dessus, le navigateur rend un `<nav>` que le pré-rendu
+n'a pas : l'hydratation échoue franchement, React jette l'arbre servi, refait tout, et repeint les
+couleurs au passage. **En dessous — sur téléphone, la cible principale — l'arbre servi correspond,
+l'hydratation réussit, et React 18 ne répare pas les attributs divergents.** Les couleurs cuites au
+pré-rendu restaient en place.
+
+**Ce constat corrige la roadmap.** `ROADMAP.md` décrivait la conséquence de l'échec d'hydratation
+comme « React jette l'arbre servi et refait tout côté client […] la peinture pré-rendue est
+perdue » — un désagrément cosmétique. C'est vrai sur grand écran **seulement**. L'entrée disait donc
+l'inverse de la vérité sur le cas qui compte le plus, ce qui la faisait sous-prioriser. Corrigée.
+
+Corrigé par la moitié thème du remède que la roadmap avait déjà écrit : `useHydrate()`, en paire
+`.ts` / `.web.ts`. Elle ne coûte rien — la classe CSS était **déjà** posée dans un effet, donc après
+le premier rendu ; aligner `usePalette` dessus ne fait que remettre les deux moitiés d'accord.
+Vérifié après correction : `#1c1b2a` à 390, 430, 700 et 1280 px, par les deux chemins (préférence
+enregistrée, et préférence « système » sur un système sombre), et le clair inchangé.
+
+**La moitié largeur reste ouverte, et c'est un arbitrage, pas un oubli** : la brancher coûte une
+peinture en mise en page mobile avant bascule sur grand écran. Le prix est écrit dans la roadmap.
+
+#### Un défaut dans l'audit, encore
+
+L'assertion CI `verifie reglages.html 'Le thème sombre reprend'`, écrite à la cinquième passe,
+visait la mauvaise page : l'apparence est sur `/profil`, et ce placement est argumenté dans les
+commentaires des **deux** écrans. Une assertion fausse portant sur une règle vraie — elle aurait
+fait rougir la CI en accusant le code. C'est la troisième fois de la journée qu'une vérification
+que j'ai écrite se révèle fausse avant le code qu'elle vérifie.
+
+### Ce que la sixième passe a appris
+
+Les cinq passes précédentes cherchaient des défauts **là où le code est écrit**. Celle-ci les a
+cherchés **là où le produit est vu**, et le rendement a été le plus élevé de toutes : quatre
+défauts, dont un majeur et deux invisibles à la lecture du source — parce qu'ils naissent de la
+rencontre entre le code et un contexte que le code ne contient pas. Le contraste d'une couleur ne
+se lit pas dans `tokens.ts` ; il se calcule contre le fond où elle est posée. L'hydratation ne se
+lit nulle part ; elle dépend de la largeur de la fenêtre.
+
+Deux outils ont fait tout le travail et ne coûtent rien : la capture d'écran, et `--dump-dom` avec
+une seule variable qu'on fait bouger. Le tableau des quatre largeurs ci-dessus a pris trois
+minutes ; c'est lui qui a transformé « les couleurs sont fausses » en une cause exacte, et qui a
+montré que l'entrée de roadmap disait l'inverse de la vérité.
+
 ### Ce qui reste ouvert, par ordre de coût
 
-**La liste des constats corrigeables depuis ce dépôt est épuisée.** Il reste trois entrées, dont
-aucune ne se ferme par du code écrit ici.
+**Cette phrase a été écrite deux fois — « la liste des constats corrigeables est épuisée » — et
+démentie deux fois**, par la cinquième passe puis par la sixième. Elle ne l'est pas ; elle l'est
+*pour la méthode employée jusque-là*. Chaque fois qu'on a changé d'angle — regarder les écrans, puis
+faire varier la largeur — de nouveaux défauts sont sortis, et de plus en plus graves. Ce qui suit
+est donc la liste de ce qui reste **connu** et non fermé, pas de ce qui reste.
+
+Les quatre entrées ci-dessous ne se ferment pas par du code écrit ici.
 
 | # | Constat | Pourquoi il reste |
 |---|---|---|
 | B1 🟡 | Aucun test de composant ni de bout en bout | **À ne pas faire**, et c'est dans les anti-recommandations : écrits par le même agent que le code, ils seraient circulaires eux aussi. Le manque se compense par les assertions sur le HTML livré, qui vérifient un artefact et non une intention |
 | V5 ⚖️ | `noUncheckedIndexedAccess` | Évalué, mesuré, écarté, décision dans `tsconfig.base.json`. À rouvrir si le dépôt se met à indexer des tableaux dont la taille dépend de données persistées |
 | Cp2 ⚖️ | Le plafond iOS de `rappels.ts` | Documenté chiffres à l'appui, non vérifié : cela demande un appareil. `bun test` contrôle que la génération s'arrête à 60, rien de plus |
-| **Gv2 🔴** | **Aucune revue** | **Non corrigeable par du code, et non entamé par quatre passes.** Les vingt-neuf corrections ont toutes été produites par l'agent qui a écrit le code qu'elles corrigent — y compris les quatre qui corrigent l'audit lui-même. C'est la définition du constat |
+| Hy2 ⚖️ | La moitié **largeur** de l'échec d'hydratation | `useWindowDimensions()` vaut 0 sous Node : `useLarge`, `useColumns` et le `<nav>` divergent encore entre le HTML livré et le premier rendu du navigateur. La brancher sur `useHydrate()` coûte une peinture en mise en page mobile avant bascule sur grand écran. **C'est un arbitrage de produit, pas une dette technique** — et le prix est écrit dans `ROADMAP.md` |
+| **Gv2 🔴** | **Aucune revue** | **Non corrigeable par du code, et non entamé par six passes.** Toutes les corrections ont été produites par l'agent qui a écrit le code qu'elles corrigent — y compris les quatre qui corrigent l'audit lui-même. C'est la définition du constat |
 
 **`Gv2` est le seul constat critique restant, et c'est le plus important.** Les travaux du jour ont
 créé des points de retour ; ils n'ont créé aucune revue. Tout ce qui précède — y compris cet audit,

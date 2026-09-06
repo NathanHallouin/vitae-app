@@ -26,6 +26,7 @@ import {
 } from 'react';
 import { loadTheme, type StoredTheme, saveTheme } from '@/lib/store';
 import { appliquerClasseTheme } from './classeTheme';
+import { useHydrate } from './hydrate';
 
 // Appliqué au chargement du module, avant le premier rendu : aucun éclair de thème clair.
 //
@@ -59,7 +60,12 @@ export function useColorMode(): ColorModeValue {
 
 export default function ColorModeProvider({ children }: { children: ReactNode }) {
   const { colorScheme: current } = useColorScheme();
-  const mode = current === 'dark' ? 'dark' : 'light';
+  const hydrate = useHydrate();
+  // Clair au premier rendu web, quoi qu'en dise la préférence : c'est ce que le pré-rendu a livré,
+  // et un premier rendu qui en diverge laisse les couleurs SVG figées en clair sur téléphone. Voir
+  // `hydrate.web.ts`, qui porte la mesure. En natif `useHydrate()` vaut toujours vrai, donc rien ne
+  // change : pas de premier rendu clair à rattraper, et MMKV lit de façon synchrone.
+  const mode = hydrate && current === 'dark' ? 'dark' : 'light';
 
   // La préférence est relue du stockage plutôt que déduite du mode : `loadTheme()` rend bien
   // `system` quand rien n'a été choisi, ce que le mode effectif ne peut pas dire.

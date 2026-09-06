@@ -29,13 +29,13 @@ export default function IllustrationPesee() {
       largeurMax={260}
       label="Une première pesée, suivie de trois points en pointillés sur une pente douce"
     >
-      <Line x1={22} y1={96} x2={238} y2={96} strokeWidth={2} stroke={palette.divider} />
+      <Line x1={22} y1={96} x2={238} y2={96} strokeWidth={2} stroke={palette.borderStrong} />
 
       <Polyline
         points={`46,44 ${AVENIR.map((p) => `${p.x},${p.y}`).join(' ')}`}
         fill="none"
         strokeWidth={2.5}
-        stroke={palette.divider}
+        stroke={palette.borderStrong}
         strokeDasharray="6 7"
         strokeLinecap="round"
       />
@@ -48,7 +48,7 @@ export default function IllustrationPesee() {
           r={6.5}
           strokeWidth={2.5}
           fill={palette.surface}
-          stroke={palette.divider}
+          stroke={palette.borderStrong}
         />
       ))}
 

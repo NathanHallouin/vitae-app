@@ -15,9 +15,18 @@ import { Svg } from 'react-native-svg';
  * Trois règles tiennent la famille ensemble, et s'en écarter se voit tout de suite :
  *
  * — **Aucun texte.** Rien à traduire, rien qui grossisse mal, rien qui double le titre voisin.
- * — **Les mêmes jetons pour les mêmes rôles** : `divider` pour ce qui est inerte, `primary` pour
- *   ce qui est rempli ou acquis, `primaryInk` pour le trait qui porte le sens, `surface2` pour le
- *   fond doux qui pose le motif, `surface` pour détourer.
+ * — **Les mêmes jetons pour les mêmes rôles** : `borderStrong` pour ce qui est inerte, `primary`
+ *   pour ce qui est rempli ou acquis, `primaryInk` pour le trait qui porte le sens, `surface2`
+ *   pour le fond doux qui pose le motif, `surface` pour détourer.
+ *
+ *   Ce rôle revenait à `divider`, et c'était une erreur mesurable : `divider` contraste à 1,07:1
+ *   avec le fond en clair. Un filet de séparation doit se voir à peine sur douze pixels ; un
+ *   dessin de trois cents pixels tracé dans la même couleur ne se voit pas du tout. À l'écran, le
+ *   bol de l'en-tête des recettes et le chemin de la page introuvable étaient des fantômes.
+ *   `borderStrong` tient 1,90:1 en clair et 2,03:1 en sombre — le seul jeton de la palette qui
+ *   reste symétrique entre les deux thèmes, ce qui évite d'avoir à redessiner par thème. C'est le
+ *   même raisonnement qui a fait naître `gaugeTrack` : deux rôles opposés ne tiennent pas dans une
+ *   seule couleur.
  * — **Un libellé accessible qui décrit l'image, pas l'écran.** Un lecteur d'écran qui annonce
  *   « illustration » n'apprend rien ; il doit entendre ce qu'il y a à voir.
  *

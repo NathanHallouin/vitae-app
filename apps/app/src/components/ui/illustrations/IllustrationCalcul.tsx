@@ -33,7 +33,7 @@ export default function IllustrationCalcul() {
         x2={QUESTIONS[QUESTIONS.length - 1]}
         y2={60}
         strokeWidth={2}
-        stroke={palette.divider}
+        stroke={palette.borderStrong}
       />
       {QUESTIONS.map((x, i) => {
         const repondu = i < QUESTIONS.length - 1;
@@ -57,7 +57,7 @@ export default function IllustrationCalcul() {
         d="M151.9 82A44 44 0 1 1 228.1 82"
         fill="none"
         strokeWidth={9}
-        stroke={palette.divider}
+        stroke={palette.borderStrong}
         strokeLinecap="round"
       />
       <Path

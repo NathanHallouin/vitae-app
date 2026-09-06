@@ -24,10 +24,17 @@ export default function IllustrationAucuneRecette() {
         d="M76 24h88L131 66v30h-22V66Z"
         fill="none"
         strokeWidth={3}
-        stroke={palette.divider}
+        stroke={palette.borderStrong}
         strokeLinejoin="round"
       />
-      <Glyphe nom="assiette" x={92} y={92} taille={56} couleur={palette.divider} epaisseur={2.4} />
+      <Glyphe
+        nom="assiette"
+        x={92}
+        y={92}
+        taille={56}
+        couleur={palette.borderStrong}
+        epaisseur={2.4}
+      />
     </Illustration>
   );
 }

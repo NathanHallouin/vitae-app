@@ -28,7 +28,7 @@ export default function IllustrationConfidentialite() {
         r={86}
         fill="none"
         strokeWidth={2.5}
-        stroke={palette.divider}
+        stroke={palette.borderStrong}
         strokeDasharray="7 9"
         strokeLinecap="round"
       />
@@ -44,7 +44,7 @@ export default function IllustrationConfidentialite() {
         stroke={palette.primaryInk}
       />
       {/* Le haut-parleur : deux traits suffisent à faire lire un téléphone plutôt qu'une carte. */}
-      <Rect x={148} y={48} width={24} height={4} rx={2} fill={palette.divider} />
+      <Rect x={148} y={48} width={24} height={4} rx={2} fill={palette.borderStrong} />
 
       <Glyphe
         nom="flamme"

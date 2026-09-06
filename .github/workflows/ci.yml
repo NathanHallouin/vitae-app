@@ -85,10 +85,14 @@ jobs:
           # renvoi vers l'écran suivant, qui est ce qui fait des quatre onglets un parcours.
           verifie metabolisme.html 'Ce que ces chiffres changent dans l’assiette'
           verifie bouger.html 'Des recettes pour tenir ces repères'
-          # Les réglages : le thème y est expliqué, et le site y dit pourquoi les rappels de
-          # mouvement n'existent que dans l'application.
-          verifie reglages.html 'Le thème sombre reprend'
+          # Les réglages : le site y dit pourquoi les rappels de mouvement n'existent vraiment que
+          # dans l'application.
           verifie reglages.html 'ne sonne que si l’onglet est resté ouvert'
+          # Le thème, lui, est sur le profil et non dans les réglages — c'est un choix écrit dans
+          # les deux écrans, et cette assertion l'avait d'abord contredit en visant `reglages.html`,
+          # où le texte n'a jamais été. Une assertion fausse sur une règle vraie : elle aurait fait
+          # rougir la CI en accusant le code.
+          verifie profil.html 'Le thème sombre reprend'
           verifie confidentialite.html 'aucune donnée'
 
           recette=apps/app/dist/recettes/omelette-aux-champignons.html

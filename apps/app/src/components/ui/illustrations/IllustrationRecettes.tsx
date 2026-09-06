@@ -30,11 +30,25 @@ export default function IllustrationRecettes() {
       label="Trois plats fumants posés sur un plan de travail, l’un au premier plan"
     >
       {/* En retrait : plus petits, plus haut, et dans la couleur de ce qui n'est pas le sujet. */}
-      <Glyphe nom="assiette" x={26} y={62} taille={78} couleur={palette.divider} epaisseur={2.2} />
-      <Glyphe nom="assiette" x={176} y={62} taille={78} couleur={palette.divider} epaisseur={2.2} />
+      <Glyphe
+        nom="assiette"
+        x={26}
+        y={62}
+        taille={78}
+        couleur={palette.borderStrong}
+        epaisseur={2.2}
+      />
+      <Glyphe
+        nom="assiette"
+        x={176}
+        y={62}
+        taille={78}
+        couleur={palette.borderStrong}
+        epaisseur={2.2}
+      />
 
       {/* Le plan de travail passe derrière le plat du premier plan, qui vient s'y poser. */}
-      <Line x1={40} y1={140} x2={240} y2={140} strokeWidth={2.5} stroke={palette.divider} />
+      <Line x1={40} y1={140} x2={240} y2={140} strokeWidth={2.5} stroke={palette.borderStrong} />
 
       <Glyphe
         nom="assiette"

@@ -27,12 +27,26 @@ export default function IllustrationRecette({ categorie }: { categorie: string }
     >
       {/* L'accent passe derrière : c'est le plat qui est le sujet, pas la garniture. */}
       {matin ? (
-        <Glyphe nom="soleil" x={132} y={22} taille={58} couleur={palette.divider} epaisseur={2} />
+        <Glyphe
+          nom="soleil"
+          x={132}
+          y={22}
+          taille={58}
+          couleur={palette.borderStrong}
+          epaisseur={2}
+        />
       ) : (
-        <Glyphe nom="ble" x={152} y={80} taille={40} couleur={palette.divider} epaisseur={2.2} />
+        <Glyphe
+          nom="ble"
+          x={152}
+          y={80}
+          taille={40}
+          couleur={palette.borderStrong}
+          epaisseur={2.2}
+        />
       )}
 
-      <Line x1={20} y1={118} x2={200} y2={118} strokeWidth={2.5} stroke={palette.divider} />
+      <Line x1={20} y1={118} x2={200} y2={118} strokeWidth={2.5} stroke={palette.borderStrong} />
 
       <Glyphe
         nom="assiette"
