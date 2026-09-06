@@ -27,6 +27,7 @@
     "fonts": "bun run tools/build-fonts.ts",
     "sw": "bun run tools/build-sw.ts",
     "verifie:export": "bun run tools/verifie-export.ts",
+    "verifie:paires": "bun run tools/verifie-paires.ts",
     "photos": "bun run tools/build-photos.ts"
   },
   "devDependencies": {

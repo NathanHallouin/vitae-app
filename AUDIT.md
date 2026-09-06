@@ -1080,6 +1080,60 @@ D'où la règle plutôt que les deux corrections. Elle tient en trois lignes de 
 exactement ce que le commentaire de `NumberField` disait déjà en français depuis le début — la
 différence étant qu'elle, on l'exécute.
 
+### 6 septembre 2026 — treizième passe, le natif
+
+Douze passes, toutes sur le web. L'application iOS et Android est l'autre moitié du produit et
+n'avait jamais été regardée — ni construite.
+
+#### Deux vérifications qui ne trouvent rien, et une qui trouve
+
+**Les fichiers `.web` sont-ils typés ?** `tools/` ne l'était par personne — défaut trouvé à la
+cinquième passe — et la question se reposait pour les treize variantes web, que `tsc` pourrait
+ignorer puisqu'il résout toujours la variante sans suffixe. Testé par injection d'une erreur
+délibérée dans `hydrate.web.ts` : **elle est attrapée**. Les deux moitiés sont compilées.
+
+**Le paquet natif se construit-il ?** Oui : 4,8 Mo de bytecode Hermes, en dix-sept secondes, sans
+aucun SDK Android.
+
+#### `Pp1` 🟠 — une moitié de paire ne portait pas le contrat qu'on lui prêtait
+
+`ProfileProvider` importe `LECTURE_IMMEDIATE` de `@/lib/store`, et son commentaire d'en-tête
+affirme que « la différence est **décidée par le fichier que Metro choisit** selon la plateforme —
+pas par un test à l'exécution ».
+
+`store.web.ts` ne l'exportait pas. Sur le web elle valait donc `undefined`.
+
+Le comportement était juste — `undefined` est faux, et faux est ce que le web veut. **Mais par
+coïncidence, pas par contrat.** Ce que ça coûtait : renommer le drapeau en `LECTURE_DIFFEREE` pour
+en inverser la polarité aurait donné au site la mauvaise branche en silence, sans que TypeScript
+bronche, celui-ci résolvant toujours `store.ts`. Et le commentaire affirmait quelque chose de faux —
+la classe de défaut qu'`AGENTS.md` désigne comme propre à ce dépôt.
+
+`tools/verifie-paires.ts` compare désormais les noms exportés des treize paires. Vérifié par
+injection. Les types, lui, ne les compare pas : quand une paire a un contrat partagé — `SeoProps` —
+c'est le compilateur qui tient les deux fichiers ensemble, et ce script ne fait que confirmer.
+
+#### `Nt1` 🟠 — rien ne vérifiait que l'application native compile
+
+La CI construisait le site et rien d'autre. Un import qui n'existe que sur le web, une moitié de
+paire absente, une dépendance incompatible : tout cela passait jusqu'à la publication.
+
+`expo export --platform android` produit le paquet JavaScript sans SDK. **Dix-sept secondes pour la
+moitié du produit qui n'était pas contrôlée** — c'est ajouté à la CI. Android suffit : le graphe de
+modules est le même qu'iOS, et `DateField.tsx` est la seule distinction entre les deux.
+
+### Ce que la treizième passe a appris
+
+**Deux contrôles sur trois n'ont rien trouvé, et c'est ce qui rend le troisième crédible.** L'idée
+que `tsc` ignore les fichiers `.web` était plausible — le précédent de `tools/` la rendait même
+probable — et elle était fausse. La vérifier a coûté deux minutes ; la supposer aurait produit une
+correction inutile dans un audit qui se veut factuel.
+
+Le défaut trouvé, lui, tient en une observation : **`undefined` est faux, et c'est ce qui rendait le
+bug invisible**. Le code marchait, les tests passaient, le site se comportait correctement. Seul
+l'écart entre ce que le commentaire affirmait et ce que le fichier exportait le trahissait — et cet
+écart n'était lisible qu'en comparant deux fichiers que personne n'ouvre ensemble.
+
 ### Ce qui reste ouvert, par ordre de coût
 
 **Cette phrase a été écrite deux fois — « la liste des constats corrigeables est épuisée » — et

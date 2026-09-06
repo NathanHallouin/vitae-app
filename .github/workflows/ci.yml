@@ -52,6 +52,18 @@ jobs:
       - name: Export du site
         run: bun run --cwd apps/app export:web
 
+      - name: Le paquet natif se construit
+        # La CI ne prouvait que le site. L'application iOS et Android est l'autre moitié du produit,
+        # et rien ne vérifiait qu'elle **compile** — un import qui n'existe que sur le web, une
+        # moitié de paire de plateforme absente, une dépendance incompatible : tout cela passait
+        # jusqu'à la publication.
+        #
+        # `expo export --platform android` ne demande aucun SDK Android : il produit le paquet
+        # JavaScript, compilé en bytecode Hermes. Dix-sept secondes pour la moitié du produit qui
+        # n'était pas contrôlée. Android suffit : le graphe de modules est le même qu'iOS, et
+        # `DateField.tsx` est la seule distinction entre les deux — elle est dans un seul fichier.
+        run: bun run --cwd apps/app export:natif
+
       - name: Service worker
         # Après l'export, jamais avant : il nomme le paquet et la feuille de style, dont
         # l'empreinte n'existe qu'une fois l'export fait.
@@ -285,7 +297,15 @@ jobs:
             exit 1
           fi
 
-          # 3. Le métier ne connaît aucune plateforme. Sans cela, il cesse d'être testable sans
+          # 3. Les deux moitiés d'une paire de plateforme exportent la même chose.
+          #    TypeScript ne peut pas le vérifier : il résout toujours la variante sans suffixe. Un
+          #    export présent d'un seul côté compile donc sans un mot. `LECTURE_IMMEDIATE` manquait
+          #    à `store.web.ts` ; sur le web elle valait `undefined`, donc faux, donc la bonne
+          #    branche — par coïncidence. Inverser la polarité du drapeau aurait retourné le
+          #    comportement du site en silence.
+          bun run verifie:paires
+
+          # 4. Le métier ne connaît aucune plateforme. Sans cela, il cesse d'être testable sans
           #    environnement de rendu — et c'est ce qui fait tourner les 270 tests en 160 ms.
           interdits=$(grep -rnE "from '(react|react-native|node:)" packages/core/src || true)
           if [ -n "$interdits" ]; then

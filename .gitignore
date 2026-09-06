@@ -41,3 +41,6 @@ design_handoff_*/
 *.p12
 *.key
 *.mobileprovision
+
+# Export natif de vérification (CI et local)
+apps/app/.export-natif/

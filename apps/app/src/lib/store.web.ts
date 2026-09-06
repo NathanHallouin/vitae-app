@@ -43,6 +43,26 @@ export const nativeProfileStore: ProfileStore = {
   },
 };
 
+/**
+ * Sur le web, le profil n'est **pas** lisible au premier rendu.
+ *
+ * Les pages sont pré-rendues à la compilation, où `localStorage` n'existe pas : lire dès le premier
+ * rendu du navigateur produirait un balisage différent de celui qui a été livré, et l'hydratation
+ * échouerait. La lecture est donc reportée d'un rendu, dans un effet.
+ *
+ * **Cette constante manquait.** `ProfileProvider` l'importe de `@/lib/store`, Metro résolvait ce
+ * fichier-ci, et elle valait donc `undefined`. Le comportement était juste — `undefined` est faux,
+ * et faux est ce que le web veut — mais par coïncidence, pas par contrat. Le commentaire d'en-tête
+ * de `ProfileProvider` affirmait pourtant que « la différence est décidée par le fichier que Metro
+ * choisit » : c'était vrai d'un seul côté de la paire.
+ *
+ * Ce que ça coûtait : inverser la polarité du drapeau — le renommer `LECTURE_DIFFEREE`, par
+ * exemple — aurait donné au web la mauvaise branche en silence, sans que TypeScript bronche, celui-ci
+ * résolvant toujours `store.ts`. Une règle de CI vérifie désormais que les deux moitiés d'une paire
+ * exportent les mêmes noms.
+ */
+export const LECTURE_IMMEDIATE = false;
+
 const THEME_KEY = 'vitae.v1.theme';
 
 export type StoredTheme = 'light' | 'dark' | 'system';

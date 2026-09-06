@@ -9,6 +9,7 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "export:web": "expo export --platform web",
+    "export:natif": "expo export --platform android --output-dir .export-natif",
     "prebuild": "expo prebuild --clean",
     "typecheck": "tsc --noEmit"
   },
