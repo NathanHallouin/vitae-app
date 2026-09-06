@@ -1,36 +1,40 @@
 /**
  * L'en-tête, présent au-dessus de tous les écrans.
  *
- * Il porte la marque — qui ramène à l'accueil, comme le logo du site —, l'accès aux recettes et
- * la bascule de thème. Sur un écran large, il porte en plus la navigation elle-même : les quatre
- * onglets de résultats et l'accès au profil, que la barre du bas cesse alors d'afficher.
+ * **Il ne porte que la marque**, qui ramène à l'accueil comme le logo de n'importe quel site. Ni
+ * navigation, ni réglage, ni bascule de thème : sur un téléphone, le haut de l'écran est hors de
+ * portée du pouce, et il y avait fini par s'y entasser quatre commandes qui rétrécissaient la
+ * marque jusqu'à la tronquer. Tout cela est descendu — les sections dans la barre du bas, le thème
+ * dans le profil, où l'on va chercher un réglage.
  *
- * La répartition suit celle du site d'origine : sous `NAV_BREAKPOINT`, l'outil est en bas, sous le
- * pouce, et l'en-tête ne garde que la marque ; au-dessus, tout remonte en haut.
+ * Deux choses s'y ajoutent quand même, et pour des raisons opposées :
+ *
+ * — **le bandeau des quatre écrans de résultats**, sur toutes les largeurs. C'est le second niveau
+ *   de navigation : les quatre écrans forment une seule section, et ce bandeau dit lequel on
+ *   regarde. Il était réservé aux grands écrans, où il doublait la barre du bas ; il descend
+ *   désormais sur mobile au lieu d'exister en double ;
+ * — **les quatre sections**, mais au-dessus de `NAV_BREAKPOINT` seulement, là où la barre du bas
+ *   se retire. L'argument du pouce ne vaut pas sur un écran de bureau, où le bas de la fenêtre est
+ *   au contraire le point le plus éloigné du regard.
  */
 
-import { LinearGradient } from 'expo-linear-gradient';
+import { RESULT_PAGES, SECTIONS, sectionDe } from '@vitae/core/nav';
 import { Link, usePathname } from 'expo-router';
 import { Pressable, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ResultTabs, { useTopNav } from '@/components/layout/ResultTabs';
-import Icon from '@/components/ui/Icon';
 import { MAX_CONTENT } from '@/components/ui/Page';
-import { useProfile } from '@/state/ProfileProvider';
-import { useColorMode } from '@/theme/ColorMode';
+import { cx } from '@/components/ui/primitives';
+import { versRoute } from '@/lib/route';
 import { usePalette } from '@/theme/palette';
 
 export default function AppHeader() {
   const palette = usePalette();
-  const { mode, toggle } = useColorMode();
   const insets = useSafeAreaInsets();
-  const label = mode === 'dark' ? 'Sombre' : 'Clair';
 
   const haut = useTopNav();
   const pathname = usePathname();
-  const { status } = useProfile();
-  // Comme sur le site : pas de lien vers le profil quand on y est déjà, ni avant qu'il existe.
-  const lienProfil = haut && status === 'ready' && pathname !== '/profil';
+  const dansLesChiffres = RESULT_PAGES.some((p) => p.href === pathname);
 
   return (
     <View
@@ -43,8 +47,8 @@ export default function AppHeader() {
       style={{ paddingTop: insets.top }}
     >
       {/* Le fond court jusqu'aux bords, la barre s'aligne sur la colonne de contenu : sur un
-          écran large, une marque collée à l'angle et une bascule de thème à 1 400 px de là ne
-          formaient plus un en-tête, mais deux éléments sans rapport. */}
+          écran large, une marque collée à l'angle et des liens à 1 400 px de là ne formaient plus
+          un en-tête, mais deux éléments sans rapport. */}
       <View
         className="h-14 w-full flex-row items-center gap-3 self-center px-4"
         style={{ maxWidth: MAX_CONTENT }}
@@ -58,11 +62,11 @@ export default function AppHeader() {
             accessibilityLabel="Accueil"
             className="min-w-0 flex-1 flex-row items-center gap-3"
           >
-            <LinearGradient
-              colors={[palette.heroFrom, palette.heroTo]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={{ width: 30, height: 30, borderRadius: 9, justifyContent: 'center' }}
+            {/* Un aplat, plus un dégradé : `heroFrom` et `heroTo` portent la même valeur depuis
+                la refonte, et le seul consommateur de leur écart était cette pastille. */}
+            <View
+              className="size-[30px] justify-center rounded-[9px]"
+              style={{ backgroundColor: palette.heroFrom }}
             >
               <Text
                 className="text-center text-caption font-sans-bold tracking-[0.3px]"
@@ -70,50 +74,61 @@ export default function AppHeader() {
               >
                 MB
               </Text>
-            </LinearGradient>
-            <Text numberOfLines={1} className="min-w-0 flex-1 font-display text-option text-ink">
+            </View>
+            <Text
+              numberOfLines={1}
+              className="min-w-0 flex-none font-sans-medium text-option text-ink"
+            >
               Métabolisme de base
             </Text>
           </Pressable>
         </Link>
 
-        {/* Les recettes sont la partie publique du site : accessibles sans profil, et toujours
-            visibles, la barre du bas ne portant que l'outil. C'est aussi, sur l'accueil, le seul
-            chemin qu'un moteur de recherche a vers le catalogue. */}
-        <Link href="/recettes" asChild>
-          <Pressable
-            accessibilityRole="link"
-            className="flex-none rounded-control px-2 py-2 active:bg-surface2"
-          >
-            <Text className="text-base font-sans-semibold text-muted">Recettes</Text>
-          </Pressable>
-        </Link>
-
-        {/* Le profil quitte la barre du bas avec elle : sans ce lien, il deviendrait inatteignable
-            sur un écran large. */}
-        {lienProfil ? (
-          <Link href="/profil" asChild>
-            <Pressable
-              accessibilityRole="link"
-              className="flex-none rounded-control px-[14px] py-2 active:bg-surface2"
-            >
-              <Text className="text-base font-sans-semibold text-muted">Mon profil</Text>
-            </Pressable>
-          </Link>
-        ) : null}
-
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={`Basculer en mode ${mode === 'dark' ? 'clair' : 'sombre'}`}
-          onPress={toggle}
-          className="flex-none flex-row items-center gap-2 rounded-full border border-line px-[10px] py-[6px] active:bg-surface2"
-        >
-          <Icon name={mode === 'dark' ? 'soleil' : 'lune'} size={16} color={palette.muted} />
-          <Text className="text-small font-sans-semibold text-muted">{label}</Text>
-        </Pressable>
+        {haut ? <SectionsEnHaut pathname={pathname} /> : null}
       </View>
 
-      {haut ? <ResultTabs /> : null}
+      {/* Le bandeau du second niveau ne s'affiche que dans la section « Mes chiffres » : ailleurs,
+          il n'y a pas de second niveau à montrer, et le laisser vide ferait un filet gris sans
+          objet sous l'en-tête. */}
+      {dansLesChiffres ? <ResultTabs /> : null}
+    </View>
+  );
+}
+
+/**
+ * Les quatre sections, sur écran large seulement.
+ *
+ * Les mêmes que la barre du bas, dans le même ordre et avec le même état actif : ce sont deux
+ * rendus d'un seul plan, pas deux navigations. « Mes chiffres » y mène toujours à `racine` et non
+ * au dernier écran vu — sur un écran large, le bandeau des quatre est visible juste en dessous,
+ * donc le retour au dernier écran n'a pas à être deviné.
+ */
+function SectionsEnHaut({ pathname }: { pathname: string }) {
+  const section = sectionDe(pathname);
+
+  return (
+    <View className="flex-none flex-row items-center gap-1" accessibilityRole="tablist">
+      {SECTIONS.map((s) => {
+        const actif = section?.cle === s.cle;
+        return (
+          <Link key={s.cle} href={versRoute(s.racine)} asChild>
+            <Pressable
+              accessibilityRole="tab"
+              accessibilityState={{ selected: actif }}
+              className="rounded-control px-3 py-2 active:bg-surface2"
+            >
+              <Text
+                className={cx(
+                  'text-base',
+                  actif ? 'font-sans-medium text-primary-ink' : 'font-sans text-muted',
+                )}
+              >
+                {s.label}
+              </Text>
+            </Pressable>
+          </Link>
+        );
+      })}
     </View>
   );
 }

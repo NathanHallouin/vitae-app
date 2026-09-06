@@ -12,6 +12,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { getAllRecipes } from '@vitae/content';
+import { NOTIONS, ROUTE_COURS, routeNotion } from '@vitae/core/cours';
 import { SITE_URL } from '@vitae/core/site';
 import { LIGHT } from '@vitae/core/tokens';
 import appConfig from '../apps/app/app.config';
@@ -36,10 +37,20 @@ function entrees(): Entree[] {
   return [
     { chemin: '', frequence: 'monthly', priorite: 1 },
     { chemin: '/recettes', frequence: 'weekly', priorite: 0.8 },
+    // Le cours passe devant les écrans de résultats : c'est la seule famille de pages dont le
+    // contenu est entier sans profil, donc la seule qui dise à un moteur exactement ce qu'un
+    // visiteur lira.
+    { chemin: ROUTE_COURS, frequence: 'monthly', priorite: 0.8 },
+    ...NOTIONS.map(
+      (n): Entree => ({ chemin: routeNotion(n.slug), frequence: 'yearly', priorite: 0.7 }),
+    ),
     ...['metabolisme', 'alimentation', 'poids', 'bouger'].map(
       (r): Entree => ({ chemin: `/${r}`, frequence: 'monthly', priorite: 0.7 }),
     ),
     { chemin: '/profil', frequence: 'yearly', priorite: 0.5 },
+    // Les réglages sont surtout une page d'application ; ce qu'elle a d'indexable tient en une
+    // phrase — les rappels, le thème, et le fait que rien ne sort de l'appareil.
+    { chemin: '/reglages', frequence: 'yearly', priorite: 0.3 },
     { chemin: '/confidentialite', frequence: 'yearly', priorite: 0.3 },
     ...getAllRecipes().map(
       (r): Entree => ({

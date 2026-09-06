@@ -1,9 +1,14 @@
 import { BENEFITS } from '@vitae/core/constants';
+import { ROUTE_COURS, TOTAL_NOTIONS } from '@vitae/core/cours';
+import { STALE_WEIGHT_DAYS, todayISO } from '@vitae/core/date';
 import { kcal } from '@vitae/core/format';
+import { destinationAuDemarrage } from '@vitae/core/nav';
 import { SITE_URL } from '@vitae/core/site';
+import { lireDerniereOuverture, marquerOuverture } from '@vitae/core/storage';
+import { joursEntre } from '@vitae/core/suivi';
 import { useRouter } from 'expo-router';
 import { useEffect } from 'react';
-import { Platform, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import Seo from '@/components/layout/Seo';
 import HomeIllustration from '@/components/ui/HomeIllustration';
 import Icon from '@/components/ui/Icon';
@@ -11,6 +16,8 @@ import Overline from '@/components/ui/Overline';
 import Page, { useColumns, useLarge } from '@/components/ui/Page';
 import { Button, Card } from '@/components/ui/primitives';
 import Titre from '@/components/ui/Titre';
+import { REDIRIGE_AU_DEMARRAGE } from '@/lib/demarrage';
+import { versRoute } from '@/lib/route';
 import { useProfile } from '@/state/ProfileProvider';
 import { usePalette } from '@/theme/palette';
 
@@ -34,7 +41,7 @@ let redirectionFaite = false;
  * titre ni texte à l'adresse la plus visitée du site.
  */
 export default function AccueilScreen() {
-  const { status, metrics } = useProfile();
+  const { status, metrics, profile, suivi } = useProfile();
   const router = useRouter();
   const palette = usePalette();
   const large = useLarge();
@@ -42,11 +49,28 @@ export default function AccueilScreen() {
   const known = status === 'ready' && metrics !== null;
 
   useEffect(() => {
-    if (Platform.OS === 'web' || redirectionFaite || status !== 'ready') return;
+    if (!REDIRIGE_AU_DEMARRAGE || redirectionFaite || status !== 'ready') return;
     redirectionFaite = true;
+
+    // Les deux drapeaux que la règle d'arrivée compare, lus au dernier moment : `suivi` et
+    // `profile` sont déjà en mémoire, il n'y a rien à charger.
+    const derniere = suivi.dernier;
+    const depuis = derniere ? joursEntre(derniere.date, todayISO()) : null;
+    const ouverture = lireDerniereOuverture();
+
+    const destination = destinationAuDemarrage({
+      peseePerimee: depuis === null || depuis >= STALE_WEIGHT_DAYS,
+      profilModifie: ouverture === null || (profile?.updatedAt ?? '') > ouverture,
+    });
+
+    // L'horodatage est posé après la lecture, jamais avant : l'écrire d'abord ferait de chaque
+    // lancement sa propre référence, et « modifié depuis la dernière ouverture » serait toujours
+    // faux.
+    marquerOuverture();
+
     // `replace` et non `navigate` : l'accueil ne doit pas rester dans l'historique de retour.
-    router.replace('/metabolisme');
-  }, [status, router]);
+    router.replace(versRoute(destination));
+  }, [status, router, suivi.dernier, profile]);
 
   return (
     <>
@@ -106,8 +130,8 @@ export default function AccueilScreen() {
           </View>
         </View>
 
-        <Card className="mt-10 p-6">
-          <Overline niveau={2} className="mb-5">
+        <Card className="mt-8 px-[18px] py-5">
+          <Overline niveau={2} className="mb-[14px]">
             Ce que vous obtenez
           </Overline>
           {/* Deux colonnes dès qu'il y a la place : quatre lignes pleine largeur pour une phrase
@@ -130,6 +154,15 @@ export default function AccueilScreen() {
             ))}
           </View>
         </Card>
+
+        {/* Le troisième chemin sortant de l'accueil, après le profil et les recettes — et le seul
+            qui ne demande rien : les seize notions se lisent sans chiffres. C'est aussi, pour un
+            moteur de recherche, le lien vers les pages du site dont le contenu est entier. */}
+        <View className="mt-6 items-start">
+          <Button variant="text" href={ROUTE_COURS}>
+            Comprendre : {TOTAL_NOTIONS} notions, sans vos chiffres
+          </Button>
+        </View>
       </Page>
     </>
   );

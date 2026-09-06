@@ -19,10 +19,14 @@ import type { Sauvegarde } from '@vitae/core/sauvegarde';
 import type { StaleWeight } from '@vitae/core/state';
 import {
   clearProfile,
+  loadLu,
   loadProfile,
   loadSuivi,
+  marquerLue,
+  oublierLue,
   type ProfileInput,
   type StoredProfile,
+  saveLu,
   saveProfile,
   saveSuivi,
   setProfileStore,
@@ -55,19 +59,23 @@ interface Donnees {
   profile: StoredProfile | null;
   staleWeight: StaleWeight | null;
   pesees: Pesee[];
+  /** les notions du cours déjà lues */
+  lu: string[];
 }
 
 /** Tout ce qui est persisté, lu d'un bloc pour n'ouvrir le stockage qu'une fois. */
 function lire(): Donnees {
   const stored = loadProfile();
   const pesees = loadSuivi();
-  if (!stored) return { profile: null, staleWeight: null, pesees };
+  const lu = loadLu();
+  if (!stored) return { profile: null, staleWeight: null, pesees, lu };
   return {
     profile: stored,
     staleWeight: isWeightStale(stored.updatedAt)
       ? { previous: stored.poids, updatedAt: stored.updatedAt }
       : null,
     pesees,
+    lu,
   };
 }
 
@@ -88,6 +96,20 @@ interface ProfileValue {
   setExcluded: (excluded: Exclusion[]) => void;
   /** les pesées et ce qu'elles disent, recalculé à chaque changement */
   suivi: Suivi;
+  /** les identifiants des notions du cours déjà lues */
+  lu: string[];
+  marquerNotionLue: (slug: string) => void;
+  oublierNotionLue: (slug: string) => void;
+  /**
+   * L'encart du cours a-t-il été rangé pour cette session ?
+   *
+   * Le seul état d'interface de ce fournisseur, et il y est parce qu'il concerne le cours comme
+   * `lu`, et parce qu'il doit valoir pour l'application entière : « Plus tard » sur l'écran des
+   * chiffres ne doit pas laisser le même encart réapparaître sur celui du poids trois secondes
+   * après. Non persisté, à dessein — c'est un report, pas un refus.
+   */
+  coursRepousse: boolean;
+  repousserCours: () => void;
   ajouterPesee: (pesee: Pesee) => void;
   supprimerPesee: (date: string) => void;
   /** remplace le profil et les pesées par ceux d'un fichier de sauvegarde */
@@ -106,10 +128,11 @@ export function useProfile(): ProfileValue {
 export default function ProfileProvider({ children }: { children: ReactNode }) {
   // Le profil et la fraîcheur du poids vont ensemble : un seul état, donc une seule lecture au
   // montage, et pas de rendu intermédiaire où l'un serait à jour et l'autre non.
-  const [{ profile, staleWeight, pesees }, setDonnees] = useState<Donnees>(() =>
-    LECTURE_IMMEDIATE ? lire() : { profile: null, staleWeight: null, pesees: [] },
+  const [{ profile, staleWeight, pesees, lu }, setDonnees] = useState<Donnees>(() =>
+    LECTURE_IMMEDIATE ? lire() : { profile: null, staleWeight: null, pesees: [], lu: [] },
   );
   const [targetKey, setTargetKey] = useState<string | null>(null);
+  const [coursRepousse, setCoursRepousse] = useState(false);
 
   const setProfile = useCallback((next: StoredProfile | null) => {
     setDonnees((avant) => ({ ...avant, profile: next, staleWeight: null }));
@@ -118,9 +141,10 @@ export default function ProfileProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Sur le web seulement : rattrape la lecture qui ne pouvait pas avoir lieu au premier rendu.
     if (LECTURE_IMMEDIATE) return;
-    const lu = lire();
-    // Les pesées comptent même sans profil : quelqu'un peut avoir tout effacé et gardé sa courbe.
-    if (lu.profile || lu.pesees.length) setDonnees(lu);
+    const donnees = lire();
+    // Les pesées et le cours comptent même sans profil : on peut avoir tout effacé et gardé sa
+    // courbe, ou lire les seize notions sans jamais remplir le formulaire.
+    if (donnees.profile || donnees.pesees.length || donnees.lu.length) setDonnees(donnees);
   }, []);
 
   const save = useCallback(
@@ -166,9 +190,38 @@ export default function ProfileProvider({ children }: { children: ReactNode }) {
     setDonnees((avant) => ({ ...avant, pesees: loadSuivi() }));
   }, []);
 
+  /**
+   * Enregistre une pesée, et fige le poids de départ si c'est la première.
+   *
+   * Le poids de départ ne se déduit pas de l'historique : la première pesée en sortirait, mais elle
+   * change dès qu'on supprime une entrée, et le chemin que le cadran affiche reculerait sans que
+   * rien ne se soit passé sur la balance. Il est donc écrit une fois, dans le profil, et jamais
+   * réécrit — pas même après un « Tout effacer » suivi d'un nouveau profil, qui repart de zéro de
+   * toute façon.
+   *
+   * L'écriture passe par le résultat d'`ajouter` et non par la pesée reçue : le métier borne,
+   * arrondit et dédoublonne, et une saisie aberrante qu'il aurait écartée ne doit pas devenir un
+   * point de départ.
+   *
+   * Deux précautions pour que cette écriture ne se voie nulle part ailleurs. L'horodatage d'origine
+   * est réécrit tel quel — `saveProfile` le rafraîchit par défaut, et un profil ainsi rajeuni
+   * passerait pour à jour alors que son poids, lui, n'a pas bougé : l'invitation à le corriger
+   * disparaîtrait au pire moment, juste après une pesée. Et l'état est mis à jour ici plutôt que
+   * par `setProfile`, qui efface `staleWeight` — ce qu'une pesée n'a aucune raison de faire.
+   */
   const ajouterPesee = useCallback(
-    (pesee: Pesee) => enregistrerPesees(ajouter(pesees, pesee)),
-    [pesees, enregistrerPesees],
+    (pesee: Pesee) => {
+      const prochaines = ajouter(pesees, pesee);
+      enregistrerPesees(prochaines);
+
+      if (!profile || profile.poidsDepart !== undefined) return;
+      if (pesees.length !== 0 || prochaines.length !== 1) return;
+
+      const { v: _v, updatedAt, ...rest } = profile;
+      saveProfile({ ...rest, poidsDepart: prochaines[0].poids }, new Date(updatedAt));
+      setDonnees((avant) => ({ ...avant, profile: loadProfile() }));
+    },
+    [pesees, enregistrerPesees, profile],
   );
 
   const supprimerPesee = useCallback(
@@ -176,12 +229,30 @@ export default function ProfileProvider({ children }: { children: ReactNode }) {
     [pesees, enregistrerPesees],
   );
 
+  /**
+   * Note qu'une notion a été lue.
+   *
+   * Appelé au montage de la page de la notion, pas sur un bouton : le geste de l'ouvrir *est* la
+   * déclaration, et un « J'ai compris » à cocher ferait du cours un formulaire. Idempotent côté
+   * stockage, donc relire une notion n'écrit rien.
+   */
+  const repousserCours = useCallback(() => setCoursRepousse(true), []);
+
+  const marquerNotionLue = useCallback((slug: string) => {
+    setDonnees((avant) => ({ ...avant, lu: marquerLue(slug) }));
+  }, []);
+
+  const oublierNotionLue = useCallback((slug: string) => {
+    setDonnees((avant) => ({ ...avant, lu: oublierLue(slug) }));
+  }, []);
+
   const restaurer = useCallback((sauvegarde: Sauvegarde) => {
     if (sauvegarde.profil) {
       const { v: _v, updatedAt: _updatedAt, ...champs } = sauvegarde.profil;
       saveProfile(champs);
     }
     saveSuivi(sauvegarde.pesees);
+    saveLu(sauvegarde.lu);
     setDonnees(lire());
     setTargetKey(null);
   }, []);
@@ -195,7 +266,10 @@ export default function ProfileProvider({ children }: { children: ReactNode }) {
   const reset = useCallback(() => {
     clearProfile();
     saveSuivi([]);
-    setDonnees({ profile: null, staleWeight: null, pesees: [] });
+    // Le cours n'est pas effacé : ce n'est pas une donnée personnelle, c'est une lecture. Repartir
+    // de la première notion parce qu'on a corrigé son poids n'aurait aucun sens, et le bouton ne
+    // promet que d'effacer ce qui vous concerne.
+    setDonnees({ profile: null, staleWeight: null, pesees: [], lu: loadLu() });
     setTargetKey(null);
   }, []);
 
@@ -234,6 +308,11 @@ export default function ProfileProvider({ children }: { children: ReactNode }) {
       setGoal,
       setExcluded,
       suivi,
+      lu,
+      marquerNotionLue,
+      oublierNotionLue,
+      coursRepousse,
+      repousserCours,
       ajouterPesee,
       supprimerPesee,
       restaurer,
@@ -249,6 +328,11 @@ export default function ProfileProvider({ children }: { children: ReactNode }) {
       setGoal,
       setExcluded,
       suivi,
+      lu,
+      marquerNotionLue,
+      oublierNotionLue,
+      coursRepousse,
+      repousserCours,
       ajouterPesee,
       supprimerPesee,
       restaurer,

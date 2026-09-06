@@ -2,8 +2,8 @@ import { METABOLISME_EXPLAINER } from '@vitae/core/explainers';
 import { SITE_URL } from '@vitae/core/site';
 import ResultScreen from '@/components/layout/ResultScreen';
 import Seo from '@/components/layout/Seo';
-import Explainer from '@/components/screens/Explainer';
 import MetabolismeScreen from '@/components/screens/MetabolismeScreen';
+import SuiteEcran from '@/components/screens/SuiteEcran';
 import MeditatingDoodle from '@/components/ui/doodles/MeditatingDoodle';
 import PageIntro from '@/components/ui/PageIntro';
 
@@ -22,7 +22,7 @@ export default function Page() {
           illustration={<MeditatingDoodle />}
         />
         <MetabolismeScreen />
-        <Explainer data={METABOLISME_EXPLAINER} />
+        <SuiteEcran data={METABOLISME_EXPLAINER} />
       </ResultScreen>
     </>
   );

@@ -19,7 +19,7 @@
  * désigne un appareil. Il est fait pour être rangé dans un dossier, pas pour être reconnu.
  */
 
-import { lirePesees, parseProfile, type StoredProfile } from './storage';
+import { lirePesees, parseLu, parseProfile, type StoredProfile } from './storage';
 import type { Pesee } from './suivi';
 
 export const SAUVEGARDE_VERSION = 1;
@@ -27,6 +27,15 @@ export const SAUVEGARDE_VERSION = 1;
 export interface Sauvegarde {
   profil: StoredProfile | null;
   pesees: Pesee[];
+  /**
+   * Les notions du cours déjà lues.
+   *
+   * Le champ est arrivé après la version 1 du format et n'a pas fait monter `v` : une sauvegarde
+   * ancienne se relit sans lui, et une sauvegarde récente lue par une version ancienne l'ignore.
+   * C'est exactement ce que la lecture tolérante est censée permettre — faire monter la version
+   * pour un champ facultatif condamnerait des fichiers parfaitement lisibles.
+   */
+  lu: string[];
 }
 
 /**
@@ -43,6 +52,7 @@ export function construireSauvegarde(
   profil: StoredProfile | null,
   pesees: Pesee[],
   exporteLe: string,
+  lu: string[] = [],
 ): string {
   return `${JSON.stringify(
     {
@@ -51,6 +61,7 @@ export function construireSauvegarde(
       exporteLe,
       profil,
       pesees,
+      lu,
     },
     null,
     2,
@@ -100,14 +111,17 @@ export function lireSauvegarde(texte: string): Lecture {
 
   const pesees = Array.isArray(s.pesees) ? lirePesees(s.pesees) : [];
   const profil = lireProfilDeSauvegarde(s.profil);
+  const lu = parseLu(typeof s.lu === 'undefined' ? null : JSON.stringify(s.lu));
 
+  // Les notions lues ne suffisent pas à justifier une restauration : c'est un confort, pas une
+  // donnée qu'on redoute de perdre. Un fichier qui ne contiendrait qu'elles reste un fichier vide.
   if (!profil && pesees.length === 0) {
     return { ok: false, message: 'Ce fichier ne contient ni profil ni pesée à restaurer.' };
   }
 
   return {
     ok: true,
-    sauvegarde: { profil, pesees },
+    sauvegarde: { profil, pesees, lu },
     message: resume(profil !== null, pesees.length),
   };
 }

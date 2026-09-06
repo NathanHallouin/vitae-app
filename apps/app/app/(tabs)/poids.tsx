@@ -2,8 +2,8 @@ import { POIDS_EXPLAINER } from '@vitae/core/explainers';
 import { SITE_URL } from '@vitae/core/site';
 import ResultScreen from '@/components/layout/ResultScreen';
 import Seo from '@/components/layout/Seo';
-import Explainer from '@/components/screens/Explainer';
 import PoidsScreen from '@/components/screens/PoidsScreen';
+import SuiteEcran from '@/components/screens/SuiteEcran';
 import LevitateDoodle from '@/components/ui/doodles/LevitateDoodle';
 import PageIntro from '@/components/ui/PageIntro';
 
@@ -22,7 +22,7 @@ export default function Page() {
           illustration={<LevitateDoodle />}
         />
         <PoidsScreen />
-        <Explainer data={POIDS_EXPLAINER} />
+        <SuiteEcran data={POIDS_EXPLAINER} />
       </ResultScreen>
     </>
   );

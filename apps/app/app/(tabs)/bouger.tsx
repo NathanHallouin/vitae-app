@@ -3,7 +3,7 @@ import { SITE_URL } from '@vitae/core/site';
 import ResultScreen from '@/components/layout/ResultScreen';
 import Seo from '@/components/layout/Seo';
 import BougerScreen from '@/components/screens/BougerScreen';
-import Explainer from '@/components/screens/Explainer';
+import SuiteEcran from '@/components/screens/SuiteEcran';
 import RunningDoodle from '@/components/ui/doodles/RunningDoodle';
 import PageIntro from '@/components/ui/PageIntro';
 
@@ -22,7 +22,7 @@ export default function Page() {
           illustration={<RunningDoodle />}
         />
         <BougerScreen />
-        <Explainer data={BOUGER_EXPLAINER} />
+        <SuiteEcran data={BOUGER_EXPLAINER} />
       </ResultScreen>
     </>
   );

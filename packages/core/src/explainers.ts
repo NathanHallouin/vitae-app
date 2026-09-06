@@ -12,13 +12,40 @@
  */
 
 export interface ExplainerItem {
+  /**
+   * Identifiant stable de la notion, et adresse de sa page dans `/comprendre`.
+   *
+   * Stable veut dire : il survit à une reformulation du titre. C'est ce qui permet d'enregistrer
+   * ce qui a été lu sans que corriger une virgule dans un intitulé remette le cours à zéro, et
+   * c'est aussi l'adresse publique de la notion — une fois indexée, elle ne se renomme plus.
+   */
+  slug: string;
   titre: string;
+  /**
+   * La réponse en une ligne, lisible sans ouvrir.
+   *
+   * Ajouté quand les explications sont passées en fiches : un titre replié annonce un sujet, pas
+   * une réponse, et une liste de quatre sujets ne se parcourt donc pas — on ouvre les quatre, ou
+   * aucun. Le résumé rend la carte lisible fermée, et fait du détail un choix plutôt qu'un passage
+   * obligé. Il doit tenir sur une ligne et se suffire à lui-même : s'il appelle le texte long,
+   * c'est un teaser, et un teaser se lit comme de la publicité.
+   */
+  resume: string;
   texte: string;
 }
 
 export interface Explainer {
+  /** identifiant du chapitre, et ancre de son groupe dans l'index du cours */
+  slug: string;
   /** titre de la section, en tête de carte */
   title: string;
+  /**
+   * L'écran de résultats dont ce chapitre explique les chiffres.
+   *
+   * La notion se lit sans profil — c'est la règle de tous ces textes — mais elle a bien un écran
+   * où l'appliquer, et le cours y renvoie : « Voir sur l'écran Ce que je mange ».
+   */
+  ecran: { href: string; label: string };
   /**
    * Le fil : ce qu'on va lire, et dans quel ordre.
    *
@@ -39,27 +66,37 @@ export interface Explainer {
 }
 
 export const METABOLISME_EXPLAINER: Explainer = {
+  slug: 'comprendre-ces-chiffres',
   title: 'Comprendre ces chiffres',
+  ecran: { href: '/metabolisme', label: 'Mon métabolisme' },
   fil: 'Quatre questions, dans l’ordre où elles se posent : ce que ce chiffre mesure, d’où il sort, ce qui le fait varier d’une personne à l’autre, et ce que l’IMC ne dit pas.',
   suite: { href: '/alimentation', label: 'Ce que ces chiffres changent dans l’assiette' },
   items: [
     {
+      slug: 'metabolisme-de-base',
       titre: 'Le métabolisme de base, c’est quoi ?',
+      resume: 'L’énergie que vous dépensez sans rien faire : 60 à 70 % du total.',
       texte:
         'C’est l’énergie que votre corps consomme sans rien faire : faire battre le cœur, respirer, maintenir la température, renouveler les cellules. Même immobile une journée entière, vous en dépensez l’essentiel. Il représente en général 60 à 70 % de la dépense totale d’une personne peu sportive.',
     },
     {
+      slug: 'comment-il-est-calcule',
       titre: 'Comment il est calculé ici',
+      resume: 'L’équation de Mifflin-St Jeor, multipliée par un facteur d’activité.',
       texte:
         'Par l’équation de Mifflin-St Jeor, la plus fiable des formules courantes sur une population générale : 10 × poids(kg) + 6,25 × taille(cm) − 5 × âge, plus 5 chez l’homme et moins 161 chez la femme. La dépense totale s’obtient en multipliant ce résultat par un facteur d’activité, qui tient compte à la fois du mouvement du quotidien et des séances de sport.',
     },
     {
+      slug: 'ce-qui-le-fait-varier',
       titre: 'Ce qui le fait varier',
+      resume: 'Le muscle d’abord, loin devant l’âge, le sommeil et le stress.',
       texte:
         'Par ordre d’importance : la quantité de muscle — chaque kilo consomme environ 13 kcal par jour au repos, contre 4,5 pour un kilo de graisse —, puis l’âge, le sommeil et le stress. Les « aliments brûle-graisses », eux, ne pèsent rien dans ce calcul. Deux personnes de même poids et de même taille peuvent différer de 200 kcal par jour : c’est pourquoi ces chiffres restent une estimation, à ajuster sur ce que fait réellement votre poids au bout de trois semaines.',
     },
     {
+      slug: 'ce-que-l-imc-ne-dit-pas',
       titre: 'Ce que l’IMC dit, et ne dit pas',
+      resume: 'Un repère de population, qui ne distingue ni le muscle ni la répartition.',
       texte:
         'L’IMC compare simplement votre poids à votre taille. C’est un repère de population, pas un diagnostic : il ne fait pas la différence entre muscle et graisse, et il classe donc en « surpoids » des personnes très musclées qui vont très bien. Il ne dit rien non plus de la répartition des graisses, qui compte davantage pour la santé que le chiffre lui-même.',
     },
@@ -67,27 +104,37 @@ export const METABOLISME_EXPLAINER: Explainer = {
 };
 
 export const ALIMENTATION_EXPLAINER: Explainer = {
+  slug: 'comprendre-ces-reperes',
   title: 'Comprendre ces repères',
+  ecran: { href: '/alimentation', label: 'Ce que je mange' },
   fil: 'D’abord pourquoi une fourchette plutôt qu’un chiffre précis, puis les trois macronutriments par ordre d’importance, et enfin ce qui rend un déficit tenable sur la durée.',
   suite: { href: '/poids', label: 'Où ces repères vous mènent, et en combien de temps' },
   items: [
     {
+      slug: 'pourquoi-une-fourchette',
       titre: 'Pourquoi une fourchette, et pas un chiffre',
+      resume: 'L’estimation a 10 % de marge : c’est la moyenne de la semaine qui compte.',
       texte:
         'Votre dépense réelle varie d’un jour à l’autre, et l’estimation elle-même a une marge d’environ 10 %. Viser un nombre précis au gramme donne une fausse impression de contrôle et rend le suivi intenable. Tant que la moyenne de la semaine reste dans la fourchette, l’objectif est tenu.',
     },
     {
+      slug: 'les-proteines-d-abord',
       titre: 'Les protéines d’abord',
+      resume: '1,8 à 2 g par kilo en perte de gras, sinon vous perdez du muscle avec.',
       texte:
         'C’est le macronutriment à ne pas négliger en déficit : sans elles, une partie du poids perdu est du muscle, et le métabolisme baisse d’autant. Comptez 1,8 à 2 g par kilo de poids de corps en perte de gras, 1,4 g en maintien. Au-delà d’un IMC de 30, le calcul se fait sur un poids de référence ajusté plutôt que sur le poids total, sinon la quantité devient inutilement élevée.',
     },
     {
+      slug: 'lipides-et-glucides',
       titre: 'Lipides et glucides',
+      resume: 'Jamais sous 0,6 g de lipides par kilo ; le reste de l’énergie va aux glucides.',
       texte:
         'Les lipides ne descendent jamais sous 0,6 g par kilo : en dessous, la production hormonale et l’absorption des vitamines A, D, E et K finissent par en pâtir. Le reste de l’énergie va aux glucides, qui alimentent l’effort et le cerveau. Aucun des deux n’est à supprimer.',
     },
     {
+      slug: 'le-volume-compte-autant',
       titre: 'Le volume compte autant',
+      resume: 'À calories égales, légumes, protéines et fibres calent bien plus longtemps.',
       texte:
         'À calories égales, un plat riche en légumes et en protéines remplit l’estomac bien plus qu’un plat gras ou sucré. C’est ce qui rend un déficit tenable sur plusieurs semaines, davantage que la volonté. Visez aussi 25 à 30 g de fibres par jour : ce sont elles qui calent le plus longtemps.',
     },
@@ -95,27 +142,37 @@ export const ALIMENTATION_EXPLAINER: Explainer = {
 };
 
 export const POIDS_EXPLAINER: Explainer = {
+  slug: 'a-quoi-s-attendre',
   title: 'À quoi vous attendre en chemin',
+  ecran: { href: '/poids', label: 'Mon poids' },
   fil: 'Quatre choses que la courbe ne montre pas, dans l’ordre où elles arrivent : les variations d’un jour à l’autre, les premières semaines, le palier, puis le moment de tout recalculer.',
   suite: { href: '/bouger', label: 'Ce que le mouvement peut prendre en charge' },
   items: [
     {
+      slug: 'la-balance-varie',
       titre: 'La balance monte et descend de 1 à 2 kg sans raison',
+      resume: 'C’est de l’eau et le contenu du tube digestif, pas de la graisse.',
       texte:
         'Ce sont surtout de l’eau et le contenu du tube digestif : un repas salé, des glucides, les règles, une séance intense. Pesez-vous une fois par semaine dans les mêmes conditions, ou faites la moyenne de plusieurs pesées.',
     },
     {
+      slug: 'les-premiers-kilos',
       titre: 'Les premiers kilos partent vite, puis ça ralentit',
+      resume: 'Le rythme réel n’apparaît qu’à partir de la troisième semaine.',
       texte:
         'La première semaine fait souvent perdre plus : c’est l’eau liée aux réserves de glucides. Le rythme réel apparaît à partir de la troisième semaine.',
     },
     {
+      slug: 'le-palier',
       titre: 'Un palier de 2 à 3 semaines est normal',
+      resume: 'Vérifiez vos portions et vos pas avant de baisser encore les calories.',
       texte:
         'Le corps s’adapte : vous bougez un peu moins sans vous en rendre compte et vous dépensez un peu moins. Vérifiez d’abord vos portions et vos pas avant de baisser encore les calories.',
     },
     {
+      slug: 'refaire-le-calcul',
       titre: 'Refaites le calcul tous les 4 à 5 kg',
+      resume: 'Vos besoins baissent avec votre poids : mettre à jour le poids suffit.',
       texte:
         'Vos besoins baissent avec votre poids. Mettre à jour votre poids suffit à recalculer l’ensemble.',
     },
@@ -123,27 +180,37 @@ export const POIDS_EXPLAINER: Explainer = {
 };
 
 export const BOUGER_EXPLAINER: Explainer = {
+  slug: 'deux-leviers',
   title: 'Deux leviers, qu’on confond souvent',
+  ecran: { href: '/bouger', label: 'Bouger' },
   fil: 'Les deux leviers l’un après l’autre, puis pourquoi ils ne s’additionnent pas, et enfin les repères officiels pour se situer.',
   suite: { href: '/recettes', label: 'Des recettes pour tenir ces repères' },
   items: [
     {
+      slug: 'le-mouvement-du-quotidien',
       titre: 'Le mouvement du quotidien, ou NEAT',
+      resume: 'Tout ce que le corps dépense hors séances, sans jamais rien récupérer.',
       texte:
         'Marcher, monter un escalier, porter des courses, rester debout, s’agiter en parlant : tout ce que le corps dépense en dehors des séances. C’est la source de variation la plus large entre deux personnes du même gabarit — plusieurs centaines de kilocalories par jour. Ce mouvement ne demande aucune récupération : il se cumule tous les jours, sans jamais avoir à lever le pied.',
     },
     {
+      slug: 'les-seances',
       titre: 'Les séances',
+      resume: 'Un stimulus qui garde le muscle, pas un moyen de brûler des calories.',
       texte:
         'Elles ne servent pas d’abord à brûler des calories : une séance de renforcement en dépense 150 à 250, soit l’équivalent d’une viennoiserie. Leur rôle est de garder le muscle pendant que le poids baisse, ou d’en construire en surplus. Sans elles, une partie de ce que vous perdez serait du muscle, et votre métabolisme baisserait d’autant.',
     },
     {
+      slug: 'ne-pas-tout-additionner',
       titre: 'Pourquoi ne pas tout additionner',
+      resume: 'L’un se cumule sans coût, l’autre se paie en fatigue passé un certain volume.',
       texte:
         'Les deux ne se règlent pas de la même façon. Ajouter des séances quand on est déjà très actif se paie en fatigue et en baisse de performance, sans creuser l’écart. Augmenter le mouvement du quotidien, à l’inverse, se fait sans coût de récupération. Quand le quotidien est déjà chargé — un métier physique — l’écart doit venir de l’assiette.',
     },
     {
+      slug: 'les-reperes-usuels',
       titre: 'Les repères usuels',
+      resume: '150 à 300 min d’activité par semaine, et 7 000 à 8 000 pas par jour.',
       texte:
         'L’OMS recommande 150 à 300 minutes d’activité modérée par semaine et au moins deux séances de renforcement musculaire. Côté marche, 7 000 à 8 000 pas par jour suffisent pour commencer, 10 000 étant un objectif de confort plutôt qu’un seuil de santé.',
     },

@@ -40,10 +40,35 @@ describe('construireSauvegarde', () => {
     expect(Object.keys(objet).sort()).toEqual([
       'application',
       'exporteLe',
+      'lu',
       'pesees',
       'profil',
       'v',
     ]);
+  });
+});
+
+describe('les notions lues', () => {
+  test('font l’aller-retour avec le reste', () => {
+    const texte = construireSauvegarde(PROFIL, PESEES, '2026-08-15', ['pourquoi-une-fourchette']);
+    const relu = lireSauvegarde(texte);
+    expect(relu.ok).toBe(true);
+    if (!relu.ok) return;
+    expect(relu.sauvegarde.lu).toEqual(['pourquoi-une-fourchette']);
+  });
+
+  test('un fichier antérieur au champ se relit sans lui', () => {
+    const relu = lireSauvegarde(
+      JSON.stringify({ v: 1, exporteLe: '2026-08-15', profil: PROFIL, pesees: PESEES }),
+    );
+    expect(relu.ok).toBe(true);
+    if (!relu.ok) return;
+    expect(relu.sauvegarde.lu).toEqual([]);
+  });
+
+  test('ne suffisent pas à faire une sauvegarde restaurable', () => {
+    const relu = lireSauvegarde(construireSauvegarde(null, [], '2026-08-15', ['les-seances']));
+    expect(relu.ok).toBe(false);
   });
 });
 

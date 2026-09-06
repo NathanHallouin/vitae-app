@@ -1,25 +1,27 @@
 /**
- * Les onglets du haut, sur les écrans larges.
+ * Le bandeau des quatre écrans de résultats — le second niveau de navigation.
  *
- * En dessous de `NAV_BREAKPOINT`, la navigation est la barre du bas : cinq destinations sous le
- * pouce. Au-dessus, cette barre n'a plus de sens — sur un écran de bureau, le bas de la fenêtre
- * est l'endroit le plus éloigné du regard comme du curseur, et une barre d'onglets collée là
- * ressemble à une application mobile étirée. Les onglets remontent donc dans l'en-tête, à leur
- * place, et la barre du bas disparaît.
+ * Il était réservé aux grands écrans, où il remplaçait la barre du bas. C'était une redite : sur
+ * un téléphone, les quatre écrans occupaient quatre entrées de la barre, et il ne restait qu'une
+ * place pour tout le reste de l'application — d'où deux sections reléguées dans l'en-tête, hors de
+ * portée du pouce.
  *
- * Le seuil vient de `@vitae/core/nav` et n'a pas été choisi au hasard : c'est la largeur mesurée à
- * partir de laquelle les quatre libellés français tiennent sans être coupés. Il est partagé par
- * les deux barres, ce qui garantit qu'il y en a toujours exactement une à l'écran.
+ * Les quatre écrans ne sont pas quatre destinations : ils partagent un profil et une chaîne de
+ * lecture. Ils forment **une** section, « Mes chiffres », et ce bandeau est ce qui la découpe. Il
+ * descend donc sur mobile, collé sous l'en-tête, au lieu d'exister en double.
+ *
+ * `useTopNav` sert toujours, mais pour autre chose : il dit désormais où vivent les quatre
+ * **sections** — dans la barre du bas en dessous du seuil, dans l'en-tête au-dessus. Le seuil
+ * vient de `@vitae/core/nav` et n'a pas été choisi au hasard : c'est la largeur mesurée à partir
+ * de laquelle les libellés français tiennent sans être coupés.
  */
 
 import { NAV_BREAKPOINT, RESULT_PAGES } from '@vitae/core/nav';
 import { Link, usePathname } from 'expo-router';
 import { Pressable, Text, useWindowDimensions, View } from 'react-native';
-import Icon from '@/components/ui/Icon';
 import { MAX_CONTENT } from '@/components/ui/Page';
 import { cx } from '@/components/ui/primitives';
 import { versRoute } from '@/lib/route';
-import { usePalette } from '@/theme/palette';
 
 /** Vrai quand la navigation est en haut. Faux quand elle est en bas. Jamais les deux. */
 export function useTopNav(): boolean {
@@ -28,14 +30,17 @@ export function useTopNav(): boolean {
 
 export default function ResultTabs() {
   const pathname = usePathname();
-  const palette = usePalette();
 
   return (
-    // `navigation` sort un `<nav>` : c'est la navigation principale du site sur écran large, et
-    // c'est le repère qu'un lecteur d'écran cherche en premier sur une page inconnue.
-    <View role="navigation" aria-label="Résultats" className="border-b border-divider bg-surface">
+    // `navigation` sort un `<nav>` : c'est la navigation du second niveau, et c'est un repère
+    // qu'un lecteur d'écran cherche sur une page inconnue.
+    <View
+      role="navigation"
+      aria-label="Mes chiffres"
+      className="border-t border-divider bg-surface"
+    >
       <View
-        className="w-full flex-row gap-1 self-center px-4"
+        className="w-full flex-row self-center px-2"
         style={{ maxWidth: MAX_CONTENT }}
         accessibilityRole="tablist"
       >
@@ -48,24 +53,26 @@ export default function ResultTabs() {
                 accessibilityState={{ selected: actif }}
                 accessibilityLabel={page.label}
                 className={cx(
-                  'flex-row items-center gap-2 rounded-t-control px-[14px] py-3',
+                  // 44 points : la hauteur du bandeau dans la maquette, et le minimum pour une
+                  // cible tactile — celle-ci est en haut de l'écran, mais elle reste tactile.
+                  'min-h-[44px] flex-1 items-center justify-center px-1',
                   // Un liseré sous l'onglet courant, pas seulement une couleur : la couleur seule
                   // ne marque rien pour qui ne la distingue pas.
                   actif ? 'border-b-2 border-primary-ink' : 'border-b-2 border-transparent',
                 )}
               >
-                <Icon
-                  name={page.icon}
-                  size={18}
-                  color={actif ? palette.primaryInk : palette.muted2}
-                />
+                {/* Pas d'icône, contrairement à la barre du bas. Elles y sont utiles — quatre
+                    sections à reconnaître d'un coup d'œil sous le pouce — et nuisibles ici : sur
+                    390 points, une icône de 16 px prise sur chacun des quatre quarts tronquait
+                    « Métabolisme ». Un second niveau n'a pas à se reconnaître de loin, il se lit. */}
                 <Text
+                  numberOfLines={1}
                   className={cx(
-                    'text-base',
-                    actif ? 'font-sans-semibold text-primary-ink' : 'font-sans-medium text-muted2',
+                    'text-small',
+                    actif ? 'font-sans-medium text-primary-ink' : 'font-sans text-muted',
                   )}
                 >
-                  {page.label}
+                  {page.short}
                 </Text>
               </Pressable>
             </Link>

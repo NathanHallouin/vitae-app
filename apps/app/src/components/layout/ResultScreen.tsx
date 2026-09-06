@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Text, View } from 'react-native';
 import ProfileBar from '@/components/layout/ProfileBar';
+import EncartCours from '@/components/screens/EncartCours';
 import Apparition from '@/components/ui/Apparition';
 import Page from '@/components/ui/Page';
 
@@ -17,6 +18,10 @@ import Page from '@/components/ui/Page';
  *
  * Les blocs arrivent en cascade au premier montage — l'intro, les chiffres, les explications. Les
  * écrans restant montés, cela ne rejoue pas à chaque aller-retour entre onglets.
+ *
+ * L'encart du cours est posé ici et non dans les quatre écrans : la règle « un seul par écran » ne
+ * tient que s'il n'y a qu'un seul endroit qui en pose un. Répété quatre fois, il finirait par ne
+ * plus dire la même chose sur les quatre, et rien ne le signalerait.
  */
 export default function ResultScreen({ children }: { children: ReactNode }) {
   return (
@@ -27,6 +32,7 @@ export default function ResultScreen({ children }: { children: ReactNode }) {
     >
       <ProfileBar />
       <Apparition>{children}</Apparition>
+      <EncartCours />
       <View className="mt-8">
         <Text className="font-sans text-caption leading-[19px] text-faint">
           Ces chiffres sont une estimation, pas un avis médical. La dépense réelle varie d’environ
